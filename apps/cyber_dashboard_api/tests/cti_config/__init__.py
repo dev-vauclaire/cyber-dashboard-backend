@@ -1,0 +1,1 @@
+"""Tests CTI config."""
