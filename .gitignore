@@ -29,6 +29,10 @@ build/
 dist/
 *.egg-info/
 
+# Generated reports
+reports/
+**/reports/
+
 # OS/editor
 .DS_Store
 *.swp
