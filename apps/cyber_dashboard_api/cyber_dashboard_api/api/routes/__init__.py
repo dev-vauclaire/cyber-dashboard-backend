@@ -1,0 +1,1 @@
+"""Ensemble des routes FastAPI."""

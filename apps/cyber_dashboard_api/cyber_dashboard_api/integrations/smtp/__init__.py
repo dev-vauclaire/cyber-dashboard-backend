@@ -1,0 +1,2 @@
+"""Intégrations SMTP."""
+
