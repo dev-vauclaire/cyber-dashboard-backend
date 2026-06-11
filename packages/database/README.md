@@ -1,15 +1,19 @@
 # Package database
 
-`packages/database` centralise l'accès au schéma et aux données partagées du
-backend.
+`packages/database` centralise la source de verite de la base partagee par les applications du monorepo.
 
 Sous-dossiers :
 
-- `models/` : source de vérité SQLAlchemy de la base de données
-- `db/` : primitives de connexion PostgreSQL
-- `repositories/` : accès aux données réutilisables par plusieurs apps
+- `models/` : modeles SQLAlchemy de reference du schema ;
+- `db/` : primitives de connexion PostgreSQL et builders partages ;
+- `repositories/` : acces aux donnees reutilisables par plusieurs apps.
 
-Règle importante :
+Principes de fonctionnement :
 
-- toute évolution de schéma doit d'abord être reflétée dans `models/`, puis
-  portée dans `alembic/`
+- les modeles du schema sont definis ici avant toute migration Alembic ;
+- les repositories de ce package ne doivent pas dependre d'une application concrete ;
+- chaque app peut exposer une facade locale vers ces repositories si elle veut garder un espace de noms stable.
+
+Regle importante :
+
+- toute evolution de schema doit d'abord etre refletee dans `models/`, puis portee dans `alembic/`.

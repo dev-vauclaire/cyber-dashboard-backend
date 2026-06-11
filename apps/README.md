@@ -1,18 +1,26 @@
 # Applications
 
-Le dossier `apps/` contient les exécutables du backend.
+Le dossier `apps/` contient les executables du monorepo backend.
 
-- `cyber_dashboard_api` expose les routes REST et les validations d'entrée.
-- `scheduler` collecte les inventaires et les attaques depuis les collecteurs.
-- `common_ip` calcule les alertes d'IP communes à partir des attaques stockées.
+Applications actuelles :
 
-Chaque application garde :
+- `cyber_dashboard_api` : expose l'API REST FastAPI, les validations HTTP et les routes de configuration.
+- `scheduler` : collecte les inventaires et les attaques depuis les collecteurs actifs.
+- `common_ip` : calcule les alertes d'IP communes a partir des attaques stockees.
 
-- son point d'entrée
-- sa configuration
-- sa logique métier propre
-- ses intégrations externes
-- ses tests et sa documentation locale
+Chaque application garde localement :
 
-Tout ce qui devient commun à plusieurs applications a vocation à être déplacé
-dans `packages/`.
+- son point d'entree ;
+- ses Dockerfiles ;
+- sa configuration ;
+- sa logique metier propre ;
+- ses integrations externes ;
+- ses tests ;
+- sa documentation locale.
+
+Tout ce qui doit etre partage entre plusieurs applications a vocation a vivre dans `packages/`.
+
+Regle pratique :
+
+- si un modele SQLAlchemy ou un repository est utilise par plusieurs apps, il doit etre defini dans `packages/database` ;
+- si un helper technique transverse est reutilisable, il doit etre defini dans `packages/common`.
