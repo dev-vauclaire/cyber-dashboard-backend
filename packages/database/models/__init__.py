@@ -1,4 +1,4 @@
-"""Exports des modeles SQLAlchemy de la BDD V1."""
+"""Exports des modeles SQLAlchemy du schema partage."""
 
 from .attack import Attack
 from .attacks_collector_config import AttacksCollectorConfig
