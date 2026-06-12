@@ -39,7 +39,6 @@ cyber-dashboard-backend/
 
 ## Prochaine étape de mutualisation
 
-- basculer progressivement les apps `scheduler` et `common_ip` vers
-  `packages/database`
+- finaliser la bascule de `scheduler` vers `packages/database`
 - extraire les composants purement communs hors des applications
 - garder un seul contrat de base de données pour les trois apps

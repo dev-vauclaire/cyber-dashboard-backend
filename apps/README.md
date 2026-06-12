@@ -6,7 +6,7 @@ Applications actuelles :
 
 - `cyber_dashboard_api` : expose l'API REST FastAPI, les validations HTTP et les routes de configuration.
 - `scheduler` : collecte les inventaires et les attaques depuis les collecteurs actifs.
-- `common_ip` : calcule les alertes d'IP communes a partir des attaques stockees.
+- `common_ip` : calcule les alertes d'IP communes a partir des attaques stockees, via la couche BDD partagee.
 
 Chaque application garde localement :
 

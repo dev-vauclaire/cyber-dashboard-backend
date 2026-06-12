@@ -12,6 +12,7 @@ Principes de fonctionnement :
 
 - les modeles du schema sont definis ici avant toute migration Alembic ;
 - les repositories de ce package ne doivent pas dependre d'une application concrete ;
+- ils peuvent couvrir aussi bien des lectures API que des ecritures techniques pour les workers ;
 - chaque app peut exposer une facade locale vers ces repositories si elle veut garder un espace de noms stable.
 
 Regle importante :
