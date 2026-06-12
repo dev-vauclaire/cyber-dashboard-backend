@@ -931,10 +931,10 @@ class ApiRouteSmokeRunner:
                 method="POST",
                 path=f"/api/attacks-collector-config/{config_id}/request-inventory",
                 expected_statuses=(200,),
-                body={"inventory_requested_by": "smoke-script"},
                 validator=lambda payload: None
                 if isinstance(payload, dict)
                 and payload.get("attacks_collector_config_id") == config_id
+                and payload.get("inventory_requested") is True
                 else "The inventory request response is invalid",
             )
 

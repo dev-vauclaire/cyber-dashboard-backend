@@ -8,9 +8,6 @@ from cyber_dashboard_api.api.routes.attacks_collector_config import (
     request_attacks_collector_inventory,
 )
 from cyber_dashboard_api.api.errors import NotFoundError
-from cyber_dashboard_api.api.schemas.attacks_collector_config import (
-    AttacksCollectorInventoryRequestSchema,
-)
 
 from tests.attacks_collector_config.helpers import (
     FakeAttacksCollectorConfigService,
@@ -22,38 +19,18 @@ from tests.attacks_collector_config.helpers import (
 class RequestAttacksCollectorInventoryRouteTestCase(unittest.TestCase):
     """Couvre la demande d'inventaire d'un collecteur."""
 
-    def test_request_inventory_without_body_uses_default_requested_by(self) -> None:
+    def test_request_inventory_marks_config_as_requested(self) -> None:
         service = FakeAttacksCollectorConfigService(
-            results={"request_inventory": build_inventory_response(requested_by="api")}
+            results={"request_inventory": build_inventory_response()}
         )
 
         response = request_attacks_collector_inventory(
-            payload=None,
             config_id=1,
             attacks_collector_config_service=service,
         )
 
-        self.assertEqual(dump_schema(response)["inventory_requested_by"], "api")
-        self.assertIsNone(service.calls[0]["kwargs"]["requested_by"])
-
-    def test_request_inventory_accepts_custom_requested_by(self) -> None:
-        service = FakeAttacksCollectorConfigService(
-            results={
-                "request_inventory": build_inventory_response(requested_by="front-admin")
-            }
-        )
-        payload = AttacksCollectorInventoryRequestSchema(
-            inventory_requested_by="front-admin"
-        )
-
-        response = request_attacks_collector_inventory(
-            payload=payload,
-            config_id=1,
-            attacks_collector_config_service=service,
-        )
-
-        self.assertEqual(dump_schema(response)["inventory_requested_by"], "front-admin")
-        self.assertEqual(service.calls[0]["kwargs"]["requested_by"], "front-admin")
+        self.assertTrue(dump_schema(response)["inventory_requested"])
+        self.assertEqual(service.calls[0]["kwargs"]["config_id"], 1)
 
     def test_request_inventory_returns_not_found_when_config_is_missing(self) -> None:
         service = FakeAttacksCollectorConfigService(
@@ -67,7 +44,6 @@ class RequestAttacksCollectorInventoryRouteTestCase(unittest.TestCase):
 
         with self.assertRaises(NotFoundError):
             request_attacks_collector_inventory(
-                payload=None,
                 config_id=88,
                 attacks_collector_config_service=service,
             )

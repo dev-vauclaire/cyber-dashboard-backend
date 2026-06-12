@@ -13,6 +13,7 @@ from .enums import (
     status_correlation_enum,
 )
 from .ogo_source import OgoSource
+from .retention_policies import RetentionPolicy
 from .scheduler_state import SchedulerState
 from .serenicity_source import SerenicitySource
 from .sensor_type import SensorType
@@ -31,6 +32,7 @@ __all__ = [
     "CorrelationStatus",
     "CtiConfig",
     "OgoSource",
+    "RetentionPolicy",
     "SchedulerState",
     "SerenicitySource",
     "SensorType",

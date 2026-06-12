@@ -264,25 +264,13 @@ class AttacksCollectorConfigService:
         self,
         *,
         config_id: int,
-        requested_by: str | None,
     ) -> dict[str, Any]:
-        """Demande un inventaire via scheduler_state_v2 sans lancer le scheduler."""
+        """Demande un inventaire futur sans lancer le scheduler directement."""
         self._load_row(config_id)
-
-        normalized_requested_by = normalize_optional_text_input(
-            name="inventory_requested_by",
-            value=requested_by,
-            max_length=150,
-        )
-        scheduler_row = self._repository.request_inventory(
-            config_id=config_id,
-            requested_by=normalized_requested_by or "api",
-        )
+        scheduler_row = self._repository.request_inventory(config_id=config_id)
         return {
             "attacks_collector_config_id": scheduler_row["attacks_collector_config_id"],
-            "inventory_requested_at": scheduler_row["inventory_requested_at"],
-            "inventory_requested_by": scheduler_row["inventory_requested_by"],
-            "last_inventory_status": scheduler_row["last_inventory_status"],
+            "inventory_requested": scheduler_row["inventory_requested"],
             "updated_at": scheduler_row["updated_at"],
         }
 
@@ -419,6 +407,7 @@ class AttacksCollectorConfigService:
             "name": row["name"],
             "collector_type": row["collector_type"],
             "is_active": row["is_active"],
+            "inventory_requested": row["inventory_requested"],
             "has_email": self._secret_service.has_secret(row.get("encrypted_email")),
             "email_hint": row.get("email_hint"),
             "has_api_key": self._secret_service.has_secret(row.get("encrypted_api_key")),

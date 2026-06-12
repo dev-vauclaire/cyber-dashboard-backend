@@ -50,6 +50,10 @@ class AttacksCollectorConfig(Base):
         nullable=False,
         server_default=text("FALSE"),
     )
+    inventory_requested: Mapped[bool] = mapped_column(
+        nullable=False,
+        server_default=text("TRUE"),
+    )
     last_validation_status: Mapped[str | None] = mapped_column(
         String(30),
         nullable=True,
@@ -71,4 +75,3 @@ class AttacksCollectorConfig(Base):
     )
 
     sources: Mapped[list["Source"]] = relationship(back_populates="attacks_collector_config")
-

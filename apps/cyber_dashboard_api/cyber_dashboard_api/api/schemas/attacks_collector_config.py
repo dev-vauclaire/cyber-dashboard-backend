@@ -18,6 +18,7 @@ class AttacksCollectorConfigSchema(ApiSchema):
     name: str
     collector_type: CollectorType
     is_active: bool
+    inventory_requested: bool
     has_email: bool
     email_hint: str | None
     has_api_key: bool
@@ -54,17 +55,9 @@ class AttacksCollectorConfigUpdateRequestSchema(ApiSchema):
     email: str | None = None
 
 
-class AttacksCollectorInventoryRequestSchema(ApiSchema):
-    """Payload optionnel pour demander un inventaire."""
-
-    inventory_requested_by: str | None = None
-
-
 class AttacksCollectorInventoryRequestResponseSchema(ApiSchema):
-    """Etat de la demande d'inventaire enregistre dans scheduler_state_v2."""
+    """Etat de la demande d'inventaire enregistre sur la configuration."""
 
     attacks_collector_config_id: int
-    inventory_requested_at: datetime
-    inventory_requested_by: str
-    last_inventory_status: str
+    inventory_requested: bool
     updated_at: datetime

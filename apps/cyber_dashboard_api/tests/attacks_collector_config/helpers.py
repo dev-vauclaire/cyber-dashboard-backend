@@ -18,6 +18,7 @@ def build_config_response(
     name: str = "OGO production",
     collector_type: str = "ogo",
     is_active: bool = False,
+    inventory_requested: bool = False,
     has_email: bool = True,
     email_hint: str | None = "****ocal",
     has_api_key: bool = True,
@@ -32,6 +33,7 @@ def build_config_response(
         "name": name,
         "collector_type": collector_type,
         "is_active": is_active,
+        "inventory_requested": inventory_requested,
         "has_email": has_email,
         "email_hint": email_hint,
         "has_api_key": has_api_key,
@@ -47,14 +49,11 @@ def build_config_response(
 def build_inventory_response(
     *,
     config_id: int = 1,
-    requested_by: str = "api",
 ) -> dict[str, Any]:
     """Construit une reponse representative de demande d'inventaire."""
     return {
         "attacks_collector_config_id": config_id,
-        "inventory_requested_at": fixed_now(),
-        "inventory_requested_by": requested_by,
-        "last_inventory_status": "pending",
+        "inventory_requested": True,
         "updated_at": fixed_now(),
     }
 
@@ -119,12 +118,10 @@ class FakeAttacksCollectorConfigService:
         self,
         *,
         config_id: int,
-        requested_by: str | None,
     ) -> dict[str, Any]:
         return self._dispatch(
             "request_inventory",
             config_id=config_id,
-            requested_by=requested_by,
         )
 
 def dump_schema(payload: Any) -> dict[str, Any]:

@@ -18,6 +18,7 @@ class AttacksCollectorConfigRepository:
         "encrypted_api_key",
         "api_key_hint",
         "is_active",
+        "inventory_requested",
         "last_validation_status",
         "last_validation_at",
         "last_validation_error",
@@ -38,6 +39,7 @@ class AttacksCollectorConfigRepository:
                 encrypted_api_key,
                 api_key_hint,
                 is_active,
+                inventory_requested,
                 last_validation_status,
                 last_validation_at,
                 last_validation_error,
@@ -60,6 +62,7 @@ class AttacksCollectorConfigRepository:
                 encrypted_api_key,
                 api_key_hint,
                 is_active,
+                inventory_requested,
                 last_validation_status,
                 last_validation_at,
                 last_validation_error,
@@ -91,6 +94,7 @@ class AttacksCollectorConfigRepository:
                 encrypted_api_key,
                 api_key_hint,
                 is_active,
+                inventory_requested,
                 last_validation_status,
                 last_validation_at,
                 last_validation_error,
@@ -140,6 +144,7 @@ class AttacksCollectorConfigRepository:
                 encrypted_email,
                 email_hint,
                 is_active,
+                inventory_requested,
                 last_validation_status,
                 last_validation_at,
                 last_validation_error,
@@ -173,43 +178,19 @@ class AttacksCollectorConfigRepository:
         self,
         *,
         config_id: int,
-        requested_by: str,
     ) -> dict[str, Any]:
-        """Cree ou met a jour la demande d'inventaire dans scheduler_state_v2."""
+        """Marque une configuration pour un futur inventaire par le scheduler."""
         query = """
-            INSERT INTO scheduler_state_v2 (
-                attacks_collector_config_id,
-                inventory_requested_at,
-                inventory_requested_by,
-                last_inventory_status,
-                last_inventory_error,
-                updated_at
-            )
-            VALUES (
-                %(config_id)s,
-                NOW(),
-                %(requested_by)s,
-                'pending',
-                NULL,
-                NOW()
-            )
-            ON CONFLICT (attacks_collector_config_id) DO UPDATE
-            SET inventory_requested_at = NOW(),
-                inventory_requested_by = EXCLUDED.inventory_requested_by,
-                last_inventory_status = 'pending',
-                last_inventory_error = NULL,
+            UPDATE attacks_collector_config
+            SET inventory_requested = TRUE,
                 updated_at = NOW()
+            WHERE id = %(config_id)s
             RETURNING
-                attacks_collector_config_id,
-                inventory_requested_at,
-                inventory_requested_by,
-                last_inventory_status,
+                id AS attacks_collector_config_id,
+                inventory_requested,
                 updated_at
         """
-        params = {
-            "config_id": config_id,
-            "requested_by": requested_by,
-        }
+        params = {"config_id": config_id}
 
         with self._database.transaction() as connection:
             with connection.cursor() as cursor:
@@ -217,6 +198,6 @@ class AttacksCollectorConfigRepository:
                 row = cursor.fetchone()
 
         if row is None:
-            raise RuntimeError("Unable to create or update scheduler_state_v2 row")
+            raise RuntimeError("Unable to update attacks_collector_config row")
 
         return dict(row)

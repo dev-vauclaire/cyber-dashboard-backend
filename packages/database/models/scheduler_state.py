@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Text
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -18,6 +18,16 @@ class SchedulerState(Base):
     """Represente l'etat courant du scheduler par source."""
 
     __tablename__ = "scheduler_state"
+    __table_args__ = (
+        CheckConstraint(
+            "last_inventory_status IN ('not_run', 'success', 'failed')",
+            name="scheduler_state_last_inventory_status_check",
+        ),
+        CheckConstraint(
+            "last_collection_status IN ('not_run', 'success', 'failed')",
+            name="scheduler_state_last_collection_status_check",
+        ),
+    )
 
     source_id: Mapped[int] = mapped_column(
         ForeignKey("sources.id", ondelete="CASCADE"),
@@ -31,15 +41,39 @@ class SchedulerState(Base):
         DateTime(timezone=True),
         nullable=True,
     )
-    last_success_at: Mapped[datetime | None] = mapped_column(
+    last_inventory_status: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        server_default=text("'not_run'"),
+    )
+    last_inventory_success_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
-    last_error_at: Mapped[datetime | None] = mapped_column(
+    last_inventory_error_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
-    last_error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    last_inventory_error_message: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    last_collection_status: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        server_default=text("'not_run'"),
+    )
+    last_collection_success_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    last_collection_error_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    last_collection_error_message: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
 
     source: Mapped["Source"] = relationship(back_populates="scheduler_state")
-

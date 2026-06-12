@@ -11,9 +11,8 @@ from cyber_dashboard_api.api.schemas import (
     AttacksCollectorConfigCreateRequestSchema,
     AttacksCollectorConfigListResponseSchema,
     AttacksCollectorConfigSchema,
-    AttacksCollectorConfigUpdateRequestSchema,
     AttacksCollectorInventoryRequestResponseSchema,
-    AttacksCollectorInventoryRequestSchema,
+    AttacksCollectorConfigUpdateRequestSchema,
 )
 from cyber_dashboard_api.services import AttacksCollectorConfigService
 
@@ -183,20 +182,16 @@ def delete_attacks_collector_email(
     response_model=AttacksCollectorInventoryRequestResponseSchema,
 )
 def request_attacks_collector_inventory(
-    payload: AttacksCollectorInventoryRequestSchema | None = None,
     config_id: int = Path(..., ge=1),
     attacks_collector_config_service: AttacksCollectorConfigService = Depends(
         get_attacks_collector_config_service
     ),
 ) -> AttacksCollectorInventoryRequestResponseSchema:
-    """Demande un inventaire dans scheduler_state_v2 sans lancer le scheduler."""
+    """Demande un inventaire futur sans lancer le scheduler directement."""
     logger.info(
         "endpoint=attacks_collector_request_inventory event=requested config_id=%s",
         config_id,
     )
     return AttacksCollectorInventoryRequestResponseSchema(
-        **attacks_collector_config_service.request_inventory(
-            config_id=config_id,
-            requested_by=None if payload is None else payload.inventory_requested_by,
-        )
+        **attacks_collector_config_service.request_inventory(config_id=config_id)
     )

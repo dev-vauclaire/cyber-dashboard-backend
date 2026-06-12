@@ -13,7 +13,6 @@ from .attacks_collector_config import (
     AttacksCollectorConfigSchema,
     AttacksCollectorConfigUpdateRequestSchema,
     AttacksCollectorInventoryRequestResponseSchema,
-    AttacksCollectorInventoryRequestSchema,
 )
 from .attacks import AttackItemSchema, AttackListResponseSchema, AttackListQuerySchema
 from .common import PaginationSchema, TimeRangeQuerySchema
@@ -69,7 +68,6 @@ __all__ = [
     "AttacksCollectorConfigSchema",
     "AttacksCollectorConfigUpdateRequestSchema",
     "AttacksCollectorInventoryRequestResponseSchema",
-    "AttacksCollectorInventoryRequestSchema",
     "AttackItemSchema",
     "AttackListQuerySchema",
     "AttackListResponseSchema",
