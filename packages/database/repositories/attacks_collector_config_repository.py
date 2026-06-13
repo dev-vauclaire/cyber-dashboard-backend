@@ -50,6 +50,31 @@ class AttacksCollectorConfigRepository:
         """
         return self._database.fetch_all(query)
 
+    def list_active_inventory_requested_configs(self) -> list[dict[str, Any]]:
+        """Retourne les configurations actives en attente d'inventaire."""
+        query = """
+            SELECT
+                id,
+                name,
+                collector_type,
+                encrypted_email,
+                email_hint,
+                encrypted_api_key,
+                api_key_hint,
+                is_active,
+                inventory_requested,
+                last_validation_status,
+                last_validation_at,
+                last_validation_error,
+                created_at,
+                updated_at
+            FROM attacks_collector_config
+            WHERE is_active = TRUE
+              AND inventory_requested = TRUE
+            ORDER BY collector_type ASC, name ASC, id ASC
+        """
+        return self._database.fetch_all(query)
+
     def get_by_id(self, config_id: int) -> dict[str, Any] | None:
         """Retourne une configuration par identifiant."""
         query = """
@@ -201,3 +226,10 @@ class AttacksCollectorConfigRepository:
             raise RuntimeError("Unable to update attacks_collector_config row")
 
         return dict(row)
+
+    def clear_inventory_request(self, *, config_id: int) -> dict[str, Any] | None:
+        """Marque une configuration comme inventoriée avec succès."""
+        return self.update_config(
+            config_id=config_id,
+            updates={"inventory_requested": False},
+        )

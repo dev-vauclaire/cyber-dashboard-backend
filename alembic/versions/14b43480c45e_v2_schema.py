@@ -59,10 +59,10 @@ def _backfill_specialized_sources() -> None:
     if not context.is_offline_mode():
         bind = op.get_bind()
 
-        duplicate_ogo_site_url = bind.execute(
+        duplicate_ogo_domain_name = bind.execute(
             sa.text(
                 """
-                SELECT BTRIM(s.external_id) AS site_url
+                SELECT BTRIM(s.external_id) AS domain_name
                 FROM sources AS s
                 JOIN sensor_types AS st
                     ON st.id = s.sensor_type_id
@@ -75,10 +75,10 @@ def _backfill_specialized_sources() -> None:
                 """
             )
         ).scalar_one_or_none()
-        if duplicate_ogo_site_url is not None:
+        if duplicate_ogo_domain_name is not None:
             raise RuntimeError(
-                "Migration V2 cannot continue because duplicate OGO site_url values "
-                f"were found in V1 sources: {duplicate_ogo_site_url}"
+                "Migration V2 cannot continue because duplicate OGO domain_name values "
+                f"were found in V1 sources: {duplicate_ogo_domain_name}"
             )
 
         duplicate_serenicity_external_id = bind.execute(
@@ -132,13 +132,13 @@ def _backfill_specialized_sources() -> None:
         """
         INSERT INTO ogo_sources (
             source_id,
-            site_url,
-            organization_code
+            domain_name,
+            organization_codes
         )
         SELECT
             s.id,
             s.external_id,
-            NULL
+            ARRAY[]::VARCHAR[]
         FROM sources AS s
         JOIN sensor_types AS st
             ON st.id = s.sensor_type_id
@@ -199,7 +199,7 @@ def _insert_legacy_collector_config(
     )
 
 
-def _link_specialized_sources_to_config(
+def _attach_specialized_sources_to_config(
     *,
     bind: sa.engine.Connection,
     collector_type: str,
@@ -210,16 +210,14 @@ def _link_specialized_sources_to_config(
     bind.execute(
         sa.text(
             f"""
-            UPDATE sources
+            UPDATE sources AS s
             SET attacks_collector_config_id = config.id
-            FROM attacks_collector_config AS config
-            WHERE config.collector_type = :collector_type
-              AND config.name = :config_name
-              AND sources.attacks_collector_config_id IS NULL
-              AND sources.id IN (
-                  SELECT source_id
-                  FROM {specialized_table}
-              )
+            FROM {specialized_table} AS specialized
+            INNER JOIN attacks_collector_config AS config
+                ON config.collector_type = :collector_type
+               AND config.name = :config_name
+            WHERE s.id = specialized.source_id
+              AND s.attacks_collector_config_id IS NULL
             """
         ),
         {
@@ -268,7 +266,7 @@ def _backfill_legacy_collector_configs() -> None:
             encrypted_api_key=secret_service.encrypt_secret(ogo_api_key),
             api_key_hint=secret_service.build_secret_hint(ogo_api_key),
         )
-        _link_specialized_sources_to_config(
+        _attach_specialized_sources_to_config(
             bind=bind,
             collector_type="ogo",
             config_name=LEGACY_OGO_CONFIG_NAME,
@@ -285,7 +283,7 @@ def _backfill_legacy_collector_configs() -> None:
             encrypted_api_key=secret_service.encrypt_secret(serenicity_api_key),
             api_key_hint=secret_service.build_secret_hint(serenicity_api_key),
         )
-        _link_specialized_sources_to_config(
+        _attach_specialized_sources_to_config(
             bind=bind,
             collector_type="serenicity",
             config_name=LEGACY_SERENICITY_CONFIG_NAME,
@@ -644,17 +642,18 @@ def upgrade() -> None:
     op.create_table(
         "ogo_sources",
         sa.Column("source_id", sa.Integer(), nullable=False),
-        sa.Column("site_url", sa.String(length=500), nullable=False),
-        sa.Column("organization_code", sa.String(length=100), nullable=True),
-        sa.CheckConstraint(
-            "organization_code IS NULL OR LENGTH(TRIM(organization_code)) > 0",
-            name="ogo_sources_organization_code_not_empty",
+        sa.Column("domain_name", sa.String(length=500), nullable=False),
+        sa.Column(
+            "organization_codes",
+            sa.ARRAY(sa.String(length=100)),
+            server_default=sa.text("'{}'::character varying[]"),
+            nullable=False,
         ),
         sa.CheckConstraint(
-            "LENGTH(TRIM(site_url)) > 0",
-            name="ogo_sources_site_url_not_empty",
+            "LENGTH(TRIM(domain_name)) > 0",
+            name="ogo_sources_domain_name_not_empty",
         ),
-        sa.UniqueConstraint("site_url", name="ogo_sources_site_url_unique"),
+        sa.UniqueConstraint("domain_name", name="ogo_sources_domain_name_unique"),
         sa.ForeignKeyConstraint(["source_id"], ["sources.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("source_id"),
     )
@@ -698,16 +697,24 @@ def upgrade() -> None:
     )
     op.add_column(
         "sources",
-        sa.Column("attacks_collector_config_id", sa.Integer(), nullable=True),
-    )
-    op.add_column(
-        "sources",
         sa.Column(
             "updated_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("NOW()"),
             nullable=False,
         ),
+    )
+    op.add_column(
+        "sources",
+        sa.Column("attacks_collector_config_id", sa.Integer(), nullable=True),
+    )
+    op.create_foreign_key(
+        "sources_attacks_collector_config_id_fkey",
+        "sources",
+        "attacks_collector_config",
+        ["attacks_collector_config_id"],
+        ["id"],
+        ondelete="SET NULL",
     )
     op.alter_column(
         "sources",
@@ -729,15 +736,6 @@ def upgrade() -> None:
         "sources",
         "LENGTH(TRIM(name)) > 0",
     )
-    op.create_foreign_key(
-        "fk_sources_attacks_collector_config_id",
-        "sources",
-        "attacks_collector_config",
-        ["attacks_collector_config_id"],
-        ["id"],
-        ondelete="SET NULL",
-    )
-
     """ Rempli les sources spécialisées ogo et serenicity à partir des données de la table sources """
     _backfill_specialized_sources()
     """ Crée les configs d'attaque à partir des variables d'env correspondantes pour les sources migrées"""
@@ -852,17 +850,12 @@ def downgrade() -> None:
     op.execute(
         """
         UPDATE sources AS s
-        SET external_id = os.site_url
+        SET external_id = os.domain_name
         FROM ogo_sources AS os
         WHERE s.id = os.source_id
         """
     )
     _restore_legacy_scheduler_state()
-    op.drop_constraint(
-        "fk_sources_attacks_collector_config_id",
-        "sources",
-        type_="foreignkey",
-    )
     op.drop_constraint("sources_name_not_empty", "sources", type_="check")
     op.create_unique_constraint(
         op.f("sources_sensor_type_id_external_id_key"),
@@ -894,7 +887,6 @@ def downgrade() -> None:
         existing_server_default=None,
     )
     op.drop_column("sources", "updated_at")
-    op.drop_column("sources", "attacks_collector_config_id")
     op.create_index(
         op.f("idx_attacks_type_occurred_at"),
         "attacks",
@@ -927,6 +919,12 @@ def downgrade() -> None:
         ["attacker_ip"],
         unique=False,
     )
+    op.drop_constraint(
+        "sources_attacks_collector_config_id_fkey",
+        "sources",
+        type_="foreignkey",
+    )
+    op.drop_column("sources", "attacks_collector_config_id")
     op.drop_table("serenicity_sources")
     op.drop_table("ogo_sources")
     op.drop_table("smtp_config")

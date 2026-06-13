@@ -9,6 +9,8 @@ from .common_ip_state_repository import CommonIpStateRepository
 from .cti_config_repository import CtiConfigRepository
 from .dashboard_repository import DashboardRepository
 from .retention_policy_repository import RetentionPolicyRepository
+from .scheduler_state_repository import SchedulerStateRepository
+from .sensor_type_repository import SensorTypeRepository
 from .source_repository import SourceRepository
 from .smtp_config_repository import SmtpConfigRepository
 from .statistics_repository import StatisticsRepository
@@ -23,6 +25,8 @@ __all__ = [
     "CtiConfigRepository",
     "DashboardRepository",
     "RetentionPolicyRepository",
+    "SchedulerStateRepository",
+    "SensorTypeRepository",
     "SourceRepository",
     "SmtpConfigRepository",
     "StatisticsRepository",
