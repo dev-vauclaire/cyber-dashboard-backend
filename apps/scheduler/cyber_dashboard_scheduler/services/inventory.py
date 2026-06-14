@@ -29,7 +29,7 @@ from cyber_dashboard_scheduler.clients import (
 from cyber_dashboard_scheduler.config import Settings
 from cyber_dashboard_scheduler.db import PostgresDatabase
 from cyber_dashboard_scheduler.models import SourceOgo, SourceSerenicity
-from cyber_dashboard_scheduler.services.source_normalization import (
+from cyber_dashboard_scheduler.services.normalization.source_normalization import (
     normalize_lurio_source,
     normalize_serenicity_sensor,
 )

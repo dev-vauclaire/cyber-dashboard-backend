@@ -22,13 +22,13 @@ from packages.database.repositories import (
 from cyber_dashboard_scheduler.clients import ApiClientError, SerenicitySensorClient
 from cyber_dashboard_scheduler.config import Settings
 from cyber_dashboard_scheduler.db import PostgresDatabase
-from cyber_dashboard_scheduler.services.attack_normalization import (
-    normalize_serenicity_sensor_flux,
-)
-from cyber_dashboard_scheduler.services.collection_common import (
+from cyber_dashboard_scheduler.services.collection.collection_common import (
     build_collection_window,
     persist_collection_error,
     persist_collection_success,
+)
+from cyber_dashboard_scheduler.services.normalization.attack_normalization import (
+    normalize_serenicity_sensor_flux,
 )
 from cyber_dashboard_scheduler.utils import NormalizationError
 

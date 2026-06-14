@@ -1,13 +1,15 @@
 """Package des services métier du scheduler."""
 
-from .inventory import InventoryRunResult, SourceInventoryService
-from .lurio_collection import LurioAttackCollectionResult, LurioAttackCollectionService
-from .ogo_collection import OgoAttackCollectionResult, OgoAttackCollectionService
-from .scheduler_runtime import SchedulerRuntimeService
-from .serenicity_sensor_collection import (
+from .collection import (
+    LurioAttackCollectionResult,
+    LurioAttackCollectionService,
+    OgoAttackCollectionResult,
+    OgoAttackCollectionService,
     SerenicitySensorAttackCollectionResult,
     SerenicitySensorAttackCollectionService,
 )
+from .inventory import InventoryRunResult, SourceInventoryService
+from .scheduler_runtime import SchedulerRuntimeService
 
 __all__ = [
     "InventoryRunResult",

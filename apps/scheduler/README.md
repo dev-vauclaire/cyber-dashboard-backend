@@ -91,6 +91,8 @@ cyber_dashboard_scheduler/
 ├── db/
 ├── models/
 ├── services/
+│   ├── collection/
+│   └── normalization/
 ├── utils/
 └── main.py
 ```
@@ -99,6 +101,8 @@ cyber_dashboard_scheduler/
 - `config` : chargement des variables d'environnement
 - `db` : façade locale vers `packages/database/db`
 - `models` : modèles internes du scheduler
-- `services` : orchestration métier du scheduler
+- `services` : orchestration métier, inventaire et runtime
+- `services/collection` : collecteurs d'attaques et helpers de collecte
+- `services/normalization` : normalisation des payloads sources et attaques
 - `utils` : fonctions utilitaires
 - `main.py` : point d'entrée
