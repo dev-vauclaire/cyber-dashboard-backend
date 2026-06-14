@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import os
 import unittest
+from unittest import mock
 
 from scripts.migrate import (
     ALEMBIC_VERSION_TABLE,
     DatabaseInspectionResult,
+    MigrationBootstrapError,
     has_alembic_version_table,
     is_empty_database,
     matches_legacy_v1_schema,
     resolve_migration_plan,
+    wait_for_database,
 )
 
 
@@ -223,6 +227,87 @@ class MigrationPlanResolutionTests(unittest.TestCase):
         self.assertEqual(
             resolve_migration_plan(inspection),
             "abort_unknown_database",
+        )
+
+
+class WaitForDatabaseTests(unittest.TestCase):
+    """Tests for the database readiness wait loop."""
+
+    @mock.patch.dict(
+        os.environ,
+        {
+            "DATABASE_WAIT_TIMEOUT_SECONDS": "10",
+            "DATABASE_WAIT_POLL_SECONDS": "1",
+        },
+        clear=False,
+    )
+    @mock.patch("scripts.migrate.time.sleep")
+    @mock.patch("scripts.migrate.time.monotonic", side_effect=[0, 0])
+    @mock.patch("scripts.migrate._probe_database_connection")
+    def test_wait_for_database_returns_when_connection_succeeds(
+        self,
+        probe_connection_mock: mock.Mock,
+        _monotonic_mock: mock.Mock,
+        _sleep_mock: mock.Mock,
+    ) -> None:
+        wait_for_database("postgresql+psycopg://user:pass@db:5432/test")
+
+        probe_connection_mock.assert_called_once_with(
+            "postgresql+psycopg://user:pass@db:5432/test"
+        )
+
+    @mock.patch.dict(
+        os.environ,
+        {
+            "DATABASE_WAIT_TIMEOUT_SECONDS": "10",
+            "DATABASE_WAIT_POLL_SECONDS": "1",
+        },
+        clear=False,
+    )
+    @mock.patch("scripts.migrate.time.sleep")
+    @mock.patch("scripts.migrate.time.monotonic", side_effect=[0, 0, 1])
+    @mock.patch("scripts.migrate._probe_database_connection")
+    def test_wait_for_database_retries_after_transient_connection_error(
+        self,
+        probe_connection_mock: mock.Mock,
+        _monotonic_mock: mock.Mock,
+        sleep_mock: mock.Mock,
+    ) -> None:
+        probe_connection_mock.side_effect = [
+            MigrationBootstrapError("temporary failure in name resolution"),
+            None,
+        ]
+
+        wait_for_database("postgresql+psycopg://user:pass@db:5432/test")
+
+        self.assertEqual(probe_connection_mock.call_count, 2)
+        sleep_mock.assert_called_once_with(1)
+
+    @mock.patch.dict(
+        os.environ,
+        {
+            "DATABASE_WAIT_TIMEOUT_SECONDS": "10",
+            "DATABASE_WAIT_POLL_SECONDS": "1",
+        },
+        clear=False,
+    )
+    @mock.patch("scripts.migrate.time.sleep")
+    @mock.patch("scripts.migrate.time.monotonic", side_effect=[0, 11])
+    @mock.patch("scripts.migrate._probe_database_connection")
+    def test_wait_for_database_raises_after_timeout(
+        self,
+        probe_connection_mock: mock.Mock,
+        _monotonic_mock: mock.Mock,
+        _sleep_mock: mock.Mock,
+    ) -> None:
+        probe_connection_mock.side_effect = MigrationBootstrapError("connection refused")
+
+        with self.assertRaises(MigrationBootstrapError) as context:
+            wait_for_database("postgresql+psycopg://user:pass@db:5432/test")
+
+        self.assertIn("Database did not become reachable before timeout", str(context.exception))
+        probe_connection_mock.assert_called_once_with(
+            "postgresql+psycopg://user:pass@db:5432/test"
         )
 
 
