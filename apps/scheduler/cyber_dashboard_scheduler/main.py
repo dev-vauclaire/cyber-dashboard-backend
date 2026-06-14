@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 
 from packages.common.secret_service import SecretService
-from packages.database.db import PostgresDatabase
 
 from cyber_dashboard_scheduler.clients import (
     OgoApiClient,
@@ -13,6 +12,7 @@ from cyber_dashboard_scheduler.clients import (
     SerenicitySensorClient,
 )
 from cyber_dashboard_scheduler.config import ConfigurationError, Settings
+from cyber_dashboard_scheduler.db import PostgresDatabase
 from cyber_dashboard_scheduler.services import (
     LurioAttackCollectionService,
     OgoAttackCollectionService,
@@ -58,6 +58,7 @@ def main() -> int:
         base_url=settings.ogo.base_url,
         timeout_seconds=settings.http_timeout_seconds,
     )
+
     inventory_service = SourceInventoryService(
         settings=settings,
         database=database,

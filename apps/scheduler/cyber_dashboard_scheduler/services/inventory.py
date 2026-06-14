@@ -13,7 +13,6 @@ from packages.common.secret_service import (
     SecretDecryptionError,
     SecretService,
 )
-from packages.database.db import PostgresDatabase
 from packages.database.repositories import (
     AttacksCollectorConfigRepository,
     SchedulerStateRepository,
@@ -28,6 +27,7 @@ from cyber_dashboard_scheduler.clients import (
     SerenicitySensorClient,
 )
 from cyber_dashboard_scheduler.config import Settings
+from cyber_dashboard_scheduler.db import PostgresDatabase
 from cyber_dashboard_scheduler.models import SourceOgo, SourceSerenicity
 from cyber_dashboard_scheduler.services.source_normalization import (
     normalize_lurio_source,
@@ -110,7 +110,6 @@ class SourceInventoryService:
                 collector_type,
                 config["name"],
             )
-
             if collector_type == "ogo":
                 is_success = self._run_ogo_inventory(
                     config=config,

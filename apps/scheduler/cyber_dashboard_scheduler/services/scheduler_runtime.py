@@ -10,7 +10,7 @@ import time
 from typing import Any, Callable
 
 from cyber_dashboard_scheduler.config import Settings
-from packages.database.db import PostgresDatabase
+from cyber_dashboard_scheduler.db import PostgresDatabase
 from packages.database.repositories import SensorTypeRepository
 
 from .inventory import SourceInventoryService
@@ -96,19 +96,6 @@ class SchedulerRuntimeService:
         LOGGER.info(
             "Boucle périodique configurée à un cycle toutes les %s secondes",
             self._poll_interval_seconds,
-        )
-
-        inventory_result = self._inventory_service.run_once()
-        LOGGER.info(
-            "Inventaire initial terminé. configs_selectionnees=%s configs_ok=%s configs_ko=%s endpoints=%s persistes=%s desactivees=%s ignorees=%s erreurs=%s",
-            inventory_result.configs_selected,
-            inventory_result.configs_succeeded,
-            inventory_result.configs_failed,
-            ", ".join(inventory_result.endpoints_called) or "aucun",
-            inventory_result.sources_persisted,
-            inventory_result.sources_deactivated,
-            inventory_result.sources_skipped,
-            inventory_result.source_errors,
         )
 
     def _load_sensor_types(self) -> list[str]:

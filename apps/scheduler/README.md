@@ -33,7 +33,7 @@ Le flow actuel du scheduler est le suivant :
 
 1. Chargement de la configuration et initialisation des logs.
 2. Vérification de la connexion PostgreSQL.
-3. Lecture des lignes `attacks_collector_config` où `is_active = TRUE` et `inventory_requested = TRUE`.
+3. À chaque cycle, lecture des lignes `attacks_collector_config` où `is_active = TRUE` et `inventory_requested = TRUE`.
 4. Déchiffrement des secrets stockés en base.
 5. Inventaire OGO via `GET /v2/organizations` puis `GET /v2/organizations/{code}/sites`.
 6. Inventaire Serenicity via `GET /api/v1/sensors` et `GET /api/v1/lurios`.
@@ -73,7 +73,7 @@ python3 -m cyber_dashboard_scheduler.main
 
 ## Stratégie d'inventaire
 
-- L'inventaire est exécuté au démarrage.
+- L'inventaire est exécuté de manière périodique à chaque cycle.
 - Une source appartient au plus à une seule `attacks_collector_config` via `sources.attacks_collector_config_id`.
 - Si une source historisee sans configuration est redetectee, le scheduler peut la rattacher a la configuration courante.
 - Cote OGO, les codes d'organisation visibles pour un domaine sont stockes directement dans `ogo_sources.organization_codes`.
@@ -90,7 +90,6 @@ cyber_dashboard_scheduler/
 ├── config/
 ├── db/
 ├── models/
-├── repositories/
 ├── services/
 ├── utils/
 └── main.py
@@ -98,9 +97,8 @@ cyber_dashboard_scheduler/
 
 - `clients` : clients HTTP des APIs externes
 - `config` : chargement des variables d'environnement
-- `db` : bootstrap de la connexion PostgreSQL
+- `db` : façade locale vers `packages/database/db`
 - `models` : modèles internes du scheduler
-- `repositories` : accès SQL historiques du scheduler, en cours de remplacement par `packages/database/repositories`
 - `services` : orchestration métier du scheduler
 - `utils` : fonctions utilitaires
 - `main.py` : point d'entrée

@@ -12,7 +12,6 @@ from packages.common.secret_service import (
     SecretDecryptionError,
     SecretService,
 )
-from packages.database.db import PostgresDatabase
 from packages.database.repositories import (
     AttackRepository,
     AttacksCollectorConfigRepository,
@@ -22,6 +21,7 @@ from packages.database.repositories import (
 
 from cyber_dashboard_scheduler.clients import ApiClientError, SerenicitySensorClient
 from cyber_dashboard_scheduler.config import Settings
+from cyber_dashboard_scheduler.db import PostgresDatabase
 from cyber_dashboard_scheduler.services.attack_normalization import (
     normalize_serenicity_sensor_flux,
 )
