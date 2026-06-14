@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 import logging
@@ -43,6 +44,8 @@ from cyber_dashboard_scheduler.utils import (
 LOGGER = logging.getLogger(__name__)
 SourceKey: TypeAlias = tuple[str, str]
 InventorySource: TypeAlias = SourceOgo | SourceSerenicity
+SerenicitySensorClientFactory: TypeAlias = Callable[[str], SerenicitySensorClient]
+SerenicityLurioClientFactory: TypeAlias = Callable[[str], SerenicityLurioClient]
 
 
 @dataclass(slots=True)
@@ -70,11 +73,15 @@ class SourceInventoryService:
         database: PostgresDatabase,
         secret_service: SecretService,
         ogo_client: OgoApiClient,
+        serenicity_sensor_client_factory: SerenicitySensorClientFactory,
+        serenicity_lurio_client_factory: SerenicityLurioClientFactory,
     ) -> None:
         self._settings = settings
         self._database = database
         self._secret_service = secret_service
         self._ogo_client = ogo_client
+        self._serenicity_sensor_client_factory = serenicity_sensor_client_factory
+        self._serenicity_lurio_client_factory = serenicity_lurio_client_factory
         self._config_repository = AttacksCollectorConfigRepository(database)
         self._sensor_type_repository = SensorTypeRepository(database)
         self._source_repository = SourceRepository(database)
@@ -363,16 +370,8 @@ class SourceInventoryService:
             )
             return False
 
-        sensor_client = SerenicitySensorClient(
-            base_url=self._settings.serenicity.base_url,
-            api_key=api_key,
-            timeout_seconds=self._settings.http_timeout_seconds,
-        )
-        lurio_client = SerenicityLurioClient(
-            base_url=self._settings.serenicity.base_url,
-            api_key=api_key,
-            timeout_seconds=self._settings.http_timeout_seconds,
-        )
+        sensor_client = self._serenicity_sensor_client_factory(api_key)
+        lurio_client = self._serenicity_lurio_client_factory(api_key)
 
         if "detoxio" in supported_codes:
             endpoint = "GET /api/v1/sensors"
@@ -577,8 +576,17 @@ class SourceInventoryService:
 
         try:
             return self._secret_service.decrypt_secret(encrypted_value)
-        except (SecretConfigurationError, SecretDecryptionError) as exc:
-            raise RuntimeError(f"Impossible de déchiffrer {field_name}") from exc
+        except SecretConfigurationError as exc:
+            raise RuntimeError(
+                f"Impossible de charger la clé maître de chiffrement pour {field_name}"
+            ) from exc
+        except SecretDecryptionError as exc:
+            raise RuntimeError(
+                _build_secret_decryption_error_message(
+                    field_name=field_name,
+                    encrypted_value=encrypted_value,
+                )
+            ) from exc
 
     def _record_known_source_error(
         self,
@@ -642,6 +650,26 @@ def _derive_source_color(sensor_type_color: str, field_name: str) -> str:
         return derive_color_random(require_hex_color(sensor_type_color, field_name))
     except ValueError as exc:
         raise NormalizationError(str(exc)) from exc
+
+
+def _build_secret_decryption_error_message(
+    *,
+    field_name: str,
+    encrypted_value: str,
+) -> str:
+    """Construit un message utile quand un secret stocke ne peut pas etre dechiffre."""
+    base_message = (
+        f"Impossible de déchiffrer {field_name}; vérifier que l'API et le scheduler "
+        "partagent la même clé maître de chiffrement"
+    )
+
+    if field_name == "encrypted_email" and "@" in encrypted_value:
+        return (
+            f"{base_message}. La valeur semble être un email stocké en clair dans une "
+            "colonne chiffrée"
+        )
+
+    return base_message
 
 
 def _build_source_key(source: InventorySource) -> SourceKey:

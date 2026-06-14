@@ -2,12 +2,25 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from datetime import datetime
 import hashlib
 from typing import Any
 
 import requests
 
+from cyber_dashboard_scheduler.utils import format_utc_datetime_for_api
+
 from .serenicity_base_client import ApiClientError
+
+
+@dataclass(frozen=True, slots=True)
+class OgoJournalFetchResult:
+    """Resultat agrege d'une lecture paginee du journal OGO."""
+
+    items: list[dict[str, Any]]
+    pages_read: int
+    total_count: int
 
 
 class OgoApiClient:
@@ -92,6 +105,54 @@ class OgoApiClient:
 
         return sites
 
+    def list_journal_events(
+        self,
+        *,
+        email: str,
+        api_key: str,
+        organization_code: str,
+        after: datetime,
+        before: datetime,
+        sites: list[str],
+        lang: str = "fr",
+    ) -> OgoJournalFetchResult:
+        """Retourne tous les evenements SECURITY du journal OGO pour un ou plusieurs sites."""
+        path = f"/v2/organizations/{organization_code}/journal"
+        page_number = 0
+        pages_read = 0
+        total_count = 0
+        items: list[dict[str, Any]] = []
+
+        while True:
+            payload = self._request_json(
+                path=path,
+                email=email,
+                api_key=api_key,
+                lang=lang,
+                params={
+                    "after": format_utc_datetime_for_api(after),
+                    "before": format_utc_datetime_for_api(before),
+                    "type": ["SECURITY"],
+                    "sites": sites,
+                    "page": page_number,
+                    "size": 100,
+                    "sort": ["date,asc"],
+                },
+            )
+            parsed_page = self._parse_journal_page_payload(payload, endpoint_label=path)
+            pages_read += 1
+            total_count = parsed_page["total_count"]
+            items.extend(parsed_page["items"])
+            if page_number >= parsed_page["last_page_number"]:
+                break
+            page_number += 1
+
+        return OgoJournalFetchResult(
+            items=items,
+            pages_read=pages_read,
+            total_count=total_count,
+        )
+
     def _request_json(
         self,
         *,
@@ -158,6 +219,39 @@ class OgoApiClient:
         return {
             "items": items,
             "last_page_number": max(total_pages - 1, 0),
+        }
+
+    @staticmethod
+    def _parse_journal_page_payload(payload: Any, *, endpoint_label: str) -> dict[str, Any]:
+        """Valide une reponse paginee du journal OGO."""
+        if not isinstance(payload, dict):
+            raise ApiClientError(f"Format inattendu pour la reponse OGO {endpoint_label}")
+
+        items = payload.get("content")
+        if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):
+            raise ApiClientError(
+                f"Format inattendu pour le champ content du journal OGO {endpoint_label}"
+            )
+
+        total_pages = _parse_non_negative_int(payload.get("totalPages", 1), "totalPages")
+        total_count = _parse_non_negative_int(payload.get("totalElements", 0), "totalElements")
+
+        if not items and total_pages == 0:
+            return {
+                "items": [],
+                "last_page_number": 0,
+                "total_count": 0,
+            }
+
+        if total_pages <= 0:
+            raise ApiClientError(
+                f"Pagination inattendue pour la reponse OGO {endpoint_label}"
+            )
+
+        return {
+            "items": items,
+            "last_page_number": max(total_pages - 1, 0),
+            "total_count": total_count,
         }
 
 

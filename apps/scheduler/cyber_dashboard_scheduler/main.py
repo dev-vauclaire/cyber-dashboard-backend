@@ -7,10 +7,17 @@ import logging
 from packages.common.secret_service import SecretService
 from packages.database.db import PostgresDatabase
 
-from cyber_dashboard_scheduler.clients import OgoApiClient
+from cyber_dashboard_scheduler.clients import (
+    OgoApiClient,
+    SerenicityLurioClient,
+    SerenicitySensorClient,
+)
 from cyber_dashboard_scheduler.config import ConfigurationError, Settings
 from cyber_dashboard_scheduler.services import (
+    LurioAttackCollectionService,
+    OgoAttackCollectionService,
     SchedulerRuntimeService,
+    SerenicitySensorAttackCollectionService,
     SourceInventoryService,
 )
 from cyber_dashboard_scheduler.utils.logging import configure_logging
@@ -51,24 +58,46 @@ def main() -> int:
         base_url=settings.ogo.base_url,
         timeout_seconds=settings.http_timeout_seconds,
     )
-
-    LOGGER.info(
-        "Seul le module d'inventaire est activé à cette étape. "
-        "Les collecteurs d'attaques seront rebranchés après leur migration dédiée."
+    inventory_service = SourceInventoryService(
+        settings=settings,
+        database=database,
+        secret_service=secret_service,
+        ogo_client=inventory_ogo_client,
+        serenicity_sensor_client_factory=lambda api_key: SerenicitySensorClient(
+            base_url=settings.serenicity.base_url,
+            api_key=api_key,
+            timeout_seconds=settings.http_timeout_seconds,
+        ),
+        serenicity_lurio_client_factory=lambda api_key: SerenicityLurioClient(
+            base_url=settings.serenicity.base_url,
+            api_key=api_key,
+            timeout_seconds=settings.http_timeout_seconds,
+        ),
+    )
+    ogo_collection_service = OgoAttackCollectionService(
+        settings=settings,
+        database=database,
+        secret_service=secret_service,
+        ogo_client=inventory_ogo_client,
+    )
+    sensor_collection_service = SerenicitySensorAttackCollectionService(
+        settings=settings,
+        database=database,
+        secret_service=secret_service,
+    )
+    lurio_collection_service = LurioAttackCollectionService(
+        settings=settings,
+        database=database,
+        secret_service=secret_service,
     )
 
     runtime_service = SchedulerRuntimeService(
         settings=settings,
         database=database,
-        inventory_service=SourceInventoryService(
-            settings=settings,
-            database=database,
-            secret_service=secret_service,
-            ogo_client=inventory_ogo_client,
-        ),
-        ogo_collection_runner=None,
-        sensor_collection_runner=None,
-        lurio_collection_runner=None,
+        inventory_service=inventory_service,
+        ogo_collection_runner=ogo_collection_service.collect_once,
+        sensor_collection_runner=sensor_collection_service.collect_once,
+        lurio_collection_runner=lurio_collection_service.collect_once,
     )
 
     try:

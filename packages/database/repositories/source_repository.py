@@ -184,6 +184,55 @@ class SourceRepository:
         """
         return self._database.fetch_all(query, {"config_id": config_id})
 
+    def list_active_ogo_sources_for_collection(self) -> list[dict[str, Any]]:
+        """Retourne les sources OGO actives collectables."""
+        query = """
+            SELECT
+                s.id AS source_id,
+                s.name AS source_name,
+                s.attacks_collector_config_id,
+                st.code AS sensor_type_code,
+                ogo.domain_name,
+                ogo.organization_codes
+            FROM sources AS s
+            INNER JOIN sensor_types AS st
+                ON st.id = s.sensor_type_id
+            INNER JOIN ogo_sources AS ogo
+                ON ogo.source_id = s.id
+            INNER JOIN attacks_collector_config AS config
+                ON config.id = s.attacks_collector_config_id
+            WHERE s.is_active = TRUE
+              AND st.code = 'waf'
+              AND config.is_active = TRUE
+              AND config.collector_type = 'ogo'
+            ORDER BY s.id ASC
+        """
+        return self._database.fetch_all(query)
+
+    def list_active_serenicity_sources_for_collection(self) -> list[dict[str, Any]]:
+        """Retourne les sources Serenicity actives collectables."""
+        query = """
+            SELECT
+                s.id AS source_id,
+                s.name AS source_name,
+                s.attacks_collector_config_id,
+                st.code AS sensor_type_code,
+                ss.external_id
+            FROM sources AS s
+            INNER JOIN sensor_types AS st
+                ON st.id = s.sensor_type_id
+            INNER JOIN serenicity_sources AS ss
+                ON ss.source_id = s.id
+            INNER JOIN attacks_collector_config AS config
+                ON config.id = s.attacks_collector_config_id
+            WHERE s.is_active = TRUE
+              AND st.code IN ('detoxio', 'lurio')
+              AND config.is_active = TRUE
+              AND config.collector_type = 'serenicity'
+            ORDER BY s.id ASC
+        """
+        return self._database.fetch_all(query)
+
     def upsert_ogo_source(
         self,
         *,

@@ -40,29 +40,41 @@ class SecretService:
 
     def _read_key_value(self) -> str:
         """Read the encryption key from a file or from the environment."""
+        env_key_value = self._read_env_key_value()
+
         if self._settings.secret_key_file:
             try:
                 key_value = Path(self._settings.secret_key_file).read_text(
                     encoding="utf-8"
                 ).strip()
             except OSError as exc:
+                if env_key_value is not None:
+                    return env_key_value
                 raise SecretConfigurationError(
                     "Unable to read CYBER_DASHBOARD_SECRET_KEY_FILE"
                 ) from exc
 
-            if not key_value:
-                raise SecretConfigurationError(
-                    "CYBER_DASHBOARD_SECRET_KEY_FILE is empty"
-                )
-            return key_value
+            if key_value:
+                return key_value
+            if env_key_value is not None:
+                return env_key_value
+            raise SecretConfigurationError(
+                "CYBER_DASHBOARD_SECRET_KEY_FILE is empty"
+            )
 
-        if self._settings.secret_key and self._settings.secret_key.strip():
-            return self._settings.secret_key.strip()
+        if env_key_value is not None:
+            return env_key_value
 
         raise SecretConfigurationError(
             "Encryption master key is not configured. "
             "Set CYBER_DASHBOARD_SECRET_KEY_FILE or CYBER_DASHBOARD_SECRET_KEY"
         )
+
+    def _read_env_key_value(self) -> str | None:
+        """Read the encryption key directly from the environment if present."""
+        if self._settings.secret_key and self._settings.secret_key.strip():
+            return self._settings.secret_key.strip()
+        return None
 
     def _get_fernet(self) -> Fernet:
         """Initialize Fernet only when needed."""

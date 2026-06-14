@@ -10,7 +10,8 @@ from sqlalchemy.dialects.postgresql import INET, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
-from .enums import CorrelationStatus, status_correlation_enum
+from .enums import CorrelationStatus
+from .sqlalchemy_enums import status_correlation_enum
 
 if TYPE_CHECKING:
     from .source import Source

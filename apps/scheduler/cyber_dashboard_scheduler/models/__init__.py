@@ -1,5 +1,6 @@
-"""Package des modèles internes utiles au module d'inventaire."""
+"""Package des modèles internes utiles au scheduler."""
 
+from .attack import Attack
 from .source import SourceOgo, SourceSerenicity
 
-__all__ = ["SourceOgo", "SourceSerenicity"]
+__all__ = ["Attack", "SourceOgo", "SourceSerenicity"]

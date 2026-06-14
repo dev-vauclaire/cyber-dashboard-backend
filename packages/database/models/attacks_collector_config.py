@@ -9,7 +9,8 @@ from sqlalchemy import CheckConstraint, DateTime, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
-from .enums import AttacksCollectorType, attacks_collector_type_enum
+from .enums import AttacksCollectorType
+from .sqlalchemy_enums import attacks_collector_type_enum
 
 if TYPE_CHECKING:
     from .source import Source

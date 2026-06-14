@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime
+from hashlib import sha256
 from typing import Any
 
+from psycopg.types.json import Jsonb
+
 from packages.database.db import PostgresDatabase
+from packages.database.models.enums import CorrelationStatus
 
 
 class AttackRepository:
@@ -124,3 +128,83 @@ class AttackRepository:
         """
         row = self._database.fetch_one(query, params)
         return 0 if row is None else int(row["total"])
+
+    def insert_collected_attacks(self, attacks: list[dict[str, Any]]) -> tuple[int, int]:
+        """Insere un lot d'attaques collectees en une seule transaction."""
+        if not attacks:
+            return (0, 0)
+
+        query = """
+            INSERT INTO attacks (
+                deduplication_id,
+                source_id,
+                source_event_id,
+                attacker_ip,
+                occurred_at,
+                collected_at,
+                attack_type,
+                raw_payload,
+                correlation_status
+            )
+            VALUES (
+                %(deduplication_id)s,
+                %(source_id)s,
+                %(source_event_id)s,
+                %(attacker_ip)s,
+                %(occurred_at)s,
+                %(collected_at)s,
+                %(attack_type)s,
+                %(raw_payload)s,
+                %(correlation_status)s
+            )
+            ON CONFLICT (deduplication_id) DO NOTHING
+            RETURNING id
+        """
+
+        inserted_count = 0
+        ignored_count = 0
+        with self._database.transaction() as connection:
+            with connection.cursor() as cursor:
+                for attack in attacks:
+                    deduplication_id = _build_deduplication_id(
+                        source_id=int(attack["source_id"]),
+                        attacker_ip=str(attack["attacker_ip"]),
+                        occurred_at=attack["occurred_at"],
+                    )
+                    cursor.execute(
+                        query,
+                        {
+                            "deduplication_id": deduplication_id,
+                            "source_id": attack["source_id"],
+                            "source_event_id": attack.get("source_event_id"),
+                            "attacker_ip": attack["attacker_ip"],
+                            "occurred_at": attack["occurred_at"],
+                            "collected_at": attack["collected_at"],
+                            "attack_type": attack.get("attack_type"),
+                            "raw_payload": (
+                                Jsonb(attack["raw_payload"])
+                                if attack.get("raw_payload") is not None
+                                else None
+                            ),
+                            "correlation_status": CorrelationStatus.PENDING.value,
+                        },
+                    )
+                    if cursor.fetchone() is None:
+                        ignored_count += 1
+                    else:
+                        inserted_count += 1
+
+        return (inserted_count, ignored_count)
+
+
+def _build_deduplication_id(
+    *,
+    source_id: int,
+    attacker_ip: str,
+    occurred_at: datetime,
+) -> str:
+    """Construit la cle idempotente d'une attaque collectee."""
+    digest = sha256(
+        f"{source_id}|{attacker_ip}|{occurred_at.isoformat()}".encode("utf-8")
+    )
+    return digest.hexdigest()

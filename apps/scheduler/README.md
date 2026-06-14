@@ -2,7 +2,7 @@
 
 Scheduler V2 du projet `cyber-dashboard`.
 
-À ce stade, cette application porte surtout le module d'inventaire des sources à partir de `attacks_collector_config`.
+Cette application porte l'inventaire des sources et la collecte des attaques à partir de `attacks_collector_config`.
 
 ## Variables d'environnement
 
@@ -39,6 +39,10 @@ Le flow actuel du scheduler est le suivant :
 6. Inventaire Serenicity via `GET /api/v1/sensors` et `GET /api/v1/lurios`.
 7. Mise à jour des tables `sources`, `ogo_sources`, `serenicity_sources` et `scheduler_state`.
 8. Si une configuration se termine sans erreur, remise de `inventory_requested` à `FALSE`.
+9. Collecte OGO via `GET /v2/organizations/{code}/journal`.
+10. Collecte Serenicity des capteurs via `GET /api/v1/sensors/{sensor_id}/flux`.
+11. Collecte Serenicity des lurios via `GET /api/v1/lurios/{lurio_id}/reports`.
+12. Insertion des attaques dans `attacks` avec génération d'un `deduplication_id` stable et mise à jour de `scheduler_state.last_poll_at`.
 
 ## Mode de lancement
 
@@ -76,7 +80,7 @@ python3 -m cyber_dashboard_scheduler.main
 - Si une source disparait d'un inventaire, elle est simplement desactivee mais conserve son rattachement et son historique.
 - Chaque source conserve son historique dans `scheduler_state`.
 
-La collecte d'attaques sera rebranchée ensuite sur ce socle V2.
+La collecte d'attaques s'appuie sur les sources déjà inventoriées et sur les secrets chiffrés stockés en base.
 
 ## Structure
 
