@@ -86,7 +86,7 @@ class SourceService:
         return {
             "source_id": row["id"],
             "source_name": row["name"],
-            "site_url": row.get("site_url"),
+            "domain_name": row.get("domain_name"),
             "is_active": row["is_active"],
             "created_at": row["created_at"],
             "sensor_type_code": row["sensor_type_code"],

@@ -25,7 +25,7 @@ def build_source_item(
     *,
     source_id: int = 1,
     source_name: str = "OGO Paris",
-    site_url: str | None = "https://ogo.example.local/site/paris",
+    domain_name: str | None = "ogo.example.local",
     is_active: bool = True,
     sensor_type_code: str = "waf",
     sensor_type_label: str = "Web Application Firewall",
@@ -35,7 +35,7 @@ def build_source_item(
     return {
         "source_id": source_id,
         "source_name": source_name,
-        "site_url": site_url,
+        "domain_name": domain_name,
         "is_active": is_active,
         "created_at": fixed_now(),
         "sensor_type_code": sensor_type_code,
@@ -125,7 +125,7 @@ class SourceRoutesTestCase(unittest.TestCase):
     def test_list_sources_returns_typed_items(self) -> None:
         response = list_sources(source_service=self.service)
 
-        self.assertEqual(dump_schema(response)["items"][0]["site_url"], "https://ogo.example.local/site/paris")
+        self.assertEqual(dump_schema(response)["items"][0]["domain_name"], "ogo.example.local")
         self.assertEqual(dump_schema(response)["items"][0]["source_name"], "OGO Paris")
 
     def test_rename_source_passes_payload_to_service(self) -> None:

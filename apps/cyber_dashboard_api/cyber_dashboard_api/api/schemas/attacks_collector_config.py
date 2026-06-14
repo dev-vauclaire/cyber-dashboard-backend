@@ -43,7 +43,6 @@ class AttacksCollectorConfigCreateRequestSchema(ApiSchema):
     collector_type: CollectorType
     api_key: str | None = None
     email: str | None = None
-    is_active: bool = False
 
 
 class AttacksCollectorConfigUpdateRequestSchema(ApiSchema):

@@ -21,7 +21,7 @@ def build_source_row(
     source_id: int = 1,
     name: str = "Suricata",
     external_id: str | None = "https://sensor.local",
-    site_url: str | None = None,
+    domain_name: str | None = None,
     is_active: bool = True,
     sensor_type_code: str = "ids",
     sensor_type_label: str = "IDS",
@@ -31,7 +31,7 @@ def build_source_row(
     return {
         "id": source_id,
         "external_id": external_id,
-        "site_url": site_url,
+        "domain_name": domain_name,
         "name": name,
         "is_active": is_active,
         "created_at": fixed_now(),
@@ -114,7 +114,7 @@ class SourceServiceTestCase(unittest.TestCase):
             build_source_row(
                 name="OGO GHT Dordogne",
                 external_id=None,
-                site_url="https://ogo.example.local/site/ghtd6790",
+                domain_name="ogo.example.local",
                 sensor_type_code="ogo",
                 sensor_type_label="OGO",
             )
@@ -124,8 +124,8 @@ class SourceServiceTestCase(unittest.TestCase):
         self.assertEqual(items[0]["source_id"], 1)
         self.assertEqual(items[0]["source_name"], "OGO GHT Dordogne")
         self.assertEqual(
-            items[0]["site_url"],
-            "https://ogo.example.local/site/ghtd6790",
+            items[0]["domain_name"],
+            "ogo.example.local",
         )
         self.assertEqual(items[0]["sensor_type_label"], "OGO")
         self.assertNotIn("source_external_id", items[0])
@@ -142,7 +142,7 @@ class SourceServiceTestCase(unittest.TestCase):
         self.repository.status_result = build_source_row(
             name="OGO GHT Dordogne",
             external_id=None,
-            site_url="https://ogo.example.local/site/ghtd6790",
+            domain_name="ogo.example.local",
             is_active=False,
             sensor_type_code="ogo",
             sensor_type_label="OGO",
@@ -152,8 +152,8 @@ class SourceServiceTestCase(unittest.TestCase):
         self.assertFalse(item["is_active"])
         self.assertEqual(item["source_id"], 1)
         self.assertEqual(
-            item["site_url"],
-            "https://ogo.example.local/site/ghtd6790",
+            item["domain_name"],
+            "ogo.example.local",
         )
         self.assertNotIn("source_external_id", item)
 
@@ -161,7 +161,7 @@ class SourceServiceTestCase(unittest.TestCase):
         self.repository.color_result = build_source_row(
             name="OGO GHT Dordogne",
             external_id=None,
-            site_url="https://ogo.example.local/site/ghtd6790",
+            domain_name="ogo.example.local",
             color="#00FF00",
             sensor_type_code="ogo",
             sensor_type_label="OGO",
@@ -171,16 +171,16 @@ class SourceServiceTestCase(unittest.TestCase):
         self.assertEqual(item["color"], "#00FF00")
         self.assertEqual(item["source_name"], "OGO GHT Dordogne")
         self.assertEqual(
-            item["site_url"],
-            "https://ogo.example.local/site/ghtd6790",
+            item["domain_name"],
+            "ogo.example.local",
         )
         self.assertNotIn("source_external_id", item)
 
-    def test_rename_source_returns_public_shape_with_site_url(self) -> None:
+    def test_rename_source_returns_public_shape_with_domain_name(self) -> None:
         self.repository.rename_result = build_source_row(
             name="OGO GHT Dordogne PROD",
             external_id=None,
-            site_url="https://ogo.example.local/site/ghtd6790",
+            domain_name="ogo.example.local",
             sensor_type_code="ogo",
             sensor_type_label="OGO",
         )
@@ -192,7 +192,7 @@ class SourceServiceTestCase(unittest.TestCase):
 
         self.assertEqual(item["source_name"], "OGO GHT Dordogne PROD")
         self.assertEqual(
-            item["site_url"],
-            "https://ogo.example.local/site/ghtd6790",
+            item["domain_name"],
+            "ogo.example.local",
         )
         self.assertNotIn("source_external_id", item)

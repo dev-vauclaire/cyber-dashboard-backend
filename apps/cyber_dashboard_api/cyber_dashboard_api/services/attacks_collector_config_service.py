@@ -62,14 +62,6 @@ class AttacksCollectorConfigService:
 
     def create_config(self, payload: Any) -> dict[str, Any]:
         """Cree une nouvelle configuration de collecteur."""
-        if payload.is_active:
-            raise BadRequestError(
-                code="invalid_payload",
-                message=(
-                    "Field 'is_active' cannot be true on create. "
-                    "Use POST /api/attacks-collector-config/{id}/activate instead"
-                ),
-            )
 
         values: dict[str, Any] = {
             "name": self._require_text_field(

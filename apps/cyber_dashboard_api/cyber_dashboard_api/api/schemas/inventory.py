@@ -31,7 +31,7 @@ class SourceItemSchema(ApiSchema):
 
     source_id: int
     source_name: str
-    site_url: str | None
+    domain_name: str | None
     is_active: bool
     created_at: datetime
     sensor_type_code: str

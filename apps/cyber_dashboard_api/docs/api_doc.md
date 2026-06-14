@@ -68,7 +68,7 @@ Statuts frequents :
   Champs principaux :
   - `source_id`
   - `source_name`
-  - `site_url`
+  - `domain_name`
   - `is_active`
   - `created_at`
   - `sensor_type_code`
@@ -231,8 +231,7 @@ Body de creation :
   "name": "OGO prod",
   "collector_type": "ogo",
   "api_key": "optional-secret",
-  "email": "optional@example.org",
-  "is_active": false
+  "email": "optional@example.org"
 }
 ```
 
