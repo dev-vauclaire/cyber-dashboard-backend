@@ -43,6 +43,7 @@ Le flow actuel du scheduler est le suivant :
 10. Collecte Serenicity des capteurs via `GET /api/v1/sensors/{sensor_id}/flux`.
 11. Collecte Serenicity des lurios via `GET /api/v1/lurios/{lurio_id}/reports`.
 12. Insertion des attaques dans `attacks` avec génération d'un `deduplication_id` stable et mise à jour de `scheduler_state.last_poll_at`.
+13. Lecture des `retention_policies` actives et suppression des données trop anciennes dans les tables supportées.
 
 ## Mode de lancement
 
@@ -58,6 +59,12 @@ Commande locale de démarrage :
 ```bash
 cd apps/scheduler
 python3 -m cyber_dashboard_scheduler.main
+```
+
+Build Docker depuis la racine `cyber-dashboard-backend` :
+
+```bash
+docker build -f apps/scheduler/Dockerfile -t cyber-dashboard-scheduler .
 ```
 
 Exemple complet :
@@ -92,7 +99,13 @@ cyber_dashboard_scheduler/
 ├── models/
 ├── services/
 │   ├── collection/
-│   └── normalization/
+│   ├── inventory/
+│   ├── normalization/
+│   ├── retention/
+│   ├── collection_service.py
+│   ├── inventory_service.py
+│   ├── retention_service.py
+│   └── scheduler_runtime.py
 ├── utils/
 └── main.py
 ```
@@ -103,6 +116,9 @@ cyber_dashboard_scheduler/
 - `models` : modèles internes du scheduler
 - `services` : orchestration métier, inventaire et runtime
 - `services/collection` : collecteurs d'attaques et helpers de collecte
+- `services/inventory` : logique fournisseur de découverte des sources
 - `services/normalization` : normalisation des payloads sources et attaques
+- `services/retention` : spécialisations de rétention par table métier
+- `services/*_service.py` : orchestration de haut niveau pour inventory, collection, retention et runtime
 - `utils` : fonctions utilitaires
 - `main.py` : point d'entrée
