@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from datetime import datetime
 from typing import Any, Iterator
 
 from psycopg import Connection
@@ -113,6 +114,17 @@ class CommonIpAlertRepository:
         """
         with self._cursor(connection) as cursor:
             cursor.execute(query, payload)
+
+    def delete_alerts_before(self, *, updated_before: datetime) -> int:
+        """Supprime les alertes plus anciennes qu'une date limite."""
+        query = """
+            DELETE FROM common_ip_alerts
+            WHERE updated_at < %(updated_before)s
+        """
+        with self._database.transaction() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(query, {"updated_before": updated_before})
+                return cursor.rowcount
 
     @contextmanager
     def _cursor(

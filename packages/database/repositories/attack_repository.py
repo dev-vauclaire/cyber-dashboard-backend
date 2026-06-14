@@ -196,6 +196,17 @@ class AttackRepository:
 
         return (inserted_count, ignored_count)
 
+    def delete_attacks_before(self, *, occurred_before: datetime) -> int:
+        """Supprime les attaques plus anciennes qu'une date limite."""
+        query = """
+            DELETE FROM attacks
+            WHERE occurred_at < %(occurred_before)s
+        """
+        with self._database.transaction() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(query, {"occurred_before": occurred_before})
+                return cursor.rowcount
+
 
 def _build_deduplication_id(
     *,

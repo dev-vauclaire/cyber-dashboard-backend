@@ -14,8 +14,10 @@ from cyber_dashboard_scheduler.clients import (
 from cyber_dashboard_scheduler.config import ConfigurationError, Settings
 from cyber_dashboard_scheduler.db import PostgresDatabase
 from cyber_dashboard_scheduler.services import (
+    CollectionService,
     LurioAttackCollectionService,
     OgoAttackCollectionService,
+    RetentionService,
     SchedulerRuntimeService,
     SerenicitySensorAttackCollectionService,
     SourceInventoryService,
@@ -60,7 +62,6 @@ def main() -> int:
     )
 
     inventory_service = SourceInventoryService(
-        settings=settings,
         database=database,
         secret_service=secret_service,
         ogo_client=inventory_ogo_client,
@@ -91,14 +92,19 @@ def main() -> int:
         database=database,
         secret_service=secret_service,
     )
+    collection_service = CollectionService(
+        ogo_collection_runner=ogo_collection_service.collect_once,
+        serenicity_sensor_collection_runner=sensor_collection_service.collect_once,
+        lurio_collection_runner=lurio_collection_service.collect_once,
+    )
+    retention_service = RetentionService(database)
 
     runtime_service = SchedulerRuntimeService(
         settings=settings,
         database=database,
         inventory_service=inventory_service,
-        ogo_collection_runner=ogo_collection_service.collect_once,
-        sensor_collection_runner=sensor_collection_service.collect_once,
-        lurio_collection_runner=lurio_collection_service.collect_once,
+        collection_service=collection_service,
+        retention_service=retention_service,
     )
 
     try:
