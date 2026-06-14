@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 import os
 from pathlib import Path
+import time
 import subprocess
 import tempfile
 from typing import Any, Iterable, Literal
@@ -16,6 +17,8 @@ from typing import Any, Iterable, Literal
 V1_BASELINE_REVISION = "6d98af97a0e5"
 PUBLIC_SCHEMA = "public"
 ALEMBIC_VERSION_TABLE = "alembic_version"
+DATABASE_WAIT_TIMEOUT_SECONDS = 60
+DATABASE_WAIT_POLL_SECONDS = 2
 
 LEGACY_V1_REQUIRED_TABLES = {
     "sensor_types",
@@ -75,6 +78,27 @@ class DatabaseInspectionResult:
     matches_legacy_v1: bool
 
 
+def _get_positive_int_env(name: str, default: int) -> int:
+    """Read an optional positive integer environment variable."""
+    raw_value = os.getenv(name)
+    if raw_value is None or not raw_value.strip():
+        return default
+
+    try:
+        value = int(raw_value.strip())
+    except ValueError as exc:
+        raise MigrationBootstrapError(
+            f"{name} must be a positive integer when provided."
+        ) from exc
+
+    if value <= 0:
+        raise MigrationBootstrapError(
+            f"{name} must be a positive integer when provided."
+        )
+
+    return value
+
+
 def require_database_url() -> str:
     """Read the database URL from the environment."""
     database_url = os.getenv("DATABASE_URL")
@@ -93,6 +117,67 @@ def resolve_baseline_revision() -> str:
             "V1_BASELINE_REVISION is required when a legacy V1 database needs stamping."
         )
     return revision
+
+
+def _probe_database_connection(database_url: str) -> None:
+    """Attempt a single SQLAlchemy connection against the target database."""
+    try:
+        from sqlalchemy import create_engine, text
+        from sqlalchemy.exc import SQLAlchemyError
+    except ModuleNotFoundError as exc:
+        raise MigrationBootstrapError(
+            "SQLAlchemy is required to wait for the database. "
+            "Install the backend dependencies before running this script."
+        ) from exc
+
+    try:
+        engine = create_engine(database_url)
+    except SQLAlchemyError as exc:
+        raise MigrationBootstrapError(
+            f"Unable to create SQLAlchemy engine from DATABASE_URL: {exc}"
+        ) from exc
+
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+    except SQLAlchemyError as exc:
+        raise MigrationBootstrapError(str(exc)) from exc
+    finally:
+        engine.dispose()
+
+
+def wait_for_database(database_url: str) -> None:
+    """Wait until the target PostgreSQL database accepts SQLAlchemy connections."""
+    timeout_seconds = _get_positive_int_env(
+        "DATABASE_WAIT_TIMEOUT_SECONDS",
+        DATABASE_WAIT_TIMEOUT_SECONDS,
+    )
+    poll_seconds = _get_positive_int_env(
+        "DATABASE_WAIT_POLL_SECONDS",
+        DATABASE_WAIT_POLL_SECONDS,
+    )
+    deadline = time.monotonic() + timeout_seconds
+    last_error: str | None = None
+
+    while True:
+        try:
+            _probe_database_connection(database_url)
+            return
+        except MigrationBootstrapError as exc:
+            last_error = str(exc)
+            if time.monotonic() >= deadline:
+                break
+
+            print(
+                "Database is not reachable yet; retrying in "
+                f"{poll_seconds}s. Last error: {last_error}"
+            )
+            time.sleep(poll_seconds)
+
+    raise MigrationBootstrapError(
+        "Database did not become reachable before timeout. "
+        f"Last error: {last_error}"
+    )
 
 
 def has_alembic_version_table(public_tables: Iterable[str]) -> bool:
@@ -297,6 +382,7 @@ def main() -> int:
     """Inspect the database and execute the matching Alembic bootstrap flow."""
     repo_root = Path(__file__).resolve().parents[1]
     database_url = require_database_url()
+    wait_for_database(database_url)
     inspection = inspect_database(database_url)
     plan = resolve_migration_plan(inspection)
 
