@@ -124,6 +124,10 @@ class AlertRepository:
                 a.attacker_ip::TEXT AS attacker_ip,
                 s.id AS source_id,
                 s.name AS source_name,
+                st.code AS sensor_type_code,
+                config.collector_type,
+                ogo.domain_name,
+                ss.external_id,
                 cas.first_seen_at,
                 cas.last_seen_at,
                 cas.hit_count
@@ -132,6 +136,14 @@ class AlertRepository:
                 ON cas.alert_id = a.id
             INNER JOIN sources s
                 ON s.id = cas.source_id
+            INNER JOIN sensor_types st
+                ON st.id = s.sensor_type_id
+            LEFT JOIN attacks_collector_config config
+                ON config.id = s.attacks_collector_config_id
+            LEFT JOIN ogo_sources ogo
+                ON ogo.source_id = s.id
+            LEFT JOIN serenicity_sources ss
+                ON ss.source_id = s.id
             WHERE a.id = %(alert_id)s
             ORDER BY cas.last_seen_at DESC, s.name ASC
         """

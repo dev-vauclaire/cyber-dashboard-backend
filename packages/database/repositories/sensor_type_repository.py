@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from packages.database.db import PostgresDatabase
 
 
@@ -33,3 +35,31 @@ class SensorTypeRepository:
             FROM sensor_types
         """
         return self._database.fetch_all(query)
+
+    def rename_sensor_type(
+        self,
+        *,
+        sensor_type_id: int,
+        label: str,
+    ) -> dict[str, Any] | None:
+        """Renomme un type de capteur et retourne son etat courant."""
+        query = """
+            UPDATE sensor_types
+            SET label = %(label)s
+            WHERE id = %(sensor_type_id)s
+            RETURNING
+                id,
+                code,
+                label,
+                category,
+                color
+        """
+        with self._database.transaction() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    query,
+                    {"sensor_type_id": sensor_type_id, "label": label},
+                )
+                row = cursor.fetchone()
+
+        return None if row is None else dict(row)

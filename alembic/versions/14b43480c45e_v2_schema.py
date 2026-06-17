@@ -500,8 +500,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
             "collector_type",
-            "name",
-            name="attacks_collector_config_unique_name_per_type",
+            "encrypted_email",
+            "encrypted_api_key",
+            name="attacks_collector_config_unique_email_api_key_per_type",
         ),
     )
     op.create_table(
