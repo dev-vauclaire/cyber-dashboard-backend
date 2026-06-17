@@ -8,10 +8,15 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Path, Query
 
 from cyber_dashboard_api.api.errors import BadRequestError, NotFoundError
-from cyber_dashboard_api.api.dependencies import get_alert_repository
+from cyber_dashboard_api.api.dependencies import (
+    get_alert_email_service,
+    get_alert_repository,
+)
 from cyber_dashboard_api.api.schemas import (
     AlertDetailItemSchema,
     AlertDetailResponseSchema,
+    AlertEmailRequestSchema,
+    AlertEmailResponseSchema,
     AlertListItemSchema,
     AlertListResponseSchema,
 )
@@ -19,6 +24,7 @@ from cyber_dashboard_api.api.schemas.common import PaginationSchema
 from cyber_dashboard_api.api.validation import validate_datetime_range
 from cyber_dashboard_api.models import Pagination
 from cyber_dashboard_api.repositories import AlertRepository
+from cyber_dashboard_api.services import AlertEmailService
 
 
 logger = logging.getLogger(__name__)
@@ -112,6 +118,10 @@ def get_common_ip_alert_detail(
         AlertDetailItemSchema(
             source_id=row["source_id"],
             source_name=row["source_name"],
+            sensor_type_code=row.get("sensor_type_code"),
+            collector_type=row.get("collector_type"),
+            domain_name=row.get("domain_name"),
+            external_id=row.get("external_id"),
             first_seen_at=row["first_seen_at"],
             last_seen_at=row["last_seen_at"],
             hit_count=row["hit_count"],
@@ -122,4 +132,20 @@ def get_common_ip_alert_detail(
     return AlertDetailResponseSchema(
         attacker_ip=rows[0]["attacker_ip"],
         sources=sources,
+    )
+
+
+@router.post("/{alert_id}/email", response_model=AlertEmailResponseSchema)
+def send_common_ip_alert_email(
+    payload: AlertEmailRequestSchema,
+    alert_id: int = Path(..., ge=1),
+    alert_email_service: AlertEmailService = Depends(get_alert_email_service),
+) -> AlertEmailResponseSchema:
+    """Envoie manuellement un email d'alerte pour une IP commune."""
+    logger.info(
+        "endpoint=alerts_common_ips_email event=requested alert_id=%s",
+        alert_id,
+    )
+    return AlertEmailResponseSchema(
+        **alert_email_service.send_alert_email(alert_id=alert_id, payload=payload)
     )

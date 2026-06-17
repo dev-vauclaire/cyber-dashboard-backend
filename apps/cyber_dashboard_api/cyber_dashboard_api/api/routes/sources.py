@@ -6,17 +6,22 @@ import logging
 
 from fastapi import APIRouter, Depends, Path
 
-from cyber_dashboard_api.api.dependencies import get_source_service
+from cyber_dashboard_api.api.dependencies import (
+    get_sensor_type_service,
+    get_source_service,
+)
 from cyber_dashboard_api.api.schemas import (
     SensorInventoryItemSchema,
     SensorInventoryResponseSchema,
+    SensorTypeItemSchema,
+    SensorTypeRenameRequestSchema,
+    SourceColorUpdateRequestSchema,
     SourceItemSchema,
     SourceListResponseSchema,
     SourceRenameRequestSchema,
     SourceStatusUpdateRequestSchema,
-    SourceColorUpdateRequestSchema,
 )
-from cyber_dashboard_api.services import SourceService
+from cyber_dashboard_api.services import SensorTypeService, SourceService
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +49,27 @@ def list_sources(
     logger.info("endpoint=sources_list event=requested")
     items = [SourceItemSchema(**item) for item in source_service.list_sources()]
     return SourceListResponseSchema(items=items)
+
+
+@router.patch(
+    "/sensor-types/{sensor_type_id}/label",
+    response_model=SensorTypeItemSchema,
+)
+def rename_sensor_type(
+    payload: SensorTypeRenameRequestSchema,
+    sensor_type_id: int = Path(..., ge=1),
+    sensor_type_service: SensorTypeService = Depends(get_sensor_type_service),
+) -> SensorTypeItemSchema:
+    """Met a jour le libelle d'un type de capteur a partir de son identifiant."""
+    logger.info(
+        "endpoint=sensor_type_rename event=requested sensor_type_id=%s",
+        sensor_type_id,
+    )
+    item = sensor_type_service.rename_sensor_type(
+        sensor_type_id=sensor_type_id,
+        label=payload.sensor_type_label,
+    )
+    return SensorTypeItemSchema(**item)
 
 
 @router.patch("/{source_id}/name", response_model=SourceItemSchema)

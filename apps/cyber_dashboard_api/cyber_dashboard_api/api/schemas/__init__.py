@@ -4,6 +4,8 @@ from .errors import ErrorDetailSchema, ErrorInfoSchema, ErrorResponseSchema
 from .alerts import (
     AlertDetailItemSchema,
     AlertDetailResponseSchema,
+    AlertEmailRequestSchema,
+    AlertEmailResponseSchema,
     AlertListItemSchema,
     AlertListResponseSchema,
 )
@@ -31,15 +33,24 @@ from .cti_enrichment import (
     VirusTotalAnalysisStatsSchema,
     VirusTotalEnrichmentResponseSchema,
 )
-from .dashboard import DashboardOverviewSchema
+from .dashboard import (
+    DashboardOverviewSchema,
+    DashboardTopologyAlertLinkSchema,
+    DashboardTopologyAlertSchema,
+    DashboardTopologyCollectorSchema,
+    DashboardTopologyResponseSchema,
+    DashboardTopologySourceSchema,
+)
 from .inventory import (
     SensorInventoryItemSchema,
     SensorInventoryResponseSchema,
+    SensorTypeItemSchema,
+    SensorTypeRenameRequestSchema,
+    SourceColorUpdateRequestSchema,
     SourceItemSchema,
     SourceListResponseSchema,
     SourceRenameRequestSchema,
     SourceStatusUpdateRequestSchema,
-    SourceColorUpdateRequestSchema,
 )
 from .retention_policies import (
     RetentionPolicyListResponseSchema,
@@ -61,6 +72,8 @@ from .system import HealthcheckSchema
 __all__ = [
     "AlertDetailItemSchema",
     "AlertDetailResponseSchema",
+    "AlertEmailRequestSchema",
+    "AlertEmailResponseSchema",
     "AlertListItemSchema",
     "AlertListResponseSchema",
     "AttacksCollectorConfigCreateRequestSchema",
@@ -89,6 +102,11 @@ __all__ = [
     "CtiConfigSchema",
     "CtiConfigUpdateRequestSchema",
     "DashboardOverviewSchema",
+    "DashboardTopologyAlertLinkSchema",
+    "DashboardTopologyAlertSchema",
+    "DashboardTopologyCollectorSchema",
+    "DashboardTopologyResponseSchema",
+    "DashboardTopologySourceSchema",
     "ErrorDetailSchema",
     "ErrorInfoSchema",
     "ErrorResponseSchema",
@@ -99,13 +117,15 @@ __all__ = [
     "RetentionPolicyUpdateRequestSchema",
     "SensorInventoryItemSchema",
     "SensorInventoryResponseSchema",
+    "SensorTypeItemSchema",
+    "SensorTypeRenameRequestSchema",
     "SmtpConfigSchema",
     "SmtpConfigUpdateRequestSchema",
+    "SourceColorUpdateRequestSchema",
     "SourceItemSchema",
     "SourceListResponseSchema",
     "SourceRenameRequestSchema",
     "SourceStatusUpdateRequestSchema",
     "TimeRangeQuerySchema",
     "TopAttackTypesResponseSchema",
-    "SourceColorUpdateRequestSchema",
 ]

@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from cyber_dashboard_api.api.errors import NotFoundError
-from cyber_dashboard_api.services import SourceService
+from cyber_dashboard_api.services import SensorTypeService, SourceService
 
 
 def fixed_now() -> datetime:
@@ -85,6 +85,35 @@ class FakeSourceRepository:
     ) -> dict[str, Any] | None:
         del source_id, color
         return deepcopy(self.color_result)
+
+
+class FakeSensorTypeRepository:
+    """Repository minimal en memoire pour les tests du service sensor types."""
+
+    def __init__(self) -> None:
+        self.rename_result: dict[str, Any] | None = {
+            "id": 2,
+            "code": "waf",
+            "label": "WAF PROD",
+            "category": "network",
+            "color": "#2563EB",
+        }
+        self.calls: list[dict[str, object]] = []
+
+    def rename_sensor_type(
+        self,
+        *,
+        sensor_type_id: int,
+        label: str,
+    ) -> dict[str, Any] | None:
+        self.calls.append(
+            {
+                "method": "rename_sensor_type",
+                "sensor_type_id": sensor_type_id,
+                "label": label,
+            }
+        )
+        return deepcopy(self.rename_result)
 
 
 class SourceServiceTestCase(unittest.TestCase):
@@ -196,3 +225,41 @@ class SourceServiceTestCase(unittest.TestCase):
             "ogo.example.local",
         )
         self.assertNotIn("source_external_id", item)
+
+
+class SensorTypeServiceTestCase(unittest.TestCase):
+    """Couvre la projection publique et les erreurs du service sensor types."""
+
+    def setUp(self) -> None:
+        self.repository = FakeSensorTypeRepository()
+        self.service = SensorTypeService(self.repository)
+
+    def test_rename_sensor_type_returns_public_shape(self) -> None:
+        item = self.service.rename_sensor_type(sensor_type_id=2, label="WAF PROD")
+
+        self.assertEqual(
+            item,
+            {
+                "sensor_type_id": 2,
+                "sensor_type_code": "waf",
+                "sensor_type_label": "WAF PROD",
+                "sensor_type_category": "network",
+                "color": "#2563EB",
+            },
+        )
+        self.assertEqual(
+            self.repository.calls[-1],
+            {
+                "method": "rename_sensor_type",
+                "sensor_type_id": 2,
+                "label": "WAF PROD",
+            },
+        )
+
+    def test_rename_sensor_type_raises_not_found_when_missing(self) -> None:
+        self.repository.rename_result = None
+
+        with self.assertRaises(NotFoundError) as context:
+            self.service.rename_sensor_type(sensor_type_id=99, label="Missing")
+
+        self.assertEqual(context.exception.code, "sensor_type_not_found")

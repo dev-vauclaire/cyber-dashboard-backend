@@ -45,6 +45,15 @@ def activate_smtp_config(
     return SmtpConfigSchema(**smtp_config_service.activate_config())
 
 
+@router.post("/test", response_model=SmtpConfigSchema)
+def test_smtp_config(
+    smtp_config_service: SmtpConfigService = Depends(get_smtp_config_service),
+) -> SmtpConfigSchema:
+    """Teste la configuration SMTP sans changer son activation."""
+    logger.info("endpoint=smtp_config_test event=requested")
+    return SmtpConfigSchema(**smtp_config_service.test_config())
+
+
 @router.post("/deactivate", response_model=SmtpConfigSchema)
 def deactivate_smtp_config(
     smtp_config_service: SmtpConfigService = Depends(get_smtp_config_service),

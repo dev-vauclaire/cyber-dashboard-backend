@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Annotated
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import StringConstraints, field_validator
 
@@ -24,6 +24,25 @@ class SensorInventoryResponseSchema(ApiSchema):
     """Liste des types de capteurs et de leur inventaire."""
 
     items: list[SensorInventoryItemSchema]
+
+
+class SensorTypeItemSchema(ApiSchema):
+    """Representation publique d'un type de capteur."""
+
+    sensor_type_id: int
+    sensor_type_code: str
+    sensor_type_label: str
+    sensor_type_category: str
+    color: str
+
+
+class SensorTypeRenameRequestSchema(ApiSchema):
+    """Payload minimal pour renommer un type de capteur."""
+
+    sensor_type_label: Annotated[
+        str,
+        StringConstraints(strip_whitespace=True, min_length=1, max_length=150),
+    ]
 
 
 class SourceItemSchema(ApiSchema):
@@ -62,7 +81,9 @@ class SourceRenameRequestSchema(ApiSchema):
 
 class SourceStatusUpdateRequestSchema(ApiSchema):
     """Payload minimal pour changer l'etat actif d'une source."""
+
     is_active: bool
+
 
 class SourceColorUpdateRequestSchema(ApiSchema):
     """Payload minimal pour changer la couleur d'une source."""

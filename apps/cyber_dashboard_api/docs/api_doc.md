@@ -79,6 +79,11 @@ Statuts frequents :
   ```json
   { "source_name": "OGO Paris PROD" }
   ```
+- `PATCH /api/sources/sensor-types/{sensor_type_id}/label`
+  Body :
+  ```json
+  { "sensor_type_label": "Web Application Firewall PROD" }
+  ```
 - `PATCH /api/sources/{source_id}/is_active`
   Body :
   ```json

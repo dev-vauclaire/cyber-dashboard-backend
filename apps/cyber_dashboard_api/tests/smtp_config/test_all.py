@@ -10,6 +10,7 @@ from tests.smtp_config import (
     test_delete_password_route,
     test_get_route,
     test_service,
+    test_test_route,
     test_update_route,
     test_validator,
 )
@@ -21,6 +22,7 @@ TEST_MODULES = (
     test_activate_route,
     test_deactivate_route,
     test_delete_password_route,
+    test_test_route,
     test_service,
     test_validator,
 )

@@ -61,7 +61,6 @@ class CreateAttacksCollectorConfigRouteTestCase(unittest.TestCase):
             name="OGO invalid",
             collector_type="ogo",
             api_key="ogo-api-key-5678",
-            is_active=True,
         )
 
         with self.assertRaises(BadRequestError) as context:

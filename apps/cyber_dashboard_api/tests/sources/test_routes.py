@@ -8,11 +8,13 @@ from cyber_dashboard_api.api.errors import NotFoundError
 from cyber_dashboard_api.api.routes.sources import (
     get_sources_inventory,
     list_sources,
+    rename_sensor_type,
     rename_source,
     update_source_color,
     update_source_status,
 )
 from cyber_dashboard_api.api.schemas import (
+    SensorTypeRenameRequestSchema,
     SourceColorUpdateRequestSchema,
     SourceRenameRequestSchema,
     SourceStatusUpdateRequestSchema,
@@ -99,11 +101,41 @@ class FakeSourceService:
         return self.color_updated
 
 
+class FakeSensorTypeService:
+    """Service fake pour les routes de types de capteurs."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+        self.renamed = {
+            "sensor_type_id": 2,
+            "sensor_type_code": "waf",
+            "sensor_type_label": "WAF PROD",
+            "sensor_type_category": "network",
+            "color": "#2563EB",
+        }
+
+    def rename_sensor_type(
+        self,
+        *,
+        sensor_type_id: int,
+        label: str,
+    ) -> dict[str, object]:
+        self.calls.append(
+            {
+                "method": "rename_sensor_type",
+                "sensor_type_id": sensor_type_id,
+                "label": label,
+            }
+        )
+        return self.renamed
+
+
 class SourceRoutesTestCase(unittest.TestCase):
     """Couvre les routes sources et inventaire."""
 
     def setUp(self) -> None:
         self.service = FakeSourceService()
+        self.sensor_type_service = FakeSensorTypeService()
 
     def test_inventory_returns_typed_items(self) -> None:
         response = get_sources_inventory(source_service=self.service)
@@ -142,6 +174,23 @@ class SourceRoutesTestCase(unittest.TestCase):
                 "method": "rename_source",
                 "source_id": 3,
                 "source_name": "OGO Paris PROD",
+            },
+        )
+
+    def test_rename_sensor_type_passes_payload_to_service(self) -> None:
+        response = rename_sensor_type(
+            payload=SensorTypeRenameRequestSchema(sensor_type_label="WAF PROD"),
+            sensor_type_id=2,
+            sensor_type_service=self.sensor_type_service,
+        )
+
+        self.assertEqual(dump_schema(response)["sensor_type_label"], "WAF PROD")
+        self.assertEqual(
+            self.sensor_type_service.calls[-1],
+            {
+                "method": "rename_sensor_type",
+                "sensor_type_id": 2,
+                "label": "WAF PROD",
             },
         )
 
@@ -196,3 +245,26 @@ class SourceRoutesTestCase(unittest.TestCase):
             )
 
         self.assertEqual(context.exception.code, "source_not_found")
+
+    def test_rename_sensor_type_propagates_not_found_error(self) -> None:
+        class MissingSensorTypeService(FakeSensorTypeService):
+            def rename_sensor_type(
+                self,
+                *,
+                sensor_type_id: int,
+                label: str,
+            ) -> dict[str, object]:
+                del sensor_type_id, label
+                raise NotFoundError(
+                    code="sensor_type_not_found",
+                    message="Sensor type not found",
+                )
+
+        with self.assertRaises(NotFoundError) as context:
+            rename_sensor_type(
+                payload=SensorTypeRenameRequestSchema(sensor_type_label="Missing"),
+                sensor_type_id=999,
+                sensor_type_service=MissingSensorTypeService(),
+            )
+
+        self.assertEqual(context.exception.code, "sensor_type_not_found")

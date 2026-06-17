@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 
 from .common import ApiSchema, PaginationSchema, strip_ip_prefix
 
@@ -37,9 +37,29 @@ class AlertDetailItemSchema(ApiSchema):
 
     source_id: int
     source_name: str
+    sensor_type_code: str | None = None
+    collector_type: str | None = None
+    domain_name: str | None = None
+    external_id: str | None = None
     first_seen_at: datetime
     last_seen_at: datetime
     hit_count: int
+
+
+class AlertEmailRequestSchema(ApiSchema):
+    """Payload d'envoi manuel d'un email d'alerte."""
+
+    recipient: str = Field(..., min_length=1, max_length=255)
+    subject: str = Field(..., min_length=1, max_length=255)
+    body: str = Field(..., min_length=1, max_length=10000)
+
+
+class AlertEmailResponseSchema(ApiSchema):
+    """Resultat public de l'envoi manuel d'un email d'alerte."""
+
+    alert_id: int
+    recipient: str
+    sent: bool
 
 
 class AlertDetailResponseSchema(ApiSchema):

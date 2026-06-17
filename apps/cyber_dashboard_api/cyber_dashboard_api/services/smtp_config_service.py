@@ -116,6 +116,9 @@ class SmtpConfigService:
                 max_length=255,
             )
 
+        if "auto_email_enabled" in fields_set:
+            updates["auto_email_enabled"] = payload.auto_email_enabled
+
         if critical_fields_changed:
             updates["is_active"] = False
             self._reset_validation_fields(updates)
@@ -129,6 +132,35 @@ class SmtpConfigService:
 
         if validation_result.success:
             return self._to_public_row(self._persist_validation_success())
+
+        self._repository.update_config(
+            updates={
+                "last_validation_status": "failed",
+                "last_validation_at": datetime.now(UTC),
+                "last_validation_error": validation_result.message
+                or "Réponse SMTP inattendue.",
+            }
+        )
+        raise BadRequestError(
+            code="smtp_validation_failed",
+            message=validation_result.message or "Réponse SMTP inattendue.",
+        )
+
+    def test_config(self) -> dict[str, Any]:
+        """Valide la configuration SMTP sans changer son statut actif."""
+        current_row = self._repository.get_or_create_config()
+        validation_result = self._validate_for_activation(current_row)
+
+        if validation_result.success:
+            return self._to_public_row(
+                self._repository.update_config(
+                    updates={
+                        "last_validation_status": "success",
+                        "last_validation_at": datetime.now(UTC),
+                        "last_validation_error": None,
+                    }
+                )
+            )
 
         self._persist_validation_failure(
             message=validation_result.message or "Réponse SMTP inattendue."
@@ -268,6 +300,7 @@ class SmtpConfigService:
             "smtp_user": row["smtp_user"],
             "smtp_from": row["smtp_from"],
             "smtp_from_name": row["smtp_from_name"],
+            "auto_email_enabled": row.get("auto_email_enabled", False),
             "is_active": row["is_active"],
             "has_smtp_password": self._secret_service.has_secret(
                 row.get("encrypted_smtp_password")

@@ -24,16 +24,19 @@ from cyber_dashboard_api.repositories import (
     CtiConfigRepository,
     DashboardRepository,
     RetentionPolicyRepository,
+    SensorTypeRepository,
     SourceRepository,
     SmtpConfigRepository,
     StatisticsRepository,
 )
 from cyber_dashboard_api.services import (
+    AlertEmailService,
     AttacksCollectorConfigService,
     CtiConfigService,
     CtiEnrichmentService,
     RetentionPolicyService,
     SecretService,
+    SensorTypeService,
     SmtpConfigService,
     SourceService,
 )
@@ -49,9 +52,19 @@ def get_source_repository() -> SourceRepository:
     return SourceRepository(get_database())
 
 
+def get_sensor_type_repository() -> SensorTypeRepository:
+    """Construit le repository de lecture des types de capteurs."""
+    return SensorTypeRepository(get_database())
+
+
 def get_source_service() -> SourceService:
     """Construit le service metier des sources."""
     return SourceService(get_source_repository())
+
+
+def get_sensor_type_service() -> SensorTypeService:
+    """Construit le service metier des types de capteurs."""
+    return SensorTypeService(get_sensor_type_repository())
 
 
 def get_alert_repository() -> AlertRepository:
@@ -179,6 +192,16 @@ def get_smtp_config_service() -> SmtpConfigService:
         get_smtp_config_repository(),
         get_secret_service(),
         get_smtp_validator(),
+        get_settings().validation,
+    )
+
+
+def get_alert_email_service() -> AlertEmailService:
+    """Construit le service d'envoi manuel d'emails d'alerte."""
+    return AlertEmailService(
+        get_alert_repository(),
+        get_smtp_config_repository(),
+        get_secret_service(),
         get_settings().validation,
     )
 

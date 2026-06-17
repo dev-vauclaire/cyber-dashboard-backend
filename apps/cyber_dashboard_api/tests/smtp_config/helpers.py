@@ -52,6 +52,7 @@ def build_smtp_row(
     smtp_password_hint: str | None = None,
     smtp_from: str | None = "cyber-dashboard@example.local",
     smtp_from_name: str | None = "Cyber Dashboard",
+    auto_email_enabled: bool = False,
     is_active: bool = False,
     last_validation_status: str | None = "not_tested",
     last_validation_at: datetime | None = None,
@@ -67,6 +68,7 @@ def build_smtp_row(
         "smtp_password_hint": smtp_password_hint,
         "smtp_from": smtp_from,
         "smtp_from_name": smtp_from_name,
+        "auto_email_enabled": auto_email_enabled,
         "is_active": is_active,
         "last_validation_status": last_validation_status,
         "last_validation_at": last_validation_at,
@@ -152,6 +154,9 @@ class FakeSmtpConfigService:
 
     def activate_config(self) -> dict[str, Any]:
         return self._dispatch("activate_config")
+
+    def test_config(self) -> dict[str, Any]:
+        return self._dispatch("test_config")
 
     def deactivate_config(self) -> dict[str, Any]:
         return self._dispatch("deactivate_config")
