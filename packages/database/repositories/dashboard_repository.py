@@ -58,6 +58,7 @@ class DashboardRepository:
                 last_validation_at,
                 last_validation_error
             FROM attacks_collector_config
+            WHERE is_active = TRUE
             ORDER BY collector_type ASC, name ASC, id ASC
         """
         sources_query = """
