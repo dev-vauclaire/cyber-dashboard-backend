@@ -42,7 +42,7 @@ class DeactivateAttacksCollectorConfigRouteTestCase(unittest.TestCase):
             errors={
                 "deactivate_config": NotFoundError(
                     code="attacks_collector_config_not_found",
-                    message="Attacks collector configuration not found",
+                    message="Configuration de collecteur d'attaques introuvable",
                 )
             }
         )

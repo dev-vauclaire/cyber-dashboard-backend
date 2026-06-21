@@ -28,9 +28,9 @@ class OgoValidator(BaseAttacksCollectorValidator):
         context: AttacksCollectorValidationContext,
     ) -> ValidationResult:
         if context.api_key is None:
-            return ValidationResult.fail("OGO API key is missing")
+            return ValidationResult.fail("La clé API OGO est manquante")
         if context.email is None:
-            return ValidationResult.fail("OGO email is missing")
+            return ValidationResult.fail("L'email OGO est manquant")
 
         try:
             result = self._client.validate_credentials(
@@ -49,13 +49,13 @@ class OgoValidator(BaseAttacksCollectorValidator):
         """Traduit le resultat detaille OGO vers le format de validation commun."""
         if not result.authenticated:
             return ValidationResult.fail(
-                "OGO credentials were rejected",
+                "Les identifiants OGO ont été rejetés",
                 provider_status_code=result.status_code,
             )
 
         if not result.has_journal_access:
             return ValidationResult.fail(
-                "OGO credentials are valid but missing required 'export_logs' privilege",
+                "Les identifiants OGO sont valides mais le privilège requis 'export_logs' est manquant",
                 provider_status_code=result.status_code,
             )
 

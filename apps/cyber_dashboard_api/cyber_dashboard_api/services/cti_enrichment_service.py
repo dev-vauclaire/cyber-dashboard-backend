@@ -137,7 +137,7 @@ class CtiEnrichmentService:
         if self._shodan_client is None:
             raise ServiceUnavailableError(
                 code="cti_enrichment_unavailable",
-                message="Shodan client is not configured",
+                message="Le client Shodan n'est pas configuré",
             )
 
         try:
@@ -173,13 +173,13 @@ class CtiEnrichmentService:
         if row is None:
             raise NotFoundError(
                 code="cti_config_not_found",
-                message="CTI configuration not found",
+                message="Configuration CTI introuvable",
             )
 
         if not bool(row.get("is_active")):
             raise BadRequestError(
                 code="cti_provider_inactive",
-                message=f"CTI provider '{code}' is not active",
+                message=f"Le fournisseur CTI '{code}' n'est pas actif",
             )
 
         return row
@@ -190,7 +190,7 @@ class CtiEnrichmentService:
         if not self._secret_service.has_secret(encrypted_api_key):
             raise BadRequestError(
                 code="cti_provider_not_configured",
-                message=f"CTI provider '{code}' does not have an API key",
+                message=f"Le fournisseur CTI '{code}' n'a pas de clé API",
             )
 
         try:
@@ -198,7 +198,7 @@ class CtiEnrichmentService:
         except (SecretConfigurationError, SecretDecryptionError) as exc:
             raise ServiceUnavailableError(
                 code="secret_key_unavailable",
-                message="Stored CTI secret could not be decrypted",
+                message="Le secret CTI stocké n'a pas pu être déchiffré",
             ) from exc
 
     @staticmethod
@@ -210,7 +210,7 @@ class CtiEnrichmentService:
         if not isinstance(payload, dict):
             raise ServiceUnavailableError(
                 code="cti_enrichment_invalid_response",
-                message="AbuseIPDB returned an unexpected response",
+                message="AbuseIPDB a renvoyé une réponse inattendue",
             )
 
         data = CtiEnrichmentService._coerce_dict(payload.get("data"))
@@ -242,7 +242,7 @@ class CtiEnrichmentService:
         if not isinstance(payload, dict):
             raise ServiceUnavailableError(
                 code="cti_enrichment_invalid_response",
-                message="VirusTotal returned an unexpected response",
+                message="VirusTotal a renvoyé une réponse inattendue",
             )
 
         data = CtiEnrichmentService._coerce_dict(payload.get("data"))
@@ -272,7 +272,7 @@ class CtiEnrichmentService:
         if not isinstance(payload, dict):
             raise ServiceUnavailableError(
                 code="cti_enrichment_invalid_response",
-                message="IPData returned an unexpected response",
+                message="IPData a renvoyé une réponse inattendue",
             )
 
         asn = CtiEnrichmentService._coerce_dict(payload.get("asn"))
@@ -294,7 +294,7 @@ class CtiEnrichmentService:
         if not isinstance(payload, dict):
             raise ServiceUnavailableError(
                 code="cti_enrichment_invalid_response",
-                message="GreyNoise returned an unexpected response",
+                message="GreyNoise a renvoyé une réponse inattendue",
             )
 
         return {
@@ -314,7 +314,7 @@ class CtiEnrichmentService:
         if not isinstance(payload, dict):
             raise ServiceUnavailableError(
                 code="cti_enrichment_invalid_response",
-                message="RDAP returned an unexpected response",
+                message="RDAP a renvoyé une réponse inattendue",
             )
 
         entities = payload.get("entities")
@@ -358,7 +358,7 @@ class CtiEnrichmentService:
         if not isinstance(payload, dict):
             raise ServiceUnavailableError(
                 code="cti_enrichment_invalid_response",
-                message="Shodan returned an unexpected response",
+                message="Shodan a renvoyé une réponse inattendue",
             )
 
         items = payload.get("data")
@@ -660,30 +660,30 @@ class CtiEnrichmentService:
         if error.kind == "auth_rejected":
             raise ServiceUnavailableError(
                 code="cti_enrichment_unavailable",
-                message=f"{provider_label} rejected the configured API key",
+                message=f"{provider_label} a rejeté la clé API configurée",
             )
         if error.kind == "timeout":
             raise ServiceUnavailableError(
                 code="cti_enrichment_unavailable",
-                message=f"{provider_label} request timed out",
+                message=f"La requête vers {provider_label} a expiré",
             )
         if error.kind == "rate_limit":
             raise ServiceUnavailableError(
                 code="cti_enrichment_unavailable",
-                message=f"{provider_label} rate limit was reached",
+                message=f"La limite de débit de {provider_label} a été atteinte",
             )
         if error.kind == "service_unavailable":
             raise ServiceUnavailableError(
                 code="cti_enrichment_unavailable",
-                message=f"{provider_label} service is unavailable",
+                message=f"Le service {provider_label} est indisponible",
             )
         if error.kind == "dns_error":
             raise ServiceUnavailableError(
                 code="cti_enrichment_unavailable",
-                message=f"{provider_label} DNS resolution failed",
+                message=f"La résolution DNS de {provider_label} a échoué",
             )
 
         raise ServiceUnavailableError(
             code="cti_enrichment_unavailable",
-            message=f"{provider_label} returned an unexpected response",
+            message=f"{provider_label} a renvoyé une réponse inattendue",
         )

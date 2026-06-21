@@ -18,7 +18,7 @@ class AbuseIpdbValidator(BaseCtiValidator):
 
     def validate(self, context: CtiValidationContext) -> ValidationResult:
         if context.api_key is None:
-            return ValidationResult.fail("AbuseIPDB API key is missing")
+            return ValidationResult.fail("La clé API AbuseIPDB est manquante")
 
         try:
             status_code = self._client.validate_api_key(

@@ -53,7 +53,7 @@ class HttpJsonClient:
         except TimeoutError as exc:
             raise IntegrationRequestError(
                 "timeout",
-                "The external service request timed out",
+                "La requête vers le service externe a expiré",
             ) from exc
 
         try:
@@ -61,7 +61,7 @@ class HttpJsonClient:
         except json.JSONDecodeError as exc:
             raise IntegrationRequestError(
                 "invalid_response",
-                "The external service returned an invalid JSON response",
+                "Le service externe a renvoyé une réponse JSON invalide",
                 status_code=status_code,
             ) from exc
 
@@ -70,24 +70,24 @@ class HttpJsonClient:
         if exc.code in {401, 403}:
             raise IntegrationRequestError(
                 "auth_rejected",
-                "The external service rejected the provided credentials",
+                "Le service externe a rejeté les identifiants fournis",
                 status_code=exc.code,
             ) from exc
         if exc.code == 429:
             raise IntegrationRequestError(
                 "rate_limit",
-                "The external service rate limit has been reached",
+                "La limite de débit du service externe a été atteinte",
                 status_code=exc.code,
             ) from exc
         if exc.code >= 500:
             raise IntegrationRequestError(
                 "service_unavailable",
-                "The external service is temporarily unavailable",
+                "Le service externe est temporairement indisponible",
                 status_code=exc.code,
             ) from exc
         raise IntegrationRequestError(
             "http_error",
-            "The external service returned an unexpected HTTP error",
+            "Le service externe a renvoyé une erreur HTTP inattendue",
             status_code=exc.code,
         ) from exc
 
@@ -98,19 +98,19 @@ class HttpJsonClient:
         if isinstance(reason, socket.timeout):
             raise IntegrationRequestError(
                 "timeout",
-                "The external service request timed out",
+                "La requête vers le service externe a expiré",
             ) from exc
         if isinstance(reason, socket.gaierror):
             raise IntegrationRequestError(
                 "dns_error",
-                "The external service hostname could not be resolved",
+                "Le nom d'hôte du service externe n'a pas pu être résolu",
             ) from exc
         if isinstance(reason, OSError):
             raise IntegrationRequestError(
                 "network_error",
-                "The external service request failed",
+                "La requête vers le service externe a échoué",
             ) from exc
         raise IntegrationRequestError(
             "network_error",
-            "The external service request failed",
+            "La requête vers le service externe a échoué",
         ) from exc

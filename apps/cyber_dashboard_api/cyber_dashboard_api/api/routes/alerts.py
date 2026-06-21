@@ -40,7 +40,7 @@ def validate_source_ids(source_ids: list[int] | None) -> list[int] | None:
     if any(source_id < 1 for source_id in source_ids):
         raise BadRequestError(
             code="invalid_source_id",
-            message="Query parameter 'source_id' must contain positive integers",
+            message="Le paramètre de requête 'source_id' doit contenir des entiers positifs",
         )
 
     return source_ids
@@ -111,7 +111,7 @@ def get_common_ip_alert_detail(
     if not rows:
         raise NotFoundError(
             code="common_ip_alert_not_found",
-            message="Common IP alert not found",
+            message="Alerte IP commune introuvable",
         )
 
     sources = [

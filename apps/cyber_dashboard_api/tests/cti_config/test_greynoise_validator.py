@@ -72,4 +72,4 @@ class GreyNoiseValidatorTestCase(unittest.TestCase):
 
         self.assertFalse(result.success)
         self.assertEqual(result.provider_status_code, 401)
-        self.assertIn("rejected", str(result.message).lower())
+        self.assertIn("rejet", str(result.message).lower())

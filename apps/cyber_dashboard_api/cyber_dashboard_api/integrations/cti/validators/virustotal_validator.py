@@ -18,7 +18,7 @@ class VirusTotalValidator(BaseCtiValidator):
 
     def validate(self, context: CtiValidationContext) -> ValidationResult:
         if context.api_key is None:
-            return ValidationResult.fail("VirusTotal API key is missing")
+            return ValidationResult.fail("La clé API VirusTotal est manquante")
 
         try:
             status_code = self._client.validate_api_key(

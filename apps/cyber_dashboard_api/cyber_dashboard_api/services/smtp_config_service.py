@@ -52,7 +52,7 @@ class SmtpConfigService:
         if not fields_set:
             raise BadRequestError(
                 code="invalid_payload",
-                message="At least one SMTP field must be provided",
+                message="Au moins un champ SMTP doit être fourni",
             )
 
         if "smtp_host" in fields_set:
@@ -261,7 +261,7 @@ class SmtpConfigService:
         except (SecretConfigurationError, SecretDecryptionError) as exc:
             raise ServiceUnavailableError(
                 code="secret_key_unavailable",
-                message="Stored SMTP password could not be decrypted",
+                message="Le mot de passe SMTP stocké n'a pas pu être déchiffré",
             ) from exc
 
     @staticmethod
@@ -288,7 +288,7 @@ class SmtpConfigService:
         if normalized_value is None:
             raise BadRequestError(
                 code="invalid_payload",
-                message=f"Field '{name}' must not be blank",
+                message=f"Le champ '{name}' ne doit pas être vide",
             )
         return normalized_value
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -18,6 +19,89 @@ from cyber_dashboard_api.api.schemas.errors import (
 
 
 logger = logging.getLogger(__name__)
+
+
+_VALIDATION_MESSAGE_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"^Field required$"), "Champ requis"),
+    (
+        re.compile(r"^Extra inputs are not permitted$"),
+        "Des champs supplémentaires ne sont pas autorisés",
+    ),
+    (
+        re.compile(r"^Input should be a valid integer(?:, .+)?$"),
+        "La valeur doit être un entier valide",
+    ),
+    (
+        re.compile(r"^Input should be a valid number(?:, .+)?$"),
+        "La valeur doit être un nombre valide",
+    ),
+    (
+        re.compile(r"^Input should be a valid boolean(?:, .+)?$"),
+        "La valeur doit être un booléen valide",
+    ),
+    (
+        re.compile(r"^Input should be a valid string(?:, .+)?$"),
+        "La valeur doit être une chaîne de caractères valide",
+    ),
+    (
+        re.compile(r"^Input should be a valid dictionary(?:, .+)?$"),
+        "La valeur doit être un objet valide",
+    ),
+    (
+        re.compile(r"^Input should be a valid list(?:, .+)?$"),
+        "La valeur doit être une liste valide",
+    ),
+    (
+        re.compile(r"^Input should be a valid datetime(?:, .+)?$"),
+        "La valeur doit être une date et heure valides",
+    ),
+    (
+        re.compile(r"^Input should be a valid date(?:, .+)?$"),
+        "La valeur doit être une date valide",
+    ),
+    (
+        re.compile(r"^Input should be greater than or equal to (.+)$"),
+        r"La valeur doit être supérieure ou égale à \1",
+    ),
+    (
+        re.compile(r"^Input should be greater than (.+)$"),
+        r"La valeur doit être strictement supérieure à \1",
+    ),
+    (
+        re.compile(r"^Input should be less than or equal to (.+)$"),
+        r"La valeur doit être inférieure ou égale à \1",
+    ),
+    (
+        re.compile(r"^Input should be less than (.+)$"),
+        r"La valeur doit être strictement inférieure à \1",
+    ),
+    (
+        re.compile(r"^String should have at least (\d+) characters$"),
+        r"Le texte doit contenir au minimum \1 caractères",
+    ),
+    (
+        re.compile(r"^String should have at most (\d+) characters$"),
+        r"Le texte doit contenir au maximum \1 caractères",
+    ),
+    (
+        re.compile(r"^String should match pattern '(.+)'$"),
+        r"Le texte ne respecte pas le format attendu : \1",
+    ),
+    (
+        re.compile(r"^Input should be (.+)$"),
+        r"La valeur doit être \1",
+    ),
+)
+
+_HTTP_EXCEPTION_MESSAGE_TRANSLATIONS = {
+    "Bad Request": "Requête invalide",
+    "Unauthorized": "Non authentifié",
+    "Forbidden": "Accès interdit",
+    "Not Found": "Ressource introuvable",
+    "Method Not Allowed": "Méthode HTTP non autorisée",
+    "Unprocessable Entity": "Entité non traitable",
+    "Internal Server Error": "Erreur interne du serveur",
+}
 
 
 @dataclass(slots=True)
@@ -127,12 +211,46 @@ def _normalize_validation_errors(
         normalized_errors.append(
             ErrorDetailSchema(
                 location=location,
-                message=error.get("msg", "Invalid value"),
+                message=_translate_validation_message(
+                    str(error.get("msg", "Valeur invalide"))
+                ),
                 type=error.get("type", "validation_error"),
                 input=error.get("input"),
             )
         )
     return normalized_errors
+
+
+def _translate_validation_message(message: str) -> str:
+    """Traduit les messages Pydantic/FastAPI les plus fréquents."""
+    normalized_message = message.strip()
+    if not normalized_message:
+        return "Valeur invalide"
+
+    value_error_prefix = "Value error, "
+    if normalized_message.startswith(value_error_prefix):
+        return normalized_message[len(value_error_prefix) :]
+
+    assertion_prefix = "Assertion failed, "
+    if normalized_message.startswith(assertion_prefix):
+        return normalized_message[len(assertion_prefix) :]
+
+    for pattern, replacement in _VALIDATION_MESSAGE_PATTERNS:
+        if pattern.match(normalized_message):
+            return pattern.sub(replacement, normalized_message)
+
+    return normalized_message
+
+
+def _translate_http_exception_message(message: str) -> str:
+    """Traduit les messages HTTP par défaut de Starlette/FastAPI."""
+    normalized_message = message.strip()
+    if not normalized_message:
+        return "Erreur HTTP"
+    return _HTTP_EXCEPTION_MESSAGE_TRANSLATIONS.get(
+        normalized_message,
+        normalized_message,
+    )
 
 
 def register_exception_handlers(application: FastAPI) -> None:
@@ -174,7 +292,7 @@ def register_exception_handlers(application: FastAPI) -> None:
         return _build_error_response(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             code="validation_error",
-            message="Invalid request parameters",
+            message="Paramètres de requête invalides",
             details=details,
         )
 
@@ -184,15 +302,15 @@ def register_exception_handlers(application: FastAPI) -> None:
         exc: HTTPException,
     ) -> JSONResponse:
         details: list[ErrorDetailSchema] | None = None
-        message = "HTTP error"
+        message = "Erreur HTTP"
 
         if isinstance(exc.detail, str):
-            message = exc.detail
+            message = _translate_http_exception_message(exc.detail)
         elif exc.detail is not None:
             details = [
                 ErrorDetailSchema(
                     location="request",
-                    message="HTTP error detail",
+                    message="Détail de l'erreur HTTP",
                     type="http_error",
                     input=exc.detail,
                 )
@@ -226,5 +344,5 @@ def register_exception_handlers(application: FastAPI) -> None:
         return _build_error_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             code="internal_server_error",
-            message="Internal server error",
+            message="Erreur interne du serveur",
         )

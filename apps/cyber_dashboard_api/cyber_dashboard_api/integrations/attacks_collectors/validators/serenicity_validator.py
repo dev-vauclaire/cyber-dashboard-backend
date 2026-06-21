@@ -27,7 +27,7 @@ class SerenicityValidator(BaseAttacksCollectorValidator):
         context: AttacksCollectorValidationContext,
     ) -> ValidationResult:
         if context.api_key is None:
-            return ValidationResult.fail("Serenicity API key is missing")
+            return ValidationResult.fail("La clé API Serenicity est manquante")
 
         try:
             status_code = self._client.validate_credentials(api_key=context.api_key)

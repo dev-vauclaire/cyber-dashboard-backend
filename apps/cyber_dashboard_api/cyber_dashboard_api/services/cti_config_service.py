@@ -51,7 +51,7 @@ class CtiConfigService:
         if row is None:
             raise NotFoundError(
                 code="cti_config_not_found",
-                message="CTI configuration not found",
+                message="Configuration CTI introuvable",
             )
         return self._to_public_row(row)
 
@@ -65,7 +65,7 @@ class CtiConfigService:
         if not payload.model_fields_set:
             raise BadRequestError(
                 code="invalid_payload",
-                message="At least one of 'label' or 'api_key' must be provided",
+                message="Au moins un des champs 'label' ou 'api_key' doit être fourni",
             )
 
         updates: dict[str, Any] = {}
@@ -81,7 +81,7 @@ class CtiConfigService:
             if label is None:
                 raise BadRequestError(
                     code="invalid_payload",
-                    message="Field 'label' must not be blank",
+                    message="Le champ 'label' ne doit pas être vide",
                 )
             updates["label"] = label
 
@@ -89,7 +89,7 @@ class CtiConfigService:
             if self._repository.get_key_not_required_by_code(code) is not None:
                 raise BadRequestError(
                     code="invalid_payload",
-                    message="This CTI provider does not use an API key",
+                    message="Ce fournisseur CTI n'utilise pas de clé API",
                 )
 
             api_key = validate_secret_update_input(
@@ -109,7 +109,7 @@ class CtiConfigService:
         if updated_row is None:
             raise NotFoundError(
                 code="cti_config_not_found",
-                message="CTI configuration not found",
+                message="Configuration CTI introuvable",
             )
         return self._to_public_row(updated_row)
 
@@ -125,23 +125,28 @@ class CtiConfigService:
 
         self._persist_validation_failure(
             code=code,
-            message=validation_result.message or "CTI validation failed",
+            message=validation_result.message or "La validation CTI a échoué",
         )
         raise BadRequestError(
             code="cti_validation_failed",
-            message=validation_result.message or "CTI validation failed",
+            message=validation_result.message or "La validation CTI a échoué",
         )
 
     def deactivate_config(self, code: str) -> dict[str, Any]:
         """Desactive une configuration CTI sans effacer sa validation."""
         updated_row = self._repository.update_by_code(
             code=code,
-            updates={"is_active": False},
+            updates={
+                "is_active": False,
+                "last_validation_status": "not_tested",
+                "last_validation_at": None,
+                "last_validation_error": None,},
         )
+
         if updated_row is None:
             raise NotFoundError(
                 code="cti_config_not_found",
-                message="CTI configuration not found",
+                message="Configuration CTI introuvable",
             )
         return self._to_public_row(updated_row)
 
@@ -161,7 +166,7 @@ class CtiConfigService:
         if updated_row is None:
             raise NotFoundError(
                 code="cti_config_not_found",
-                message="CTI configuration not found",
+                message="Configuration CTI introuvable",
             )
         return self._to_public_row(updated_row)
 
@@ -172,11 +177,15 @@ class CtiConfigService:
             return ValidationResult.ok()
 
         if not self._secret_service.has_secret(row.get("encrypted_api_key")):
-            return ValidationResult.fail("This CTI provider requires an API key before activation")
+            return ValidationResult.fail(
+                "Ce fournisseur CTI nécessite une clé API avant l'activation"
+            )
 
         validator = self._validator_registry.get_validator(code)
         if validator is None:
-            return ValidationResult.fail("No validator is configured for this CTI provider")
+            return ValidationResult.fail(
+                "Aucun validateur n'est configuré pour ce fournisseur CTI"
+            )
 
         decrypted_api_key = self._decrypt_secret(row["encrypted_api_key"])
 
@@ -201,7 +210,7 @@ class CtiConfigService:
         if updated_row is None:
             raise NotFoundError(
                 code="cti_config_not_found",
-                message="CTI configuration not found",
+                message="Configuration CTI introuvable",
             )
         return updated_row
 
@@ -223,7 +232,7 @@ class CtiConfigService:
         if updated_row is None:
             raise NotFoundError(
                 code="cti_config_not_found",
-                message="CTI configuration not found",
+                message="Configuration CTI introuvable",
             )
 
     def _encrypt_secret(self, plain_value: str) -> str:
@@ -241,7 +250,7 @@ class CtiConfigService:
         except (SecretConfigurationError, SecretDecryptionError) as exc:
             raise ServiceUnavailableError(
                 code="secret_key_unavailable",
-                message="Stored CTI secret could not be decrypted",
+                message="Le secret CTI stocké n'a pas pu être déchiffré",
             ) from exc
 
     def _load_row(self, code: str) -> dict[str, Any]:
@@ -249,7 +258,7 @@ class CtiConfigService:
         if row is None:
             raise NotFoundError(
                 code="cti_config_not_found",
-                message="CTI configuration not found",
+                message="Configuration CTI introuvable",
             )
         return row
 

@@ -37,7 +37,7 @@ class RequestAttacksCollectorInventoryRouteTestCase(unittest.TestCase):
             errors={
                 "request_inventory": NotFoundError(
                     code="attacks_collector_config_not_found",
-                    message="Attacks collector configuration not found",
+                    message="Configuration de collecteur d'attaques introuvable",
                 )
             }
         )

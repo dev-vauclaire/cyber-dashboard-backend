@@ -56,7 +56,7 @@ class AttacksCollectorConfigService:
         if row is None:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
         return self._to_public_row(row)
 
@@ -98,7 +98,7 @@ class AttacksCollectorConfigService:
         except UniqueViolation as exc:
             raise ConflictError(
                 code="attacks_collector_config_conflict",
-                message="A collector configuration with the same type and name already exists",
+                message="Une configuration de collecteur avec le même type et le même nom existe déjà",
             ) from exc
 
         return self._to_public_row(row)
@@ -159,13 +159,13 @@ class AttacksCollectorConfigService:
         except UniqueViolation as exc:
             raise ConflictError(
                 code="attacks_collector_config_conflict",
-                message="A collector configuration with the same type and name already exists",
+                message="Une configuration de collecteur avec le même type et le même nom existe déjà",
             ) from exc
 
         if updated_row is None:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
 
         return self._to_public_row(updated_row)
@@ -176,7 +176,7 @@ class AttacksCollectorConfigService:
         if not deleted:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
 
     def activate_config(self, config_id: int) -> dict[str, Any]:
@@ -192,23 +192,30 @@ class AttacksCollectorConfigService:
         self._persist_validation_failure(
             config_id=config_id,
             message=validation_result.message
-            or "Attacks collector validation failed",
+            or "La validation du collecteur d'attaques a échoué",
         )
         raise BadRequestError(
             code="attacks_collector_validation_failed",
-            message=validation_result.message or "Attacks collector validation failed",
+            message=validation_result.message
+            or "La validation du collecteur d'attaques a échoué",
         )
 
     def deactivate_config(self, config_id: int) -> dict[str, Any]:
-        """Desactive une configuration de collecteur sans effacer sa validation."""
+        """Desactive une configuration de collecteur sans effacer et efface la validation."""
         updated_row = self._repository.update_config(
             config_id=config_id,
-            updates={"is_active": False},
+            updates={
+                "is_active": False,
+                "last_validation_status": "not_tested",
+                "last_validation_at": None,
+                "last_validation_error": None,
+                },
         )
+
         if updated_row is None:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
         return self._to_public_row(updated_row)
 
@@ -228,7 +235,7 @@ class AttacksCollectorConfigService:
         if updated_row is None:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
         return self._to_public_row(updated_row)
 
@@ -248,7 +255,7 @@ class AttacksCollectorConfigService:
         if updated_row is None:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
         return self._to_public_row(updated_row)
 
@@ -270,7 +277,7 @@ class AttacksCollectorConfigService:
         validator = self._validator_registry.get_validator(str(row["collector_type"]))
         if validator is None:
             return ValidationResult.fail(
-                f"{str(row['collector_type']).upper()} validation is unavailable on the API"
+                f"La validation {str(row['collector_type']).upper()} n'est pas disponible sur l'API"
             )
 
         has_api_key = self._secret_service.has_secret(row.get("encrypted_api_key"))
@@ -280,12 +287,12 @@ class AttacksCollectorConfigService:
         if collector_type == "ogo":
             if not has_api_key or not has_email:
                 return ValidationResult.fail(
-                    "OGO collector configuration is incomplete and cannot be activated"
+                    "La configuration du collecteur OGO est incomplète et ne peut pas être activée"
                 )
         elif collector_type == "serenicity":
             if not has_api_key:
                 return ValidationResult.fail(
-                    "Serenicity collector configuration is incomplete and cannot be activated"
+                    "La configuration du collecteur Serenicity est incomplète et ne peut pas être activée"
                 )
 
         decrypted_api_key = (
@@ -316,7 +323,7 @@ class AttacksCollectorConfigService:
         if updated_row is None:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
         return updated_row
 
@@ -338,7 +345,7 @@ class AttacksCollectorConfigService:
         if updated_row is None:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
 
     def _encrypt_secret(self, plain_value: str) -> str:
@@ -356,7 +363,7 @@ class AttacksCollectorConfigService:
         except (SecretConfigurationError, SecretDecryptionError) as exc:
             raise ServiceUnavailableError(
                 code="secret_key_unavailable",
-                message="Stored attacks collector secret could not be decrypted",
+                message="Le secret du collecteur d'attaques stocké n'a pas pu être déchiffré",
             ) from exc
 
     def _load_row(self, config_id: int) -> dict[str, Any]:
@@ -364,7 +371,7 @@ class AttacksCollectorConfigService:
         if row is None:
             raise NotFoundError(
                 code="attacks_collector_config_not_found",
-                message="Attacks collector configuration not found",
+                message="Configuration de collecteur d'attaques introuvable",
             )
         return row
 
@@ -389,7 +396,7 @@ class AttacksCollectorConfigService:
         if normalized_value is None:
             raise BadRequestError(
                 code="invalid_payload",
-                message=f"Field '{name}' must not be blank",
+                message=f"Le champ '{name}' ne doit pas être vide",
             )
         return normalized_value
 

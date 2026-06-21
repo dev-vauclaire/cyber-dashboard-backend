@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import unittest
 
-from tests.health import test_route
+from tests.health import test_dev_delay_middleware, test_route
 
 
-TEST_MODULES = (test_route,)
+TEST_MODULES = (test_route, test_dev_delay_middleware)
 
 
 def load_tests(

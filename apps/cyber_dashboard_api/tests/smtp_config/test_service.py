@@ -106,7 +106,7 @@ class SmtpConfigServiceTestCase(unittest.TestCase):
             self.service.update_config(payload)
 
         self.assertEqual(context.exception.code, "invalid_payload")
-        self.assertIn("valid email address", context.exception.message)
+        self.assertIn("adresse email valide", context.exception.message)
 
     def test_update_rejects_empty_payload(self) -> None:
         payload = SmtpConfigUpdateRequestSchema()

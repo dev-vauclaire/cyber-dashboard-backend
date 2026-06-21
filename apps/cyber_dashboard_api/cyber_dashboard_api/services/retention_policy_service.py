@@ -29,7 +29,7 @@ class RetentionPolicyService:
         if row is None:
             raise NotFoundError(
                 code="retention_policy_not_found",
-                message="Retention policy not found",
+                message="Politique de rétention introuvable",
             )
         return row
 
@@ -47,7 +47,7 @@ class RetentionPolicyService:
             if payload.retention_days is None:
                 raise BadRequestError(
                     code="invalid_payload",
-                    message="Field 'retention_days' must not be null",
+                    message="Le champ 'retention_days' ne doit pas être nul",
                 )
             updates["retention_days"] = validate_positive_int_field(
                 name="retention_days",
@@ -58,7 +58,7 @@ class RetentionPolicyService:
             if payload.is_active is None:
                 raise BadRequestError(
                     code="invalid_payload",
-                    message="Field 'is_active' must not be null",
+                    message="Le champ 'is_active' ne doit pas être nul",
                 )
             updates["is_active"] = payload.is_active
 
@@ -69,7 +69,7 @@ class RetentionPolicyService:
         if row is None:
             raise NotFoundError(
                 code="retention_policy_not_found",
-                message="Retention policy not found",
+                message="Politique de rétention introuvable",
             )
         return row
 
@@ -79,6 +79,6 @@ class RetentionPolicyService:
         if normalized_target_table not in ALLOWED_RETENTION_TARGET_TABLES:
             raise BadRequestError(
                 code="invalid_target_table",
-                message="target_table must be one of: attacks, common_ip_alerts",
+                message="target_table doit être l'une des valeurs suivantes : attacks, common_ip_alerts",
             )
         return normalized_target_table

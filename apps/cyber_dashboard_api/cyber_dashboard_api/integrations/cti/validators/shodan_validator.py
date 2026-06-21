@@ -18,7 +18,7 @@ class ShodanValidator(BaseCtiValidator):
 
     def validate(self, context: CtiValidationContext) -> ValidationResult:
         if context.api_key is None:
-            return ValidationResult.fail("Shodan API key is missing")
+            return ValidationResult.fail("La clé API Shodan est manquante")
 
         try:
             status_code = self._client.validate_api_key(

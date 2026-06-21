@@ -234,7 +234,7 @@ class SourceRoutesTestCase(unittest.TestCase):
                 del source_id, source_name
                 raise NotFoundError(
                     code="source_not_found",
-                    message="Source not found",
+                    message="Source introuvable",
                 )
 
         with self.assertRaises(NotFoundError) as context:
@@ -257,7 +257,7 @@ class SourceRoutesTestCase(unittest.TestCase):
                 del sensor_type_id, label
                 raise NotFoundError(
                     code="sensor_type_not_found",
-                    message="Sensor type not found",
+                    message="Type de capteur introuvable",
                 )
 
         with self.assertRaises(NotFoundError) as context:

@@ -81,7 +81,7 @@ class SmtpValidator:
     def _starttls_required(server: smtplib.SMTP) -> None:
         """Active STARTTLS et echoue explicitement si le serveur ne le supporte pas."""
         if not server.has_extn("starttls"):
-            raise _SmtpTlsValidationError("STARTTLS is required on port 587")
+            raise _SmtpTlsValidationError("STARTTLS est requis sur le port 587")
 
         SmtpValidator._starttls(server)
 
@@ -103,4 +103,4 @@ class SmtpValidator:
             smtplib.SMTPResponseException,
             smtplib.SMTPServerDisconnected,
         ) as exc:
-            raise _SmtpTlsValidationError("STARTTLS failed") from exc
+            raise _SmtpTlsValidationError("L'activation de STARTTLS a échoué") from exc

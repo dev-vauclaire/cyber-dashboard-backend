@@ -28,7 +28,7 @@ class SensorTypeService:
         if row is None:
             raise NotFoundError(
                 code="sensor_type_not_found",
-                message="Sensor type not found",
+                message="Type de capteur introuvable",
             )
         return self._to_sensor_type_item(row)
 

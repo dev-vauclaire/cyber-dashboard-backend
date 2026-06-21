@@ -76,7 +76,7 @@ class SourceService:
         if row is None:
             raise NotFoundError(
                 code="source_not_found",
-                message="Source not found",
+                message="Source introuvable",
             )
         return self._to_source_item(row)
 

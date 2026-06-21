@@ -42,7 +42,7 @@ class DeleteAttacksCollectorApiKeyRouteTestCase(unittest.TestCase):
             errors={
                 "delete_api_key": NotFoundError(
                     code="attacks_collector_config_not_found",
-                    message="Attacks collector configuration not found",
+                    message="Configuration de collecteur d'attaques introuvable",
                 )
             }
         )

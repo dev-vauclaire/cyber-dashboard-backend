@@ -194,7 +194,7 @@ class CtiConfigServiceTestCase(unittest.TestCase):
             service.update_config(code="rdap", payload=payload)
 
         self.assertEqual(context.exception.code, "invalid_payload")
-        self.assertIn("does not use an API key", context.exception.message)
+        self.assertIn("n'utilise pas de clé API", context.exception.message)
 
     def test_activate_refuses_provider_when_api_key_is_required(self) -> None:
         with self.assertRaises(BadRequestError) as context:

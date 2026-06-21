@@ -121,14 +121,14 @@ class OgoClient:
         if not isinstance(payload, dict):
             raise IntegrationRequestError(
                 "invalid_response",
-                "OGO returned an unexpected response payload",
+                "OGO a renvoyé une charge utile de réponse inattendue",
             )
 
         content = payload.get("content")
         if not isinstance(content, list):
             raise IntegrationRequestError(
                 "invalid_response",
-                "OGO returned a response without a valid 'content' list",
+                "OGO a renvoyé une réponse sans liste 'content' valide",
             )
 
         organizations: list[OgoOrganizationAccess] = []
@@ -137,7 +137,7 @@ class OgoClient:
             if not isinstance(item, dict):
                 raise IntegrationRequestError(
                     "invalid_response",
-                    "OGO returned an invalid organization entry",
+                    "OGO a renvoyé une entrée d'organisation invalide",
                 )
 
             organization = item.get("organization") or {}
@@ -152,7 +152,7 @@ class OgoClient:
             if not isinstance(raw_privileges, list):
                 raise IntegrationRequestError(
                     "invalid_response",
-                    "OGO returned an invalid privileges list",
+                    "OGO a renvoyé une liste de privilèges invalide",
                 )
 
             privileges = tuple(

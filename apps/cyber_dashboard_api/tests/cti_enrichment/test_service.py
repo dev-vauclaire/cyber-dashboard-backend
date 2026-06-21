@@ -404,7 +404,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             service.enrich_with_abuseipdb(ip_address="8.8.8.8", max_age_in_days=30)
 
         self.assertEqual(context.exception.code, "cti_enrichment_unavailable")
-        self.assertIn("rate limit", context.exception.message.lower())
+        self.assertIn("limite de débit", context.exception.message.lower())
 
     def test_enrich_with_ipdata_maps_external_errors(self) -> None:
         encrypted_api_key = self.secret_service.encrypt_secret("ipdata-api-key")
@@ -432,7 +432,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             service.enrich_with_ipdata(ip_address="8.8.8.8")
 
         self.assertEqual(context.exception.code, "cti_enrichment_unavailable")
-        self.assertIn("rejected", context.exception.message.lower())
+        self.assertIn("rejet", context.exception.message.lower())
 
     def test_enrich_with_greynoise_maps_external_errors(self) -> None:
         encrypted_api_key = self.secret_service.encrypt_secret("greynoise-api-key")
@@ -460,7 +460,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             service.enrich_with_greynoise(ip_address="71.6.135.131")
 
         self.assertEqual(context.exception.code, "cti_enrichment_unavailable")
-        self.assertIn("service is unavailable", context.exception.message.lower())
+        self.assertIn("indisponible", context.exception.message.lower())
 
     def test_enrich_with_shodan_maps_external_errors(self) -> None:
         encrypted_api_key = self.secret_service.encrypt_secret("shodan-api-key")
@@ -489,7 +489,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             service.enrich_with_shodan(ip_address="8.8.8.8")
 
         self.assertEqual(context.exception.code, "cti_enrichment_unavailable")
-        self.assertIn("service is unavailable", context.exception.message.lower())
+        self.assertIn("indisponible", context.exception.message.lower())
 
     def test_enrich_with_rdap_maps_external_errors(self) -> None:
         repository = FakeCtiConfigRepository(
@@ -517,7 +517,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             service.enrich_with_rdap(ip_address="8.8.8.8")
 
         self.assertEqual(context.exception.code, "cti_enrichment_unavailable")
-        self.assertIn("timed out", context.exception.message.lower())
+        self.assertIn("expir", context.exception.message.lower())
 
     def test_enrich_with_rdap_defaults_missing_optional_fields(self) -> None:
         repository = FakeCtiConfigRepository(
@@ -586,7 +586,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             service.enrich_with_virustotal(ip_address="8.8.8.8")
 
         self.assertEqual(context.exception.code, "cti_enrichment_unavailable")
-        self.assertIn("timed out", context.exception.message.lower())
+        self.assertIn("expir", context.exception.message.lower())
 
     def test_enrich_with_virustotal_rejects_invalid_payload(self) -> None:
         encrypted_api_key = self.secret_service.encrypt_secret("virustotal-api-key")

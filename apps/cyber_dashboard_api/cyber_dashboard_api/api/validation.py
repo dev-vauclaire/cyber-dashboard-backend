@@ -21,7 +21,7 @@ def validate_datetime_range(
 
         raise BadRequestError(
             code="invalid_date_range",
-            message="Query parameter 'from' must be earlier than or equal to 'to'",
+            message="Le paramètre de requête 'from' doit être antérieur ou égal à 'to'",
         )
 
 
@@ -44,7 +44,10 @@ def normalize_optional_filter(
 
         raise BadRequestError(
             code="invalid_filter",
-            message=f"Query parameter '{name}' exceeds the maximum length of {max_length}",
+            message=(
+                f"Le paramètre de requête '{name}' dépasse la longueur maximale "
+                f"de {max_length} caractères"
+            ),
         )
 
     if _contains_control_characters(normalized_value):
@@ -52,7 +55,7 @@ def normalize_optional_filter(
 
         raise BadRequestError(
             code="invalid_filter",
-            message=f"Query parameter '{name}' contains invalid characters",
+            message=f"Le paramètre de requête '{name}' contient des caractères invalides",
         )
 
     return normalized_value
@@ -66,7 +69,7 @@ def validate_attacker_ip(attacker_ip: str) -> str:
 
         raise BadRequestError(
             code="invalid_attacker_ip",
-            message="Path parameter 'attacker_ip' must not be blank",
+            message="Le paramètre de chemin 'attacker_ip' ne doit pas être vide",
         )
 
     try:
@@ -76,7 +79,7 @@ def validate_attacker_ip(attacker_ip: str) -> str:
 
         raise BadRequestError(
             code="invalid_attacker_ip",
-            message="Path parameter 'attacker_ip' must be a valid IP address or CIDR",
+            message="Le paramètre de chemin 'attacker_ip' doit être une adresse IP ou un CIDR valide",
         ) from exc
 
     return normalized_value
@@ -87,10 +90,10 @@ def validate_source_name(source_name: str) -> str:
     normalized_value = source_name.strip()
 
     if not normalized_value:
-        raise ValueError("source_name must not be blank")
+        raise ValueError("source_name ne doit pas être vide")
 
     if _contains_control_characters(normalized_value):
-        raise ValueError("source_name contains invalid characters")
+        raise ValueError("source_name contient des caractères invalides")
 
     return normalized_value
 
@@ -114,7 +117,10 @@ def normalize_optional_text_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' exceeds the maximum length of {max_length}",
+            message=(
+                f"Le champ '{name}' dépasse la longueur maximale de "
+                f"{max_length} caractères"
+            ),
         )
 
     if _contains_control_characters(normalized_value):
@@ -122,7 +128,7 @@ def normalize_optional_text_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' contains invalid characters",
+            message=f"Le champ '{name}' contient des caractères invalides",
         )
 
     return normalized_value
@@ -141,7 +147,7 @@ def validate_secret_update_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' must not be null. Use {delete_endpoint} to remove it",
+            message=f"Le champ '{name}' ne doit pas être nul. Utilisez {delete_endpoint} pour le supprimer",
         )
 
     normalized_value = value.strip()
@@ -150,7 +156,7 @@ def validate_secret_update_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' must not be blank. Use {delete_endpoint} to remove it",
+            message=f"Le champ '{name}' ne doit pas être vide. Utilisez {delete_endpoint} pour le supprimer",
         )
 
     if len(normalized_value) > max_length:
@@ -158,7 +164,10 @@ def validate_secret_update_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' exceeds the maximum length of {max_length}",
+            message=(
+                f"Le champ '{name}' dépasse la longueur maximale de "
+                f"{max_length} caractères"
+            ),
         )
 
     if _contains_control_characters(normalized_value):
@@ -166,7 +175,7 @@ def validate_secret_update_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' contains invalid characters",
+            message=f"Le champ '{name}' contient des caractères invalides",
         )
 
     return normalized_value
@@ -183,13 +192,13 @@ def validate_email_input(
         from cyber_dashboard_api.api.errors import BadRequestError
 
         delete_hint = (
-            f" Use {delete_endpoint} to remove it"
+            f" Utilisez {delete_endpoint} pour le supprimer"
             if delete_endpoint is not None
             else ""
         )
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' must not be null.{delete_hint}",
+            message=f"Le champ '{name}' ne doit pas être nul.{delete_hint}",
         )
 
     normalized_value = value.strip()
@@ -197,21 +206,24 @@ def validate_email_input(
         from cyber_dashboard_api.api.errors import BadRequestError
 
         delete_hint = (
-            f" Use {delete_endpoint} to remove it"
+            f" Utilisez {delete_endpoint} pour le supprimer"
             if delete_endpoint is not None
             else ""
         )
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' must not be blank.{delete_hint}",
+            message=f"Le champ '{name}' ne doit pas être vide.{delete_hint}",
         )
-    
+
     if len(normalized_value) > max_length:
         from cyber_dashboard_api.api.errors import BadRequestError
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' exceeds the maximum length of {max_length}",
+            message=(
+                f"Le champ '{name}' dépasse la longueur maximale de "
+                f"{max_length} caractères"
+            ),
         )
 
     if _contains_control_characters(normalized_value):
@@ -219,7 +231,7 @@ def validate_email_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' contains invalid characters",
+            message=f"Le champ '{name}' contient des caractères invalides",
         )
 
     # Validation basique du format de l'email
@@ -228,7 +240,7 @@ def validate_email_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' must be a valid email address",
+            message=f"Le champ '{name}' doit être une adresse email valide",
         )
 
     return normalized_value
@@ -245,6 +257,6 @@ def validate_positive_int_field(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Field '{name}' must be a strictly positive integer",
+            message=f"Le champ '{name}' doit être un entier strictement positif",
         )
     return value

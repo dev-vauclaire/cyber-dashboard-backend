@@ -55,7 +55,10 @@ class FakeCtiConfigService:
     def get_config(self, code: str) -> dict[str, object]:
         self.calls.append({"method": "get", "code": code})
         if code == "missing":
-            raise NotFoundError(code="cti_config_not_found", message="CTI configuration not found")
+            raise NotFoundError(
+                code="cti_config_not_found",
+                message="Configuration CTI introuvable",
+            )
         return build_cti_config(code=code)
 
     def update_config(self, *, code: str, payload: object) -> dict[str, object]:

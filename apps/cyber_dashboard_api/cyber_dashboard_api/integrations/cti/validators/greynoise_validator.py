@@ -21,7 +21,7 @@ class GreyNoiseValidator(BaseCtiValidator):
 
     def validate(self, context: CtiValidationContext) -> ValidationResult:
         if context.api_key is None:
-            return ValidationResult.fail("GreyNoise API key is missing")
+            return ValidationResult.fail("La clé API GreyNoise est manquante")
 
         try:
             # GreyNoise Community responds more consistently on a known catalogued IP

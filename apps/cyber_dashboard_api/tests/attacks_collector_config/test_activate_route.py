@@ -44,7 +44,7 @@ class ActivateAttacksCollectorConfigRouteTestCase(unittest.TestCase):
             errors={
                 "activate_config": BadRequestError(
                     code="attacks_collector_validation_failed",
-                    message="OGO credentials were rejected",
+                    message="Les identifiants OGO ont été rejetés",
                 )
             }
         )
@@ -65,7 +65,7 @@ class ActivateAttacksCollectorConfigRouteTestCase(unittest.TestCase):
             errors={
                 "activate_config": NotFoundError(
                     code="attacks_collector_config_not_found",
-                    message="Attacks collector configuration not found",
+                    message="Configuration de collecteur d'attaques introuvable",
                 )
             }
         )

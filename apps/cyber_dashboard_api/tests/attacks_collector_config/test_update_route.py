@@ -51,7 +51,7 @@ class UpdateAttacksCollectorConfigRouteTestCase(unittest.TestCase):
             errors={
                 "update_config": NotFoundError(
                     code="attacks_collector_config_not_found",
-                    message="Attacks collector configuration not found",
+                    message="Configuration de collecteur d'attaques introuvable",
                 )
             }
         )

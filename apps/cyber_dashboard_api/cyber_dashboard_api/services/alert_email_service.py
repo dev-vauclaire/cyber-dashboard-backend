@@ -43,7 +43,7 @@ class AlertEmailService:
         if not alert_rows:
             raise NotFoundError(
                 code="common_ip_alert_not_found",
-                message="Common IP alert not found",
+                message="Alerte IP commune introuvable",
             )
 
         recipient = validate_email_input(
@@ -66,7 +66,7 @@ class AlertEmailService:
         if not smtp_row["is_active"]:
             raise BadRequestError(
                 code="smtp_config_inactive",
-                message="SMTP configuration must be active before sending alert emails",
+                message="La configuration SMTP doit être active avant l'envoi d'emails d'alerte",
             )
 
         self._send_email(
@@ -100,7 +100,7 @@ class AlertEmailService:
         if missing_fields:
             raise BadRequestError(
                 code="smtp_config_incomplete",
-                message="SMTP configuration is incomplete",
+                message="La configuration SMTP est incomplète",
             )
 
         password = self._decrypt_secret(smtp_row["encrypted_smtp_password"])
@@ -136,7 +136,7 @@ class AlertEmailService:
         except (OSError, smtplib.SMTPException) as exc:
             raise ServiceUnavailableError(
                 code="smtp_send_failed",
-                message="Unable to send alert email with the current SMTP configuration",
+                message="Impossible d'envoyer l'email d'alerte avec la configuration SMTP actuelle",
             ) from exc
 
     def _decrypt_secret(self, encrypted_value: str) -> str:
@@ -145,7 +145,7 @@ class AlertEmailService:
         except (SecretConfigurationError, SecretDecryptionError) as exc:
             raise ServiceUnavailableError(
                 code="secret_key_unavailable",
-                message="Stored SMTP password could not be decrypted",
+                message="Le mot de passe SMTP stocké n'a pas pu être déchiffré",
             ) from exc
 
     @staticmethod
@@ -165,11 +165,11 @@ class AlertEmailService:
         if normalized == "":
             raise BadRequestError(
                 code="invalid_payload",
-                message=f"Field '{name}' must not be blank",
+                message=f"Le champ '{name}' ne doit pas être vide",
             )
         if len(normalized) > max_length:
             raise BadRequestError(
                 code="invalid_payload",
-                message=f"Field '{name}' must contain at most {max_length} characters",
+                message=f"Le champ '{name}' doit contenir au maximum {max_length} caractères",
             )
         return normalized
