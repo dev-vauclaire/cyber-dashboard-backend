@@ -84,6 +84,27 @@ def _get_positive_float(name: str, default: float) -> float:
     return parsed_value
 
 
+def _get_non_negative_float(name: str, default: float) -> float:
+    """Retourne un flottant positif ou nul avec valeur par defaut."""
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return default
+
+    try:
+        parsed_value = float(value)
+    except ValueError as exc:
+        raise ConfigurationError(
+            f"Valeur decimale invalide pour la variable d'environnement {name} : {value}"
+        ) from exc
+
+    if parsed_value < 0:
+        raise ConfigurationError(
+            f"La variable d'environnement {name} doit etre un nombre positif ou nul"
+        )
+
+    return parsed_value
+
+
 def _get_log_level(name: str, default: str) -> str:
     """Retourne un niveau de log valide."""
     value = _get_env(name, default).upper()
@@ -102,6 +123,24 @@ def _get_optional_env(name: str) -> str | None:
     if value is None or not value.strip():
         return None
     return value.strip()
+
+
+def _get_path_prefixes(name: str) -> tuple[str, ...]:
+    """Retourne une liste de prefixes de chemins HTTP depuis une variable CSV."""
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return ()
+
+    prefixes: list[str] = []
+    for raw_item in value.split(","):
+        item = raw_item.strip()
+        if not item:
+            continue
+        if not item.startswith("/"):
+            item = f"/{item}"
+        prefixes.append(item)
+
+    return tuple(prefixes)
 
 
 def _get_public_ip(name: str, default: str) -> str:
@@ -166,6 +205,8 @@ class Settings:
     api_host: str
     api_port: int
     api_log_level: str
+    api_dev_response_delay_seconds: float
+    api_dev_response_delay_paths: tuple[str, ...]
     database: DatabaseSettings
     secrets: SecretSettings
     validation: ValidationSettings
@@ -180,6 +221,13 @@ class Settings:
             api_host=_get_env("API_HOST", "127.0.0.1"),
             api_port=_get_positive_int("API_PORT", 8000),
             api_log_level=_get_log_level("API_LOG_LEVEL", "INFO"),
+            api_dev_response_delay_seconds=_get_non_negative_float(
+                "API_DEV_RESPONSE_DELAY_SECONDS",
+                0.0,
+            ),
+            api_dev_response_delay_paths=_get_path_prefixes(
+                "API_DEV_RESPONSE_DELAY_PATHS"
+            ),
             database=DatabaseSettings(
                 host=_require_env("DB_HOST"),
                 port=_get_positive_int("DB_PORT", 5432),
