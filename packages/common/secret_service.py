@@ -51,7 +51,7 @@ class SecretService:
                 if env_key_value is not None:
                     return env_key_value
                 raise SecretConfigurationError(
-                    "Unable to read CYBER_DASHBOARD_SECRET_KEY_FILE"
+                    "Impossible de lire CYBER_DASHBOARD_SECRET_KEY_FILE"
                 ) from exc
 
             if key_value:
@@ -59,15 +59,15 @@ class SecretService:
             if env_key_value is not None:
                 return env_key_value
             raise SecretConfigurationError(
-                "CYBER_DASHBOARD_SECRET_KEY_FILE is empty"
+                "CYBER_DASHBOARD_SECRET_KEY_FILE est vide"
             )
 
         if env_key_value is not None:
             return env_key_value
 
         raise SecretConfigurationError(
-            "Encryption master key is not configured. "
-            "Set CYBER_DASHBOARD_SECRET_KEY_FILE or CYBER_DASHBOARD_SECRET_KEY"
+            "La clé maître de chiffrement n'est pas configurée. "
+            "Définissez CYBER_DASHBOARD_SECRET_KEY_FILE ou CYBER_DASHBOARD_SECRET_KEY"
         )
 
     def _read_env_key_value(self) -> str | None:
@@ -80,7 +80,7 @@ class SecretService:
         """Initialize Fernet only when needed."""
         if Fernet is None:
             raise SecretConfigurationError(
-                "Dependency 'cryptography' is required for secret encryption"
+                "La dépendance 'cryptography' est requise pour le chiffrement des secrets"
             )
 
         if self._fernet is None:
@@ -89,7 +89,7 @@ class SecretService:
                 self._fernet = Fernet(key_value.encode("utf-8"))
             except (TypeError, ValueError) as exc:
                 raise SecretConfigurationError(
-                    "Encryption master key is invalid"
+                    "La clé maître de chiffrement est invalide"
                 ) from exc
 
         return self._fernet
@@ -105,7 +105,7 @@ class SecretService:
         try:
             return fernet.decrypt(encrypted_value.encode("utf-8")).decode("utf-8")
         except InvalidToken as exc:
-            raise SecretDecryptionError("Unable to decrypt stored secret") from exc
+            raise SecretDecryptionError("Impossible de déchiffrer le secret stocké") from exc
 
     def build_secret_hint(self, plain_value: str) -> str | None:
         """Build a masked hint from a plain-text secret."""
