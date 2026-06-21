@@ -55,7 +55,12 @@ python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-uvicorn cyber_dashboard_api.main:app --host 127.0.0.1 --port 8000 --reload
+uvicorn cyber_dashboard_api.main:app \
+  --host 127.0.0.1 \
+  --port 8000 \
+  --reload \
+  --reload-dir cyber_dashboard_api \
+  --reload-dir ../../packages
 ```
 
 Documentation interactive :
@@ -65,6 +70,8 @@ Documentation interactive :
 
 Le bootstrap `cyber_dashboard_api/_runtime.py` ajoute automatiquement la racine `cyber-dashboard-backend` au `PYTHONPATH`, ce qui permet aux imports `packages.*` de fonctionner meme si l'application est lancee depuis son sous-dossier.
 
+En local, il est recommande de cibler explicitement les dossiers surveilles avec `--reload-dir`. Sinon, Uvicorn peut tenter de surveiller aussi `.venv/` et atteindre la limite systeme de file watchers.
+
 ## Variables d'environnement
 
 Variables minimales :
@@ -73,6 +80,8 @@ Variables minimales :
 - `API_HOST`
 - `API_PORT`
 - `API_LOG_LEVEL`
+- `API_DEV_RESPONSE_DELAY_SECONDS`
+- `API_DEV_RESPONSE_DELAY_PATHS`
 - `DB_HOST`
 - `DB_PORT`
 - `DB_NAME`
@@ -89,6 +98,12 @@ Variables pour secrets et validations externes :
 - `SERENICITY_BASE_URL`
 
 Le fichier [.env.example](./.env.example) sert de base.
+
+Simulation simple de reponses lentes en developpement :
+
+- `API_DEV_RESPONSE_DELAY_SECONDS=2.0` applique 2 secondes de delai avant reponse
+- `API_DEV_RESPONSE_DELAY_PATHS=/api/attacks,/api/stats` limite ce delai a certains prefixes de routes
+- si `API_DEV_RESPONSE_DELAY_PATHS` est vide, le delai s'applique a toutes les routes
 
 Priorite de lecture de la cle maitre :
 
