@@ -148,7 +148,7 @@ def _backfill_specialized_sources() -> None:
         ON CONFLICT (source_id) DO NOTHING
         """
     )
-    op.execute("UPDATE sources SET updated_at = created_at")
+    op.execute("UPDATE sources SET updated_at = created_at, is_active = FALSE")
 
 
 def _insert_legacy_collector_config(
