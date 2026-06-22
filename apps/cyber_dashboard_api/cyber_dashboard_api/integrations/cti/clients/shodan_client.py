@@ -25,10 +25,10 @@ class ShodanClient:
             },
         )
 
-    def validate_api_key(self, *, api_key: str, test_ip: str) -> int:
-        """Effectue un appel léger à Shodan."""
-        _, status_code = self.get_host_report(
-            api_key=api_key,
-            ip_address=test_ip,
+    def validate_api_key(self, *, api_key: str) -> int:
+        """Valide une clé via l'endpoint d'information du plan Shodan."""
+        _, status_code = self._http_client.get_json(
+            url="https://api.shodan.io/api-info",
+            params={"key": api_key},
         )
         return status_code

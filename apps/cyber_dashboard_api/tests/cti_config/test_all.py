@@ -4,11 +4,17 @@ from __future__ import annotations
 
 import unittest
 
-from tests.cti_config import test_greynoise_validator, test_routes, test_service
+from tests.cti_config import (
+    test_greynoise_validator,
+    test_routes,
+    test_service,
+    test_shodan_validator,
+)
 
 
 TEST_MODULES = (
     test_greynoise_validator,
+    test_shodan_validator,
     test_routes,
     test_service,
 )

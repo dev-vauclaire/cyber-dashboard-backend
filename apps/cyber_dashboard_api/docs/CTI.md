@@ -354,6 +354,11 @@ Route externe utilisée :
 https://api.shodan.io/shodan/host/{ip_address}?key={your_api_key}
 ```
 
+Note de validation :
+
+- l'activation valide la clé avec `GET https://api.shodan.io/api-info?key={your_api_key}`
+- l'endpoint hôte n'est utilisé que pour l'enrichissement, car il accepte aussi les requêtes non authentifiées
+
 Route API :
 
 ```bash

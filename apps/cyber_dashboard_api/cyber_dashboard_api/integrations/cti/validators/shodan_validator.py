@@ -23,7 +23,6 @@ class ShodanValidator(BaseCtiValidator):
         try:
             status_code = self._client.validate_api_key(
                 api_key=context.api_key,
-                test_ip=context.test_ip,
             )
         except IntegrationRequestError as exc:
             return self._map_request_error(exc)
