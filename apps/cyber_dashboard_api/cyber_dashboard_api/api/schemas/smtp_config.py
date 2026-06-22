@@ -18,7 +18,6 @@ class SmtpConfigSchema(ApiSchema):
     smtp_user: str | None
     smtp_from: str | None
     smtp_from_name: str | None
-    auto_email_enabled: bool
     is_active: bool
     has_smtp_password: bool
     smtp_password_hint: str | None
@@ -38,4 +37,3 @@ class SmtpConfigUpdateRequestSchema(ApiSchema):
     smtp_password: str | None = Field(default=None, max_length=4096)
     smtp_from: str | None = Field(default=None, max_length=255)
     smtp_from_name: str | None = Field(default=None, max_length=255)
-    auto_email_enabled: bool | None = None

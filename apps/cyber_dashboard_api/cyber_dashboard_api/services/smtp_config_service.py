@@ -116,9 +116,6 @@ class SmtpConfigService:
                 max_length=255,
             )
 
-        if "auto_email_enabled" in fields_set:
-            updates["auto_email_enabled"] = payload.auto_email_enabled
-
         if critical_fields_changed:
             updates["is_active"] = False
             self._reset_validation_fields(updates)
@@ -300,7 +297,6 @@ class SmtpConfigService:
             "smtp_user": row["smtp_user"],
             "smtp_from": row["smtp_from"],
             "smtp_from_name": row["smtp_from_name"],
-            "auto_email_enabled": row.get("auto_email_enabled", False),
             "is_active": row["is_active"],
             "has_smtp_password": self._secret_service.has_secret(
                 row.get("encrypted_smtp_password")
