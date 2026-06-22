@@ -23,7 +23,10 @@ class GreyNoiseClient:
             headers={"key": api_key},
         )
 
-    def validate_api_key(self, *, api_key: str, test_ip: str) -> int:
-        """Effectue un appel léger à GreyNoise Community API."""
-        _, status_code = self.get_ip_report(api_key=api_key, ip_address=test_ip)
+    def validate_api_key(self, *, api_key: str) -> int:
+        """Valide une clé via l'endpoint GreyNoise dédié à l'accès API."""
+        _, status_code = self._http_client.get_json(
+            url="https://api.greynoise.io/ping",
+            headers={"key": api_key},
+        )
         return status_code

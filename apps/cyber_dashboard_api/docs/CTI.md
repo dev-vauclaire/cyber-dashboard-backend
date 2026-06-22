@@ -331,7 +331,8 @@ Exemple de payload source :
 
 Note de validation :
 
-- pour l'activation de la config CTI GreyNoise, la validation de clé utilise une IP de référence connue côté GreyNoise afin d'éviter les faux négatifs liés à une IP générique absente de leur base
+- l'activation valide la clé avec `GET https://api.greynoise.io/ping`
+- l'endpoint Community n'est utilisé que pour l'enrichissement, car il accepte aussi les requêtes non authentifiées
 
 ## Shodan
 
