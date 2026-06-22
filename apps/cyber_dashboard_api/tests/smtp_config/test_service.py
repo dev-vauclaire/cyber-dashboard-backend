@@ -108,6 +108,16 @@ class SmtpConfigServiceTestCase(unittest.TestCase):
         self.assertEqual(context.exception.code, "invalid_payload")
         self.assertIn("adresse email valide", context.exception.message)
 
+    def test_update_rejects_from_name_header_injection(self) -> None:
+        payload = SmtpConfigUpdateRequestSchema(
+            smtp_from_name="Cyber Dashboard\nBcc: attacker@example.net"
+        )
+
+        with self.assertRaises(BadRequestError) as context:
+            self.service.update_config(payload)
+
+        self.assertEqual(context.exception.code, "invalid_payload")
+
     def test_update_rejects_empty_payload(self) -> None:
         payload = SmtpConfigUpdateRequestSchema()
 
@@ -218,6 +228,32 @@ class SmtpConfigServiceTestCase(unittest.TestCase):
             "Authentification SMTP refusée.",
         )
         self.assertFalse(self.repository.row["is_active"])
+
+    def test_test_failure_preserves_active_status(self) -> None:
+        encrypted_password = self.secret_service.encrypt_secret("smtp-secret")
+        self.repository = FakeSmtpConfigRepository(
+            build_smtp_row(
+                encrypted_smtp_password=encrypted_password,
+                smtp_password_hint="****cret",
+                is_active=True,
+                last_validation_status="success",
+            )
+        )
+        self.validator = FakeValidator(
+            ValidationResult.fail("Authentification SMTP refusée.")
+        )
+        self.service = SmtpConfigService(
+            self.repository,
+            self.secret_service,
+            self.validator,
+            build_validation_settings(),
+        )
+
+        with self.assertRaises(BadRequestError):
+            self.service.test_config()
+
+        self.assertTrue(self.repository.row["is_active"])
+        self.assertEqual(self.repository.row["last_validation_status"], "failed")
 
     def test_activate_timeout_returns_bad_request(self) -> None:
         encrypted_password = self.secret_service.encrypt_secret("smtp-secret")

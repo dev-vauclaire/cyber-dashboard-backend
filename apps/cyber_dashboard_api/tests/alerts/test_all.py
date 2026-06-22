@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import unittest
 
-from tests.alerts import test_routes
+from tests.alerts import test_routes, test_service
 
 
-TEST_MODULES = (test_routes,)
+TEST_MODULES = (test_routes, test_service)
 
 
 def load_tests(

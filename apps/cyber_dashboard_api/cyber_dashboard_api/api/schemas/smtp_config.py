@@ -37,3 +37,18 @@ class SmtpConfigUpdateRequestSchema(ApiSchema):
     smtp_password: str | None = Field(default=None, max_length=4096)
     smtp_from: str | None = Field(default=None, max_length=255)
     smtp_from_name: str | None = Field(default=None, max_length=255)
+
+
+class SmtpEmailRequestSchema(ApiSchema):
+    """Payload d'envoi d'un email via la configuration SMTP active."""
+
+    recipient: str = Field(..., min_length=1, max_length=255)
+    subject: str = Field(..., min_length=1, max_length=255)
+    body: str = Field(..., min_length=1, max_length=10000)
+
+
+class SmtpEmailResponseSchema(ApiSchema):
+    """Resultat public de l'envoi d'un email SMTP."""
+
+    recipient: str
+    sent: bool

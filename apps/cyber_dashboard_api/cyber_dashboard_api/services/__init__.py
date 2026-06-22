@@ -13,6 +13,7 @@ from .secret_service import (
 )
 from .sensor_type_service import SensorTypeService
 from .smtp_config_service import SmtpConfigService
+from .smtp_email_service import SmtpEmailService
 from .source_service import SourceService
 
 __all__ = [
@@ -27,5 +28,6 @@ __all__ = [
     "SecretServiceError",
     "SensorTypeService",
     "SmtpConfigService",
+    "SmtpEmailService",
     "SourceService",
 ]

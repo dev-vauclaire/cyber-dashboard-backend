@@ -110,11 +110,19 @@ class SmtpConfigService:
             )
 
         if "smtp_from_name" in fields_set:
-            updates["smtp_from_name"] = normalize_optional_text_input(
+            normalized_from_name = normalize_optional_text_input(
                 name="smtp_from_name",
                 value=payload.smtp_from_name,
                 max_length=255,
             )
+            if normalized_from_name is not None and (
+                "\r" in normalized_from_name or "\n" in normalized_from_name
+            ):
+                raise BadRequestError(
+                    code="invalid_payload",
+                    message="Le champ 'smtp_from_name' doit tenir sur une seule ligne",
+                )
+            updates["smtp_from_name"] = normalized_from_name
 
         if critical_fields_changed:
             updates["is_active"] = False
@@ -130,13 +138,8 @@ class SmtpConfigService:
         if validation_result.success:
             return self._to_public_row(self._persist_validation_success())
 
-        self._repository.update_config(
-            updates={
-                "last_validation_status": "failed",
-                "last_validation_at": datetime.now(UTC),
-                "last_validation_error": validation_result.message
-                or "Réponse SMTP inattendue.",
-            }
+        self._persist_validation_failure(
+            message=validation_result.message or "Réponse SMTP inattendue."
         )
         raise BadRequestError(
             code="smtp_validation_failed",
@@ -159,8 +162,13 @@ class SmtpConfigService:
                 )
             )
 
-        self._persist_validation_failure(
-            message=validation_result.message or "Réponse SMTP inattendue."
+        self._repository.update_config(
+            updates={
+                "last_validation_status": "failed",
+                "last_validation_at": datetime.now(UTC),
+                "last_validation_error": validation_result.message
+                or "Réponse SMTP inattendue.",
+            }
         )
         raise BadRequestError(
             code="smtp_validation_failed",

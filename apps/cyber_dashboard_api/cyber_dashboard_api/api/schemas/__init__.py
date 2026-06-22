@@ -57,7 +57,12 @@ from .retention_policies import (
     RetentionPolicySchema,
     RetentionPolicyUpdateRequestSchema,
 )
-from .smtp_config import SmtpConfigSchema, SmtpConfigUpdateRequestSchema
+from .smtp_config import (
+    SmtpConfigSchema,
+    SmtpConfigUpdateRequestSchema,
+    SmtpEmailRequestSchema,
+    SmtpEmailResponseSchema,
+)
 from .statistics import (
     AttackSummaryResponseSchema,
     AttackSourcePercentageSchema,
@@ -121,6 +126,8 @@ __all__ = [
     "SensorTypeRenameRequestSchema",
     "SmtpConfigSchema",
     "SmtpConfigUpdateRequestSchema",
+    "SmtpEmailRequestSchema",
+    "SmtpEmailResponseSchema",
     "SourceColorUpdateRequestSchema",
     "SourceItemSchema",
     "SourceListResponseSchema",

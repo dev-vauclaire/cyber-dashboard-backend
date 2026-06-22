@@ -6,9 +6,17 @@ import logging
 
 from fastapi import APIRouter, Depends
 
-from cyber_dashboard_api.api.dependencies import get_smtp_config_service
-from cyber_dashboard_api.api.schemas import SmtpConfigSchema, SmtpConfigUpdateRequestSchema
-from cyber_dashboard_api.services import SmtpConfigService
+from cyber_dashboard_api.api.dependencies import (
+    get_smtp_config_service,
+    get_smtp_email_service,
+)
+from cyber_dashboard_api.api.schemas import (
+    SmtpConfigSchema,
+    SmtpConfigUpdateRequestSchema,
+    SmtpEmailRequestSchema,
+    SmtpEmailResponseSchema,
+)
+from cyber_dashboard_api.services import SmtpConfigService, SmtpEmailService
 
 
 logger = logging.getLogger(__name__)
@@ -52,6 +60,18 @@ def test_smtp_config(
     """Teste la configuration SMTP sans changer son activation."""
     logger.info("endpoint=smtp_config_test event=requested")
     return SmtpConfigSchema(**smtp_config_service.test_config())
+
+
+@router.post("/send-email", response_model=SmtpEmailResponseSchema)
+def send_smtp_email(
+    payload: SmtpEmailRequestSchema,
+    smtp_email_service: SmtpEmailService = Depends(get_smtp_email_service),
+) -> SmtpEmailResponseSchema:
+    """Envoie un email avec la configuration SMTP active."""
+    logger.info("endpoint=smtp_config_send_email event=requested")
+    return SmtpEmailResponseSchema(
+        **smtp_email_service.send_email(payload=payload)
+    )
 
 
 @router.post("/deactivate", response_model=SmtpConfigSchema)

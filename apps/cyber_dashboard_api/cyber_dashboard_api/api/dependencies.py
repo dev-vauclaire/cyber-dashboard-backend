@@ -38,6 +38,7 @@ from cyber_dashboard_api.services import (
     SecretService,
     SensorTypeService,
     SmtpConfigService,
+    SmtpEmailService,
     SourceService,
 )
 
@@ -196,13 +197,20 @@ def get_smtp_config_service() -> SmtpConfigService:
     )
 
 
+def get_smtp_email_service() -> SmtpEmailService:
+    """Construit le service generique d'envoi SMTP."""
+    return SmtpEmailService(
+        get_smtp_config_repository(),
+        get_secret_service(),
+        get_settings().validation,
+    )
+
+
 def get_alert_email_service() -> AlertEmailService:
     """Construit le service d'envoi manuel d'emails d'alerte."""
     return AlertEmailService(
         get_alert_repository(),
-        get_smtp_config_repository(),
-        get_secret_service(),
-        get_settings().validation,
+        get_smtp_email_service(),
     )
 
 

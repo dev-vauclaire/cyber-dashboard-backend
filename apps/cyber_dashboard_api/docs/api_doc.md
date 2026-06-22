@@ -204,6 +204,8 @@ Ces routes dependent de la configuration CTI active et, selon le provider, d'une
 - `PATCH /api/smtp-config`
 - `PUT /api/smtp-config`
 - `POST /api/smtp-config/activate`
+- `POST /api/smtp-config/test`
+- `POST /api/smtp-config/send-email`
 - `POST /api/smtp-config/deactivate`
 - `DELETE /api/smtp-config/password`
 
@@ -215,6 +217,16 @@ Le body de `PATCH`/`PUT` accepte notamment :
 - `smtp_password`
 - `smtp_from`
 - `smtp_from_name`
+
+L'envoi automatique attend une configuration SMTP active et le body suivant :
+
+```json
+{
+  "recipient": "ops@example.net",
+  "subject": "Alerte automatique",
+  "body": "Une alerte a été détectée."
+}
+```
 
 ## Configurations de collecteurs d'attaques
 
