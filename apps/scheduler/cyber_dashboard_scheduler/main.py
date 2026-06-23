@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 
-from packages.common.secret_service import SecretService
+from packages.cyber_dashboard_common_tools.src.cyber_dashboard_common_tools.secret_service import (
+    SecretService,
+)
 
 from cyber_dashboard_scheduler.clients import (
     OgoApiClient,

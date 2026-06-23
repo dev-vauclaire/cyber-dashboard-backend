@@ -8,7 +8,7 @@ from datetime import datetime
 import logging
 from typing import Any, TypeAlias
 
-from packages.common.secret_service import (
+from packages.cyber_dashboard_common_tools.src.cyber_dashboard_common_tools.secret_service import (
     SecretConfigurationError,
     SecretDecryptionError,
     SecretService,

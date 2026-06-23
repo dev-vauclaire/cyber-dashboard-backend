@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from packages.common.secret_service import (
+from packages.cyber_dashboard_common_tools.src.cyber_dashboard_common_tools.secret_service import (
     SecretConfigurationError,
     SecretDecryptionError,
     SecretService,

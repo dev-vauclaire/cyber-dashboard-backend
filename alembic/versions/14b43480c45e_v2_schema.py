@@ -14,7 +14,10 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import context, op
 
-from packages.common.secret_service import SecretConfigurationError, SecretService
+from packages.cyber_dashboard_common_tools.src.cyber_dashboard_common_tools.secret_service import (
+    SecretConfigurationError,
+    SecretService,
+)
 
 # revision identifiers, used by Alembic.
 revision: str = "14b43480c45e"

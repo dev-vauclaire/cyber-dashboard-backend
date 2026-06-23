@@ -7,7 +7,9 @@ from datetime import datetime
 import logging
 from typing import Any, TypeAlias
 
-from packages.common.secret_service import SecretService
+from packages.cyber_dashboard_common_tools.src.cyber_dashboard_common_tools.secret_service import (
+    SecretService,
+)
 from packages.database.repositories import SchedulerStateRepository, SourceRepository
 
 from cyber_dashboard_scheduler.clients import (

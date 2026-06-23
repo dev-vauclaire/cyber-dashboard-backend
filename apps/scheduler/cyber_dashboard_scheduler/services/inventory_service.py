@@ -6,7 +6,9 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 import logging
 
-from packages.common.secret_service import SecretService
+from packages.cyber_dashboard_common_tools.src.cyber_dashboard_common_tools.secret_service import (
+    SecretService,
+)
 from packages.database.repositories import (
     AttacksCollectorConfigRepository,
     SchedulerStateRepository,

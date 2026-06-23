@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 import logging
 from typing import Any
 
-from packages.common.secret_service import (
+from packages.cyber_dashboard_common_tools.src.cyber_dashboard_common_tools.secret_service import (
     SecretConfigurationError,
     SecretDecryptionError,
     SecretService,

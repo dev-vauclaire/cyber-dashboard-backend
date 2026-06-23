@@ -1,10 +1,11 @@
 # Packages partagés
 
-Le dossier `packages/` contient le code réutilisable par plusieurs applications
+Le dossier `packages/` contient les libraries réutilisable par plusieurs applications
 du monorepo.
 
-- `database/` : connexion PostgreSQL, modèles SQLAlchemy et repositories communs
-- `common/` : services techniques transverses
+- `cyber-dashboard-database/` : connexion PostgreSQL, modèles
+SQLAlchemy et repositories communs
+- `cyber-dashboard-common-tools/` : services techniques transverses comme le chiffrement
 
 Règle d'organisation :
 
