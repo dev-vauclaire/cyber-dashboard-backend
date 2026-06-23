@@ -1,2 +1,1 @@
 """Intégrations CTI."""
-

@@ -29,4 +29,3 @@ class SensorType(Base):
     )
 
     sources: Mapped[list["Source"]] = relationship(back_populates="sensor_type")
-

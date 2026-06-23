@@ -76,21 +76,28 @@ Statuts frequents :
   - `color`
 - `PATCH /api/sources/{source_id}/name`
   Body :
+
   ```json
   { "source_name": "OGO Paris PROD" }
   ```
+
 - `PATCH /api/sources/sensor-types/{sensor_type_id}/label`
   Body :
+
   ```json
   { "sensor_type_label": "Web Application Firewall PROD" }
   ```
+
 - `PATCH /api/sources/{source_id}/is_active`
   Body :
+
   ```json
   { "is_active": false }
   ```
+
 - `PATCH /api/sources/{source_id}/color`
   Body :
+
   ```json
   { "color": "#2563EB" }
   ```
@@ -151,7 +158,8 @@ Statuts frequents :
   Query params : `from`, `to`
   Particularite :
   - `bucket="day"`
-  - `bucket_starts_utc` expose des instants UTC correspondant aux debuts de jour Paris
+  - `bucket_starts_utc` expose des instants UTC correspondant
+  aux debuts de jour Paris
   - `series[].data` suit cet ordre de buckets
 - `GET /api/stats/attacks/by-type`
   Query params : `from`, `to`
@@ -162,12 +170,14 @@ Statuts frequents :
 - `GET /api/cti-config/{code}`
 - `PATCH /api/cti-config/{code}`
   Body possible :
+
   ```json
   {
     "label": "RDAP / WHOIS",
     "api_key": "optional-secret"
   }
   ```
+
 - `POST /api/cti-config/{code}/activate`
 - `POST /api/cti-config/{code}/deactivate`
 - `DELETE /api/cti-config/{code}/api-key`
@@ -196,7 +206,8 @@ Chaque route attend `ip_address` en query string.
 - `GET /api/cti-enrichment/shodan`
 - `GET /api/cti-enrichment/virustotal`
 
-Ces routes dependent de la configuration CTI active et, selon le provider, d'une cle valide.
+Ces routes dependent de la configuration CTI active et,
+selon le provider, d'une cle valide.
 
 ## Configuration SMTP
 

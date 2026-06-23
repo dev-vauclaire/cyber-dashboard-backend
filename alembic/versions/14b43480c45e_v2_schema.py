@@ -808,7 +808,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-   
+
 
     op.add_column(
         "sources",

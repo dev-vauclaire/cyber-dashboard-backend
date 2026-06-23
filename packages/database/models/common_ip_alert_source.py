@@ -39,4 +39,3 @@ class CommonIpAlertSource(Base):
 
     alert: Mapped["CommonIpAlert"] = relationship(back_populates="alert_sources")
     source: Mapped["Source"] = relationship(back_populates="alert_sources")
-

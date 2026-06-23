@@ -1,7 +1,7 @@
 """Init v1 schema
 
 Revision ID: 6d98af97a0e5
-Revises: 
+Revises:
 Create Date: 2026-06-10 15:52:13.627506
 
 """
@@ -90,7 +90,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('sensor_type_id', 'external_id')
     )
     op.create_index('idx_sources_sensor_type_id', 'sources', ['sensor_type_id'], unique=False)
-    
+
     op.create_table('attacks',
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('deduplication_id', sa.String(length=255), nullable=False),

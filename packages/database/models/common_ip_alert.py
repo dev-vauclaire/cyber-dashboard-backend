@@ -49,4 +49,3 @@ class CommonIpAlert(Base):
         back_populates="alert",
         cascade="all, delete-orphan",
     )
-
