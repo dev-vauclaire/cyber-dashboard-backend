@@ -21,7 +21,9 @@ class SeenIpRegistry:
             for attacker_ip, source_summaries in initial_state.items():
                 self.seed(attacker_ip, source_summaries)
 
-    def seed(self, attacker_ip: str, source_summaries: Iterable[CommonIpAlertSource]) -> None:
+    def seed(
+        self, attacker_ip: str, source_summaries: Iterable[CommonIpAlertSource]
+    ) -> None:
         # Precharger une IP et ses resumes par source.
         normalized_ip = self._normalize_ip(attacker_ip)
         self._seen_ips[normalized_ip] = {
@@ -38,7 +40,9 @@ class SeenIpRegistry:
         normalized_ip = self._normalize_ip(attacker_ip)
         return int(source_id) in self._seen_ips.get(normalized_ip, {})
 
-    def register_source(self, attacker_ip: str, source_id: int, occurred_at: datetime) -> None:
+    def register_source(
+        self, attacker_ip: str, source_id: int, occurred_at: datetime
+    ) -> None:
         # Integrer une nouvelle attaque dans le resume memoire d'une IP/source.
         normalized_ip = self._normalize_ip(attacker_ip)
         source_summaries = self._seen_ips.setdefault(normalized_ip, {})
@@ -53,7 +57,9 @@ class SeenIpRegistry:
             )
             return
 
-        existing_summary.first_seen_at = min(existing_summary.first_seen_at, occurred_at)
+        existing_summary.first_seen_at = min(
+            existing_summary.first_seen_at, occurred_at
+        )
         existing_summary.last_seen_at = max(existing_summary.last_seen_at, occurred_at)
         existing_summary.increment_hit_count()
 
@@ -93,8 +99,12 @@ class SeenIpRegistry:
                 hit_count=1,
             )
         else:
-            existing_summary.first_seen_at = min(existing_summary.first_seen_at, occurred_at)
-            existing_summary.last_seen_at = max(existing_summary.last_seen_at, occurred_at)
+            existing_summary.first_seen_at = min(
+                existing_summary.first_seen_at, occurred_at
+            )
+            existing_summary.last_seen_at = max(
+                existing_summary.last_seen_at, occurred_at
+            )
             existing_summary.increment_hit_count()
 
         return [
@@ -117,5 +127,7 @@ class SeenIpRegistry:
         return IpAddress(attacker_ip).normalize()
 
     @staticmethod
-    def _clone_source_summary(source_summary: CommonIpAlertSource) -> CommonIpAlertSource:
+    def _clone_source_summary(
+        source_summary: CommonIpAlertSource,
+    ) -> CommonIpAlertSource:
         return copy(source_summary)

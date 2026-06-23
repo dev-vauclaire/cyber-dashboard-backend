@@ -52,10 +52,14 @@ Si une clé est requise mais absente, l'API renvoie `cti_provider_not_configured
 
 L'API applique les règles suivantes pour tous les enrichissements :
 
-- si le payload racine n'est pas un objet JSON, la réponse est rejetée avec `cti_enrichment_invalid_response`
-- si des sous-champs attendus sont absents, l'API retourne des valeurs par défaut au lieu d'échouer
-- les erreurs réseau, timeout, DNS, authentification ou indisponibilité externe sont normalisées en `cti_enrichment_unavailable`
-- l'adresse IP renvoyée retombe sur l'IP demandée si le provider ne fournit pas de champ IP exploitable
+- si le payload racine n'est pas un objet JSON, la réponse est rejetée avec
+  `cti_enrichment_invalid_response`
+- si des sous-champs attendus sont absents, l'API retourne des valeurs par
+  défaut au lieu d'échouer
+- les erreurs réseau, timeout, DNS, authentification ou indisponibilité externe
+  sont normalisées en `cti_enrichment_unavailable`
+- l'adresse IP renvoyée retombe sur l'IP demandée si le provider ne fournit pas
+  de champ IP exploitable
 
 Valeurs par défaut courantes :
 
@@ -256,7 +260,8 @@ Logique de mapping :
 
 - `name` provient de `payload.name`
 - `country` est extrait de l'entité ayant le rôle `registrant`
-- `abuse_contact_email` est extrait de la première entité imbriquée ayant le rôle `abuse`
+- `abuse_contact_email` est extrait de la première entité imbriquée ayant le
+  rôle `abuse`
 - `start_address` provient de `startAddress`
 - `end_address` provient de `endAddress`
 
@@ -332,7 +337,8 @@ Exemple de payload source :
 Note de validation :
 
 - l'activation valide la clé avec `GET https://api.greynoise.io/ping`
-- l'endpoint Community n'est utilisé que pour l'enrichissement, car il accepte aussi les requêtes non authentifiées
+- l'endpoint Community n'est utilisé que pour l'enrichissement, car il accepte
+  aussi les requêtes non authentifiées
 
 ## Shodan
 
@@ -356,8 +362,10 @@ https://api.shodan.io/shodan/host/{ip_address}?key={your_api_key}
 
 Note de validation :
 
-- l'activation valide la clé avec `GET https://api.shodan.io/api-info?key={your_api_key}`
-- l'endpoint hôte n'est utilisé que pour l'enrichissement, car il accepte aussi les requêtes non authentifiées
+- l'activation valide la clé avec
+  `GET https://api.shodan.io/api-info?key={your_api_key}`
+- l'endpoint hôte n'est utilisé que pour l'enrichissement, car il accepte aussi
+  les requêtes non authentifiées
 
 Route API :
 

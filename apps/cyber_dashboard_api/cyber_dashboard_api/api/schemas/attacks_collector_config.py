@@ -7,7 +7,6 @@ from typing import Literal
 
 from .common import ApiSchema
 
-
 CollectorType = Literal["ogo", "serenicity"]
 
 

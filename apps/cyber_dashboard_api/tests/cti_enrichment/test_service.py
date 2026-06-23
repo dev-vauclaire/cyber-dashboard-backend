@@ -5,7 +5,11 @@ from __future__ import annotations
 import unittest
 from datetime import UTC, datetime
 
-from cyber_dashboard_api.api.errors import BadRequestError, NotFoundError, ServiceUnavailableError
+from cyber_dashboard_api.api.errors import (
+    BadRequestError,
+    NotFoundError,
+    ServiceUnavailableError,
+)
 from cyber_dashboard_api.integrations.common import IntegrationRequestError
 from cyber_dashboard_api.services import CtiEnrichmentService
 
@@ -42,7 +46,9 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
         self.ipdata_client = FakeIpDataClient(payload=build_ipdata_payload())
         self.rdap_client = FakeRdapClient(payload=build_rdap_payload())
         self.shodan_client = FakeShodanClient(payload=build_shodan_payload())
-        self.virustotal_client = FakeVirusTotalClient(payload=build_virustotal_payload())
+        self.virustotal_client = FakeVirusTotalClient(
+            payload=build_virustotal_payload()
+        )
         self.service = CtiEnrichmentService(
             self.repository,
             self.secret_service,
@@ -370,7 +376,9 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
 
         self.assertEqual(context.exception.code, "cti_provider_not_configured")
 
-    def test_enrich_with_abuseipdb_returns_not_found_when_config_is_missing(self) -> None:
+    def test_enrich_with_abuseipdb_returns_not_found_when_config_is_missing(
+        self,
+    ) -> None:
         service = CtiEnrichmentService(
             FakeCtiConfigRepository(None),
             self.secret_service,
@@ -416,7 +424,9 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             )
         )
         client = FakeIpDataClient(
-            error=IntegrationRequestError("auth_rejected", "auth rejected", status_code=401)
+            error=IntegrationRequestError(
+                "auth_rejected", "auth rejected", status_code=401
+            )
         )
         service = CtiEnrichmentService(
             repository,
@@ -500,9 +510,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
                 encrypted_api_key=None,
             )
         )
-        client = FakeRdapClient(
-            error=IntegrationRequestError("timeout", "timeout")
-        )
+        client = FakeRdapClient(error=IntegrationRequestError("timeout", "timeout"))
         service = CtiEnrichmentService(
             repository,
             self.secret_service,

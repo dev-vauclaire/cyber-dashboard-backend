@@ -8,6 +8,7 @@ from typing import Any, Iterator, Protocol
 from psycopg import Connection, connect
 from psycopg.rows import dict_row
 
+
 class DatabaseSettingsProtocol(Protocol):
     """Contrat minimal attendu pour configurer PostgreSQL."""
 

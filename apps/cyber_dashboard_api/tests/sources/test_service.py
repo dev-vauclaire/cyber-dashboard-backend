@@ -54,7 +54,9 @@ class FakeSourceRepository:
             }
         ]
         self.source_rows = [build_source_row()]
-        self.rename_result: dict[str, Any] | None = build_source_row(name="Suricata PROD")
+        self.rename_result: dict[str, Any] | None = build_source_row(
+            name="Suricata PROD"
+        )
         self.status_result: dict[str, Any] | None = build_source_row(is_active=False)
         self.color_result: dict[str, Any] | None = build_source_row(color="#00FF00")
 
@@ -64,7 +66,9 @@ class FakeSourceRepository:
     def list_sources(self) -> list[dict[str, Any]]:
         return deepcopy(self.source_rows)
 
-    def rename_source(self, *, source_id: int, source_name: str) -> dict[str, Any] | None:
+    def rename_source(
+        self, *, source_id: int, source_name: str
+    ) -> dict[str, Any] | None:
         del source_id, source_name
         return deepcopy(self.rename_result)
 

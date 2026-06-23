@@ -8,7 +8,6 @@ from fastapi import APIRouter
 
 from cyber_dashboard_api.api.schemas import HealthcheckSchema
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["system"])

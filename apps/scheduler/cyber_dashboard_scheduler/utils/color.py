@@ -7,7 +7,6 @@ import random
 import re
 from typing import Any
 
-
 HEX_COLOR_PATTERN = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
 
@@ -65,14 +64,17 @@ def derive_color_random(hex_color: str, variation: float = 0.15) -> str:
 
     normalized_color = normalize_hex_color(hex_color)
     red, green, blue = tuple(
-        int(normalized_color[index : index + 2], 16) / 255.0
-        for index in (1, 3, 5)
+        int(normalized_color[index : index + 2], 16) / 255.0 for index in (1, 3, 5)
     )
 
     hue, lightness, saturation = colorsys.rgb_to_hls(red, green, blue)
     new_hue = (hue + random.uniform(-variation / 2, variation / 2)) % 1.0
-    new_lightness = max(0.1, min(0.9, lightness + random.uniform(-variation, variation)))
-    new_saturation = max(0.1, min(1.0, saturation + random.uniform(-variation, variation)))
+    new_lightness = max(
+        0.1, min(0.9, lightness + random.uniform(-variation, variation))
+    )
+    new_saturation = max(
+        0.1, min(1.0, saturation + random.uniform(-variation, variation))
+    )
 
     new_red, new_green, new_blue = colorsys.hls_to_rgb(
         new_hue,

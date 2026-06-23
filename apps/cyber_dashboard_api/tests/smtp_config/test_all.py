@@ -16,7 +16,6 @@ from tests.smtp_config import (
     test_validator,
 )
 
-
 TEST_MODULES = (
     test_get_route,
     test_update_route,

@@ -6,7 +6,6 @@ import unittest
 
 from tests.retention_policies import test_routes
 
-
 TEST_MODULES = (test_routes,)
 
 

@@ -6,7 +6,6 @@ import unittest
 
 from tests.dashboard import test_route
 
-
 TEST_MODULES = (test_route,)
 
 

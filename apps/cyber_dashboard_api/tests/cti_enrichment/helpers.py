@@ -182,7 +182,9 @@ def build_rdap_payload() -> dict[str, Any]:
                     [
                         [
                             "adr",
-                            {"label": "Google LLC\n1600 Amphitheatre Pkwy\nUnited States"},
+                            {
+                                "label": "Google LLC\n1600 Amphitheatre Pkwy\nUnited States"
+                            },
                             "text",
                             "",
                         ]

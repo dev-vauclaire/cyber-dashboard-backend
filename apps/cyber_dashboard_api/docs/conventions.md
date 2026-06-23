@@ -1,6 +1,7 @@
 # Conventions API
 
-Ce document definit les conventions a suivre pour faire evoluer `apps/cyber_dashboard_api` dans le monorepo `cyber-dashboard-backend`.
+Ce document definit les conventions a suivre pour faire evoluer
+`apps/cyber_dashboard_api` dans le monorepo `cyber-dashboard-backend`.
 
 ## Positionnement dans le monorepo
 
@@ -130,8 +131,10 @@ Facade locale vers `packages.database.repositories`.
 
 Regle :
 
-- la logique SQL partagee doit vivre dans `packages/database/repositories` ;
-- l'API ne reimplemente pas ses propres repositories si une version partagee existe deja.
+- la logique SQL partagee doit vivre dans
+`packages/database/repositories` ;
+- l'API ne reimplemente pas ses propres
+repositories si une version partagee existe deja.
 
 ### `cyber_dashboard_api/services`
 
@@ -229,8 +232,10 @@ Flux cible :
 
 ## Regles de partage de code
 
-- si une app a besoin d'un repository partage, il doit etre place dans `packages/database/repositories` ;
-- si une app a besoin d'un helper technique partage, il doit etre place dans `packages/common` ;
+- si une app a besoin d'un repository partage, il doit etre place dans
+  `packages/database/repositories` ;
+- si une app a besoin d'un helper technique partage, il doit etre place dans
+  `packages/common` ;
 - le code partage ne doit pas importer `cyber_dashboard_api` ;
 - l'app peut exposer une facade locale pour garder ses imports historiques.
 

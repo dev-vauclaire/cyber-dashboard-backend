@@ -8,7 +8,6 @@ from zoneinfo import ZoneInfo
 
 from cyber_dashboard_api.api.errors import BadRequestError
 from cyber_dashboard_api.api.routes.stats import (
-    PARIS_TIMEZONE,
     get_attack_distribution_by_source,
     get_attack_distribution_by_type,
     get_attack_summary,
@@ -32,7 +31,9 @@ class FakeStatisticsRepository:
     def __init__(self) -> None:
         self.calls: list[dict[str, object]] = []
 
-    def get_attack_total_between(self, *, occurred_from: object, occurred_to: object) -> int:
+    def get_attack_total_between(
+        self, *, occurred_from: object, occurred_to: object
+    ) -> int:
         self.calls.append(
             {
                 "method": "total",

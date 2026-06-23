@@ -2,11 +2,13 @@
 
 Worker de correlation charge de detecter les adresses IP vues sur plusieurs sources.
 
-Dans le monorepo, `common_ip` garde sa logique metier locale mais s'appuie desormais sur :
+Dans le monorepo, `common_ip` garde sa logique metier locale mais s'appuie
+desormais sur :
 
 - `packages/database/db` pour la connexion PostgreSQL partagee ;
 - `packages/database/repositories` pour les acces SQL communs au correlateur ;
-- `packages/database/models` comme source de verite du schema utilise par les tests d'integration.
+- `packages/database/models` comme source de verite du schema utilise par les
+  tests d'integration.
 
 ## Role de l'application
 
@@ -18,7 +20,8 @@ Le worker :
 - cree ou met a jour `common_ip_alerts` et `common_ip_alert_sources` ;
 - repasse une attaque en `pending` si son traitement echoue.
 
-Le service reste volontairement simple : pas d'API HTTP, pas d'integration externe, uniquement la boucle de correlation.
+Le service reste volontairement simple : pas d'API HTTP, pas d'integration
+externe, uniquement la boucle de correlation.
 
 ## Structure utile
 
@@ -54,7 +57,8 @@ Variables du worker :
 - `CORRELATOR_LOG_LEVEL`
 - `CORRELATOR_COMPUTE_AVERAGE_PROCESSING_TIME`
 
-Les anciens alias `CORRELATOR_DB_*`, `POSTGRES_*` et `PG*` restent supportes pour faciliter la transition.
+Les anciens alias `CORRELATOR_DB_*`, `POSTGRES_*` et `PG*` restent supportes
+pour faciliter la transition.
 
 Le fichier [.env.example](./.env.example) sert de base.
 
@@ -70,7 +74,9 @@ cp .env.example .env
 python -m common_ip_correlator.main
 ```
 
-Le bootstrap `common_ip_correlator/_runtime.py` ajoute automatiquement la racine `cyber-dashboard-backend` au `PYTHONPATH`, ce qui permet aux imports `packages.*` de fonctionner meme si l'application est lancee depuis son sous-dossier.
+Le bootstrap `common_ip_correlator/_runtime.py` ajoute automatiquement la racine
+`cyber-dashboard-backend` au `PYTHONPATH`. Les imports `packages.*` fonctionnent
+ainsi meme si l'application est lancee depuis son sous-dossier.
 
 ## Boucle de traitement
 
@@ -104,11 +110,13 @@ Fichiers de tests :
 - `test_batch_processing_time_tracker.py` : mesure de performance par lot
 - `test_correlator.py` : orchestration metier du service principal
 - `test_repositories.py` : mapping des wrappers locaux vers le SQL partage
-- `test_postgres_integration.py` : verification sur PostgreSQL avec le schema SQLAlchemy partage
+- `test_postgres_integration.py` : verification sur PostgreSQL avec le schema
+  SQLAlchemy partage
 
 ## Docker
 
-Les builds Docker doivent partir de la racine du monorepo `cyber-dashboard-backend`, car l'image depend aussi de `packages/`.
+Les builds Docker doivent partir de la racine du monorepo
+`cyber-dashboard-backend`, car l'image depend aussi de `packages/`.
 
 Build :
 

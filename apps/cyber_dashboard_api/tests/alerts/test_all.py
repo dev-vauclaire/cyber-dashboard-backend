@@ -6,7 +6,6 @@ import unittest
 
 from tests.alerts import test_routes, test_service
 
-
 TEST_MODULES = (test_routes, test_service)
 
 

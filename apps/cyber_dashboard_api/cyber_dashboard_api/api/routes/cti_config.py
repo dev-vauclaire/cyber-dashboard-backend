@@ -14,7 +14,6 @@ from cyber_dashboard_api.api.schemas import (
 )
 from cyber_dashboard_api.services import CtiConfigService
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/cti-config", tags=["cti-config"])
@@ -48,7 +47,9 @@ def update_cti_config(
 ) -> CtiConfigSchema:
     """Met a jour une configuration CTI."""
     logger.info("endpoint=cti_config_update event=requested code=%s", code)
-    return CtiConfigSchema(**cti_config_service.update_config(code=code, payload=payload))
+    return CtiConfigSchema(
+        **cti_config_service.update_config(code=code, payload=payload)
+    )
 
 
 @router.post("/{code}/activate", response_model=CtiConfigSchema)

@@ -27,16 +27,14 @@ class AlertRepository:
         params: dict[str, Any] = {}
 
         if source_ids:
-            clauses.append(
-                """
+            clauses.append("""
                 EXISTS (
                     SELECT 1
                     FROM common_ip_alert_sources cas
                     WHERE cas.alert_id = a.id
                       AND cas.source_id = ANY(%(source_ids)s::INT[])
                 )
-                """
-            )
+                """)
             params["source_ids"] = source_ids
 
         if last_seen_from is not None:

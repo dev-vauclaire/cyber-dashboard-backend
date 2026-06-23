@@ -19,7 +19,7 @@ from packages.database.repositories import (
     SourceRepository,
 )
 
-from cyber_dashboard_scheduler.clients import ApiClientError, SerenicitySensorClient
+from cyber_dashboard_scheduler.clients import SerenicitySensorClient
 from cyber_dashboard_scheduler.config import Settings
 from cyber_dashboard_scheduler.db import PostgresDatabase
 from cyber_dashboard_scheduler.services.collection.collection_common import (
@@ -31,7 +31,6 @@ from cyber_dashboard_scheduler.services.normalization.attack_normalization impor
     normalize_serenicity_sensor_flux,
 )
 from cyber_dashboard_scheduler.utils import NormalizationError
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -205,8 +204,8 @@ class SerenicitySensorAttackCollectionService:
 
             normalized_attacks.append(asdict(attack))
 
-        inserted_count, deduplicated_count = self._attack_repository.insert_collected_attacks(
-            normalized_attacks
+        inserted_count, deduplicated_count = (
+            self._attack_repository.insert_collected_attacks(normalized_attacks)
         )
         persist_collection_success(
             self._scheduler_state_repository,

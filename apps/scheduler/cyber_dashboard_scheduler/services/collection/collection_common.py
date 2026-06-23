@@ -26,9 +26,7 @@ def build_collection_window(
     """Construit la fenêtre de collecte à partir de `last_poll_at`."""
     safety_window = timedelta(seconds=safety_window_seconds)
     last_poll_at = (
-        current_state.get("last_poll_at")
-        if current_state is not None
-        else None
+        current_state.get("last_poll_at") if current_state is not None else None
     )
     base_after = (
         last_poll_at
@@ -66,7 +64,9 @@ def persist_collection_error(
 ) -> None:
     """Enregistre un échec de collecte dans `scheduler_state`."""
     last_poll_at = None
-    if current_state is not None and isinstance(current_state.get("last_poll_at"), datetime):
+    if current_state is not None and isinstance(
+        current_state.get("last_poll_at"), datetime
+    ):
         last_poll_at = current_state["last_poll_at"]
 
     scheduler_state_repository.mark_collection_failure(

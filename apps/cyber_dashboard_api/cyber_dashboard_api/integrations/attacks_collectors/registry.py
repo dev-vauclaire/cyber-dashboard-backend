@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from cyber_dashboard_api.config import ValidationSettings
-from cyber_dashboard_api.integrations.attacks_collectors.clients.ogo_client import OgoClient
+from cyber_dashboard_api.integrations.attacks_collectors.clients.ogo_client import (
+    OgoClient,
+)
 from cyber_dashboard_api.integrations.attacks_collectors.clients.serenicity_client import (
     SerenicityClient,
 )

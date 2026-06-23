@@ -22,7 +22,6 @@ from cyber_dashboard_scheduler.utils import (
     require_hex_color,
 )
 
-
 SourceKey: TypeAlias = tuple[str, str]
 InventorySource: TypeAlias = SourceOgo | SourceSerenicity
 

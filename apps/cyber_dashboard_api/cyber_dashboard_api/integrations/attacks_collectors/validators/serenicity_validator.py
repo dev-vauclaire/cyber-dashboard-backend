@@ -11,7 +11,10 @@ from cyber_dashboard_api.integrations.attacks_collectors.types import (
 from cyber_dashboard_api.integrations.attacks_collectors.validators.base import (
     BaseAttacksCollectorValidator,
 )
-from cyber_dashboard_api.integrations.common import IntegrationRequestError, ValidationResult
+from cyber_dashboard_api.integrations.common import (
+    IntegrationRequestError,
+    ValidationResult,
+)
 
 
 class SerenicityValidator(BaseAttacksCollectorValidator):

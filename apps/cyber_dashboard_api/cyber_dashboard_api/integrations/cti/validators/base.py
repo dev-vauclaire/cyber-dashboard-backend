@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from cyber_dashboard_api.integrations.common import IntegrationRequestError, ValidationResult
+from cyber_dashboard_api.integrations.common import (
+    IntegrationRequestError,
+    ValidationResult,
+)
 from cyber_dashboard_api.integrations.cti.types import CtiValidationContext
 
 

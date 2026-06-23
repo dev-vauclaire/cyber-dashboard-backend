@@ -23,7 +23,9 @@ def normalize_serenicity_sensor(
     """Normalise une source Serenicity vers le format interne."""
     sensor_id = require_identifier(payload.get("id"), "id")
     sensor_type_code = require_text(payload.get("type_fk"), "type_fk").lower()
-    name = optional_text(payload.get("full_name")) or require_text(payload.get("name"), "name")
+    name = optional_text(payload.get("full_name")) or require_text(
+        payload.get("name"), "name"
+    )
     status = require_text(payload.get("status"), "status").upper()
     base_color = _derive_sensor_type_color(
         sensor_type_code=sensor_type_code,
@@ -86,4 +88,6 @@ def _derive_sensor_type_color(
         raise NormalizationError(
             f"Type de capteur sans couleur configurée : {sensor_type_code}"
         )
-    return _derive_source_color(sensor_type_color, f"sensor_type_colors[{sensor_type_code}]")
+    return _derive_source_color(
+        sensor_type_color, f"sensor_type_colors[{sensor_type_code}]"
+    )

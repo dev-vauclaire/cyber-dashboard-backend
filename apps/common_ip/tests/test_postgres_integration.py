@@ -8,7 +8,6 @@ from datetime import UTC, datetime
 
 from sqlalchemy import create_engine
 
-from common_ip_correlator._runtime import ensure_backend_root_on_path
 from common_ip_correlator.config import ConfigurationError, CorrelatorConfig
 from common_ip_correlator.db import PostgresDatabase
 from common_ip_correlator.repositories.alert_repository import AlertRepository
@@ -16,8 +15,6 @@ from common_ip_correlator.repositories.attack_repository import AttackRepository
 from common_ip_correlator.repositories.state_repository import StateRepository
 from common_ip_correlator.services.correlator import Correlator
 from common_ip_correlator.services.state_loader import StateLoader
-
-ensure_backend_root_on_path()
 
 from packages.database.models import (
     Attack as AttackModel,
@@ -30,7 +27,9 @@ from packages.database.models import (
 
 try:
     import psycopg
-except ModuleNotFoundError:  # pragma: no cover - the suite is skipped if psycopg is missing.
+except (
+    ModuleNotFoundError
+):  # pragma: no cover - the suite is skipped if psycopg is missing.
     psycopg = None
 
 
@@ -44,7 +43,9 @@ class PostgresIntegrationTests(unittest.TestCase):
             os.getenv(name)
             for name in ("DB_HOST", "CORRELATOR_DB_HOST", "POSTGRES_HOST", "PGHOST")
         ):
-            raise unittest.SkipTest("Missing PostgreSQL integration environment variables")
+            raise unittest.SkipTest(
+                "Missing PostgreSQL integration environment variables"
+            )
 
         try:
             cls.config = CorrelatorConfig.from_env()
@@ -93,7 +94,10 @@ class PostgresIntegrationTests(unittest.TestCase):
         self.assertEqual(len(attacks), 1)
         self.assertEqual(attacks[0].status.value, "processing")
         with self._cursor() as cursor:
-            cursor.execute("SELECT correlation_status FROM attacks WHERE id = %s;", (attacks[0].id,))
+            cursor.execute(
+                "SELECT correlation_status FROM attacks WHERE id = %s;",
+                (attacks[0].id,),
+            )
             self.assertEqual(cursor.fetchone()[0], "processing")
 
     def test_load_seen_ips_uses_completed_attacks(self) -> None:
@@ -116,7 +120,9 @@ class PostgresIntegrationTests(unittest.TestCase):
 
         seen_ips = self.state_repository.load_seen_ips()
 
-        self.assertEqual([summary.source_id for summary in seen_ips["198.51.100.10"]], [1, 2])
+        self.assertEqual(
+            [summary.source_id for summary in seen_ips["198.51.100.10"]], [1, 2]
+        )
         self.assertEqual(
             seen_ips["198.51.100.10"][0].first_seen_at,
             datetime(2026, 4, 15, 10, 0, 0, tzinfo=UTC),
@@ -150,12 +156,10 @@ class PostgresIntegrationTests(unittest.TestCase):
         with self._cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM common_ip_alerts;")
             self.assertEqual(cursor.fetchone()[0], 1)
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT attacker_ip, distinct_source_count, status
                 FROM common_ip_alerts;
-                """
-            )
+                """)
             attacker_ip, distinct_source_count, status = cursor.fetchone()
             self.assertEqual(attacker_ip, "203.0.113.10")
             self.assertEqual(distinct_source_count, 2)

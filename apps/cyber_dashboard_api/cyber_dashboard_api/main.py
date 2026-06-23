@@ -63,9 +63,11 @@ def create_app() -> FastAPI:
         logger.info(
             "Delai de reponse developpement active: %.3fs sur %s",
             settings.api_dev_response_delay_seconds,
-            ", ".join(settings.api_dev_response_delay_paths)
-            if settings.api_dev_response_delay_paths
-            else "toutes les routes",
+            (
+                ", ".join(settings.api_dev_response_delay_paths)
+                if settings.api_dev_response_delay_paths
+                else "toutes les routes"
+            ),
         )
         application.middleware("http")(_build_dev_response_delay_middleware(settings))
 

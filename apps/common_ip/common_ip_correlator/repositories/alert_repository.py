@@ -4,11 +4,7 @@ from psycopg import Connection
 
 from common_ip_correlator.domain.common_ip_alert import CommonIpAlert
 from common_ip_correlator.domain.common_ip_alert_source import CommonIpAlertSource
-from common_ip_correlator._runtime import ensure_backend_root_on_path
 from common_ip_correlator.db import PostgresDatabase
-
-ensure_backend_root_on_path()
-
 from packages.database.repositories import CommonIpAlertRepository
 
 

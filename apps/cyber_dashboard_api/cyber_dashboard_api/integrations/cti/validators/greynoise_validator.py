@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
-from cyber_dashboard_api.integrations.common import IntegrationRequestError, ValidationResult
-from cyber_dashboard_api.integrations.cti.clients.greynoise_client import GreyNoiseClient
+from cyber_dashboard_api.integrations.common import (
+    IntegrationRequestError,
+    ValidationResult,
+)
+from cyber_dashboard_api.integrations.cti.clients.greynoise_client import (
+    GreyNoiseClient,
+)
 from cyber_dashboard_api.integrations.cti.types import CtiValidationContext
 from cyber_dashboard_api.integrations.cti.validators.base import BaseCtiValidator
 

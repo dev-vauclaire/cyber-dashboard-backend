@@ -50,7 +50,9 @@ class BatchProcessingTimeTracker:
         if self._processed_attack_count == 0:
             return
 
-        average_seconds = self._total_processing_time_seconds / self._processed_attack_count
+        average_seconds = (
+            self._total_processing_time_seconds / self._processed_attack_count
+        )
         logger.info(
             "Average IP processing time for batch: average=%.3f ms processed=%s",
             average_seconds * 1000,

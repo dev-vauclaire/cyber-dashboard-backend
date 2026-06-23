@@ -15,7 +15,6 @@ from .collection_service import CollectionService
 from .inventory_service import SourceInventoryService
 from .retention_service import RetentionService
 
-
 LOGGER = logging.getLogger(__name__)
 
 

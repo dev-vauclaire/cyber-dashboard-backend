@@ -23,7 +23,6 @@ from cyber_dashboard_scheduler.services.inventory.common import (
 )
 from cyber_dashboard_scheduler.utils import NormalizationError, require_text
 
-
 LOGGER = logging.getLogger(__name__)
 
 

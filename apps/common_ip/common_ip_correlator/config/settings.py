@@ -7,9 +7,13 @@ from pathlib import Path
 
 try:
     from dotenv import load_dotenv
-except ModuleNotFoundError:  # pragma: no cover - fallback for minimal runtime environments.
+except (
+    ModuleNotFoundError
+):  # pragma: no cover - fallback for minimal runtime environments.
+
     def load_dotenv(*args, **kwargs) -> bool:
         return False
+
 
 ENV_FILE_PATH = Path(__file__).resolve().parents[2] / ".env"
 VALID_LOG_LEVELS = {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"}
@@ -133,7 +137,9 @@ class CorrelatorConfig:
         _load_env_file()
         return cls(
             database=DatabaseSettings(
-                host=_require_env("DB_HOST", "CORRELATOR_DB_HOST", "POSTGRES_HOST", "PGHOST"),
+                host=_require_env(
+                    "DB_HOST", "CORRELATOR_DB_HOST", "POSTGRES_HOST", "PGHOST"
+                ),
                 port=_get_positive_int(
                     "DB_PORT",
                     "CORRELATOR_DB_PORT",
@@ -141,8 +147,12 @@ class CorrelatorConfig:
                     "PGPORT",
                     default=5432,
                 ),
-                name=_require_env("DB_NAME", "CORRELATOR_DB_NAME", "POSTGRES_DB", "PGDATABASE"),
-                user=_require_env("DB_USER", "CORRELATOR_DB_USER", "POSTGRES_USER", "PGUSER"),
+                name=_require_env(
+                    "DB_NAME", "CORRELATOR_DB_NAME", "POSTGRES_DB", "PGDATABASE"
+                ),
+                user=_require_env(
+                    "DB_USER", "CORRELATOR_DB_USER", "POSTGRES_USER", "PGUSER"
+                ),
                 password=_require_env(
                     "DB_PASSWORD",
                     "CORRELATOR_DB_PASSWORD",
@@ -176,7 +186,9 @@ class CorrelatorConfig:
         if self.batch_size <= 0:
             raise ConfigurationError("Batch size must be a positive integer")
         if self.poll_interval_seconds < 0:
-            raise ConfigurationError("Poll interval must be greater than or equal to zero")
+            raise ConfigurationError(
+                "Poll interval must be greater than or equal to zero"
+            )
 
 
 @lru_cache(maxsize=1)

@@ -284,19 +284,19 @@ class SourceRepository:
                 # Cas où la source à deja été enregistrée dans la table ogo_sources
                 else:
                     source_id = int(source_row["source_id"])
-                    # On verifie que le type de capteur et la configuration sont cohérents avec la source existante ( ici on a que WAF pour ogo donc ça sert pas à grand chose mais c'est pour le principe )
+                    # On verifie que le type de capteur et la configuration sont cohérents avec la source existante ( ici on a que WAF pour ogo donc ça sert pas à grand chose mais c'est pour le principe )
                     self._assert_sensor_type_consistency(
                         current_sensor_type_id=source_row["sensor_type_id"],
                         expected_sensor_type_id=sensor_type_id,
                         identity=f"OGO:{domain_name}",
                     )
-                    # On vérifie si la source est issue d'une autre configuration, si c'est le cas on lève une exception
+                    # On vérifie si la source est issue d'une autre configuration, si c'est le cas on lève une exception
                     self._assert_config_consistency(
                         current_config_id=source_row["attacks_collector_config_id"],
                         expected_config_id=config_id,
                         identity=f"OGO:{domain_name}",
                     )
-                    # On met à jour la source pour la marquer comme vue dans l'inventaire et on met à jour les codes d'organisation
+                    # On met à jour la source pour la marquer comme vue dans l'inventaire et on met à jour les codes d'organisation
                     self._mark_source_seen(
                         cursor,
                         source_id=source_id,
@@ -557,8 +557,7 @@ class SourceRepository:
     ) -> None:
         if int(current_sensor_type_id) != expected_sensor_type_id:
             raise RuntimeError(
-                "Source type mismatch detected during inventory for "
-                f"{identity}"
+                "Source type mismatch detected during inventory for " f"{identity}"
             )
 
     @staticmethod

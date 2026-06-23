@@ -18,7 +18,6 @@ from cyber_dashboard_api.api.schemas import (
 )
 from cyber_dashboard_api.services import CtiEnrichmentService
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/cti-enrichment", tags=["cti-enrichment"])

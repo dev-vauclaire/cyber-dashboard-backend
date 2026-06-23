@@ -119,9 +119,7 @@ class CtiConfigService:
         validation_result = self._validate_for_activation(row)
 
         if validation_result.success:
-            return self._to_public_row(
-                self._persist_validation_success(code=code)
-            )
+            return self._to_public_row(self._persist_validation_success(code=code))
 
         self._persist_validation_failure(
             code=code,
@@ -140,7 +138,8 @@ class CtiConfigService:
                 "is_active": False,
                 "last_validation_status": "not_tested",
                 "last_validation_at": None,
-                "last_validation_error": None,},
+                "last_validation_error": None,
+            },
         )
 
         if updated_row is None:
@@ -275,7 +274,9 @@ class CtiConfigService:
             "label": row["label"],
             "is_key_required": bool(row["is_key_required"]),
             "is_active": row["is_active"],
-            "has_api_key": self._secret_service.has_secret(row.get("encrypted_api_key")),
+            "has_api_key": self._secret_service.has_secret(
+                row.get("encrypted_api_key")
+            ),
             "api_key_hint": row["api_key_hint"],
             "last_validation_status": row["last_validation_status"],
             "last_validation_at": row["last_validation_at"],

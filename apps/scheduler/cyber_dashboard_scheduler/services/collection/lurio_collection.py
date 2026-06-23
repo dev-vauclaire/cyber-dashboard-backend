@@ -32,7 +32,6 @@ from cyber_dashboard_scheduler.services.normalization.attack_normalization impor
 )
 from cyber_dashboard_scheduler.utils import NormalizationError
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -205,8 +204,8 @@ class LurioAttackCollectionService:
 
             normalized_attacks.append(asdict(attack))
 
-        inserted_count, deduplicated_count = self._attack_repository.insert_collected_attacks(
-            normalized_attacks
+        inserted_count, deduplicated_count = (
+            self._attack_repository.insert_collected_attacks(normalized_attacks)
         )
         poll_cursor = before if collection_completed else last_report_created_at
         if poll_cursor is not None:
@@ -222,7 +221,11 @@ class LurioAttackCollectionService:
                 "Collecte Lurio incomplète source_id=%s external_id=%s last_poll_at=%s",
                 source_id,
                 external_id,
-                last_report_created_at.isoformat() if last_report_created_at else "inconnu",
+                (
+                    last_report_created_at.isoformat()
+                    if last_report_created_at
+                    else "inconnu"
+                ),
             )
 
         return (inserted_count, attacks_ignored + deduplicated_count)

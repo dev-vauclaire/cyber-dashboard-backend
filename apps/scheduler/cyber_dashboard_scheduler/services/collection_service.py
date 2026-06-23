@@ -6,7 +6,6 @@ from dataclasses import dataclass
 import logging
 from typing import Any, Callable
 
-
 LOGGER = logging.getLogger(__name__)
 CollectionRunner = Callable[[], Any]
 

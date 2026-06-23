@@ -20,9 +20,7 @@ class ShodanClient:
         """Recupere les informations Shodan associees a une adresse IP."""
         return self._http_client.get_json(
             url=f"https://api.shodan.io/shodan/host/{ip_address}",
-            params={
-                "key": api_key
-            },
+            params={"key": api_key},
         )
 
     def validate_api_key(self, *, api_key: str) -> int:

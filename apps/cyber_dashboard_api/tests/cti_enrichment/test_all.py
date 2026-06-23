@@ -14,7 +14,6 @@ from tests.cti_enrichment import (
     test_virustotal_route,
 )
 
-
 TEST_MODULES = (
     test_abuseipdb_route,
     test_greynoise_route,

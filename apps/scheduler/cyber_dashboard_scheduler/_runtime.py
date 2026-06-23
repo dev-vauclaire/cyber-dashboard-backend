@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+
 def ensure_backend_root_on_path() -> Path:
     """Ajoute la racine backend au PYTHONPATH si necessaire."""
     current_file = Path(__file__).resolve()

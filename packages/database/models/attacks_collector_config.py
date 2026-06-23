@@ -75,4 +75,6 @@ class AttacksCollectorConfig(Base):
         server_default=text("NOW()"),
     )
 
-    sources: Mapped[list["Source"]] = relationship(back_populates="attacks_collector_config")
+    sources: Mapped[list["Source"]] = relationship(
+        back_populates="attacks_collector_config"
+    )

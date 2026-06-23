@@ -97,7 +97,9 @@ class SmtpConfigRepository:
 
         unknown_columns = set(updates) - self._ALLOWED_UPDATE_COLUMNS
         if unknown_columns:
-            raise ValueError(f"Unsupported SMTP update columns: {sorted(unknown_columns)}")
+            raise ValueError(
+                f"Unsupported SMTP update columns: {sorted(unknown_columns)}"
+            )
 
         self.get_or_create_config()
 

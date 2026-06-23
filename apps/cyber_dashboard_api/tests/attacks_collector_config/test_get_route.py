@@ -21,7 +21,9 @@ class GetAttacksCollectorConfigRouteTestCase(unittest.TestCase):
 
     def test_get_returns_configuration(self) -> None:
         service = FakeAttacksCollectorConfigService(
-            results={"get_config": build_config_response(config_id=4, name="OGO prod 4")}
+            results={
+                "get_config": build_config_response(config_id=4, name="OGO prod 4")
+            }
         )
 
         response = get_attacks_collector_config(

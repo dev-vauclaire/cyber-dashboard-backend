@@ -5,7 +5,14 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer, PrimaryKeyConstraint, text
+from sqlalchemy import (
+    BigInteger,
+    DateTime,
+    ForeignKey,
+    Integer,
+    PrimaryKeyConstraint,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -19,9 +26,7 @@ class CommonIpAlertSource(Base):
     """Associe une alerte commune aux sources concernees."""
 
     __tablename__ = "common_ip_alert_sources"
-    __table_args__ = (
-        PrimaryKeyConstraint("alert_id", "source_id"),
-    )
+    __table_args__ = (PrimaryKeyConstraint("alert_id", "source_id"),)
 
     alert_id: Mapped[int] = mapped_column(
         BigInteger,
@@ -29,8 +34,12 @@ class CommonIpAlertSource(Base):
         nullable=False,
     )
     source_id: Mapped[int] = mapped_column(ForeignKey("sources.id"), nullable=False)
-    first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    first_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     hit_count: Mapped[int] = mapped_column(
         Integer,
         nullable=False,

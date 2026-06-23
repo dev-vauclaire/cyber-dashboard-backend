@@ -6,21 +6,30 @@ from collections import Counter
 from datetime import UTC, datetime
 from typing import Any
 
-from cyber_dashboard_api.api.errors import BadRequestError, NotFoundError, ServiceUnavailableError
+from cyber_dashboard_api.api.errors import (
+    BadRequestError,
+    NotFoundError,
+    ServiceUnavailableError,
+)
 from cyber_dashboard_api.integrations.common import IntegrationRequestError
-from cyber_dashboard_api.integrations.cti.clients.abuseipdb_client import AbuseIpdbClient
-from cyber_dashboard_api.integrations.cti.clients.greynoise_client import GreyNoiseClient
+from cyber_dashboard_api.integrations.cti.clients.abuseipdb_client import (
+    AbuseIpdbClient,
+)
+from cyber_dashboard_api.integrations.cti.clients.greynoise_client import (
+    GreyNoiseClient,
+)
 from cyber_dashboard_api.integrations.cti.clients.ipdata_client import IpDataClient
 from cyber_dashboard_api.integrations.cti.clients.rdap_client import RdapClient
 from cyber_dashboard_api.integrations.cti.clients.shodan_client import ShodanClient
-from cyber_dashboard_api.integrations.cti.clients.virustotal_client import VirusTotalClient
+from cyber_dashboard_api.integrations.cti.clients.virustotal_client import (
+    VirusTotalClient,
+)
 from cyber_dashboard_api.repositories import CtiConfigRepository
 from cyber_dashboard_api.services.secret_service import (
     SecretConfigurationError,
     SecretDecryptionError,
     SecretService,
 )
-
 
 ABUSEIPDB_PROVIDER_CODE = "abuseipdb"
 GREYNOISE_PROVIDER_CODE = "greynoise"
@@ -216,9 +225,11 @@ class CtiEnrichmentService:
         data = CtiEnrichmentService._coerce_dict(payload.get("data"))
         total_reports = CtiEnrichmentService._coerce_int(data.get("totalReports"))
         reports = data.get("reports")
-        category_percentages = CtiEnrichmentService._compute_abuseipdb_category_percentages(
-            reports=reports,
-            total_reports=total_reports,
+        category_percentages = (
+            CtiEnrichmentService._compute_abuseipdb_category_percentages(
+                reports=reports,
+                total_reports=total_reports,
+            )
         )
 
         return {
@@ -251,7 +262,9 @@ class CtiEnrichmentService:
 
         return {
             "ip_address": str(data.get("id") or ip_address),
-            "reputation": CtiEnrichmentService._coerce_int(attributes.get("reputation")),
+            "reputation": CtiEnrichmentService._coerce_int(
+                attributes.get("reputation")
+            ),
             "country_code": attributes.get("country"),
             "as_owner": attributes.get("as_owner"),
             "last_analysis_stats": {
@@ -341,7 +354,9 @@ class CtiEnrichmentService:
         return {
             "ip_address": ip_address,
             "name": payload.get("name"),
-            "country": CtiEnrichmentService._extract_country_from_entity(registrant_entity),
+            "country": CtiEnrichmentService._extract_country_from_entity(
+                registrant_entity
+            ),
             "abuse_contact_email": CtiEnrichmentService._extract_email_from_entity(
                 abuse_entity
             ),
@@ -364,7 +379,9 @@ class CtiEnrichmentService:
         items = payload.get("data")
         data_items = items if isinstance(items, list) else []
 
-        hostnames = CtiEnrichmentService._collect_non_empty_strings(payload.get("hostnames"))
+        hostnames = CtiEnrichmentService._collect_non_empty_strings(
+            payload.get("hostnames")
+        )
         exposed_ports: list[str] = []
         services: list[str] = []
         vulnerabilities = CtiEnrichmentService._extract_shodan_vulnerability_values(
@@ -399,19 +416,23 @@ class CtiEnrichmentService:
                 services.append(service_name)
 
             vulnerabilities.extend(
-                CtiEnrichmentService._extract_shodan_vulnerability_values(item.get("vulns"))
+                CtiEnrichmentService._extract_shodan_vulnerability_values(
+                    item.get("vulns")
+                )
             )
             opts = CtiEnrichmentService._coerce_dict(item.get("opts"))
             vulnerabilities.extend(
-                CtiEnrichmentService._extract_shodan_vulnerability_values(opts.get("vulns"))
+                CtiEnrichmentService._extract_shodan_vulnerability_values(
+                    opts.get("vulns")
+                )
             )
 
             item_timestamp = CtiEnrichmentService._parse_datetime(item.get("timestamp"))
             if item_timestamp is not None:
                 observed_at_candidates.append(item_timestamp)
 
-        deduplicated_vulnerabilities = CtiEnrichmentService._deduplicate_preserving_order(
-            vulnerabilities
+        deduplicated_vulnerabilities = (
+            CtiEnrichmentService._deduplicate_preserving_order(vulnerabilities)
         )
 
         return {
@@ -420,7 +441,9 @@ class CtiEnrichmentService:
             "asn": payload.get("asn"),
             "country_name": payload.get("country_name"),
             "hostnames": CtiEnrichmentService._deduplicate_preserving_order(hostnames),
-            "exposed_ports": CtiEnrichmentService._deduplicate_preserving_order(exposed_ports),
+            "exposed_ports": CtiEnrichmentService._deduplicate_preserving_order(
+                exposed_ports
+            ),
             "services": CtiEnrichmentService._deduplicate_preserving_order(services),
             "known_vulnerabilities_count": len(deduplicated_vulnerabilities),
             "vulnerabilities": deduplicated_vulnerabilities,
@@ -499,10 +522,7 @@ class CtiEnrichmentService:
     def _entity_has_role(entity: dict[str, Any], role: str) -> bool:
         raw_roles = entity.get("roles")
         if isinstance(raw_roles, list):
-            normalized_roles = {
-                str(raw_role).strip().lower()
-                for raw_role in raw_roles
-            }
+            normalized_roles = {str(raw_role).strip().lower() for raw_role in raw_roles}
             return role.lower() in normalized_roles
 
         raw_role = entity.get("role")
@@ -516,7 +536,9 @@ class CtiEnrichmentService:
         if not isinstance(entity, dict):
             return None
 
-        vcard_entries = CtiEnrichmentService._extract_vcard_entries(entity.get("vcardArray"))
+        vcard_entries = CtiEnrichmentService._extract_vcard_entries(
+            entity.get("vcardArray")
+        )
         for entry in vcard_entries:
             if not isinstance(entry, list) or len(entry) < 2 or entry[0] != "adr":
                 continue
@@ -540,7 +562,9 @@ class CtiEnrichmentService:
         if not isinstance(entity, dict):
             return None
 
-        vcard_entries = CtiEnrichmentService._extract_vcard_entries(entity.get("vcardArray"))
+        vcard_entries = CtiEnrichmentService._extract_vcard_entries(
+            entity.get("vcardArray")
+        )
         for entry in vcard_entries:
             if not isinstance(entry, list) or len(entry) < 4 or entry[0] != "email":
                 continue

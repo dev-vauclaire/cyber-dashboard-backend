@@ -14,7 +14,6 @@ from cyber_dashboard_api.api.schemas import (
 )
 from cyber_dashboard_api.repositories import DashboardRepository
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])

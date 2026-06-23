@@ -93,7 +93,8 @@ python scripts/test_localhost_routes.py \
 Cela ajoute :
 
 - enrichissements CTI ;
-- activation d'une config de collecteur existante si une config compatible est detectee ;
+- activation d'une config de collecteur existante si une config compatible est
+  detectee ;
 - activation SMTP si tu combines aussi avec `--include-destructive`.
 
 ### Tester aussi les routes destructives
@@ -141,11 +142,14 @@ python scripts/test_localhost_routes.py --cti-test-ip 1.1.1.1
 ## 5. Interpretation du rapport
 
 - `PASS` : la route a repondu avec le statut attendu et un payload coherent ;
-- `FAIL` : la route a renvoye un statut inattendu, une erreur reseau ou un payload incoherent ;
-- `SKIP` : la route n'a pas ete executee, souvent parce qu'elle depend d'un flag ou d'une ressource non decouverte.
+- `FAIL` : la route a renvoye un statut inattendu, une erreur reseau ou un
+  payload incoherent ;
+- `SKIP` : la route n'a pas ete executee, souvent parce qu'elle depend d'un flag
+  ou d'une ressource non decouverte.
 
 Bonne pratique :
 
 - commencer par le mode minimal ;
 - passer ensuite au mode `--include-mutations` ;
-- n'activer `--include-external` et `--include-destructive` que dans un environnement maitrise.
+- n'activer `--include-external` et `--include-destructive` que dans un
+  environnement maitrise.

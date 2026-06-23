@@ -31,7 +31,9 @@ class Attack(Base):
     source_id: Mapped[int] = mapped_column(ForeignKey("sources.id"), nullable=False)
     source_event_id: Mapped[str | None] = mapped_column(String(150), nullable=True)
     attacker_ip: Mapped[str] = mapped_column(INET, nullable=False)
-    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     collected_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

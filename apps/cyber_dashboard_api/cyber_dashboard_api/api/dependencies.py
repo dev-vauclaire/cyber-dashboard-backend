@@ -9,12 +9,18 @@ from cyber_dashboard_api.db import get_database
 from cyber_dashboard_api.integrations.attacks_collectors.registry import (
     AttacksCollectorValidatorRegistry,
 )
-from cyber_dashboard_api.integrations.cti.clients.abuseipdb_client import AbuseIpdbClient
-from cyber_dashboard_api.integrations.cti.clients.greynoise_client import GreyNoiseClient
+from cyber_dashboard_api.integrations.cti.clients.abuseipdb_client import (
+    AbuseIpdbClient,
+)
+from cyber_dashboard_api.integrations.cti.clients.greynoise_client import (
+    GreyNoiseClient,
+)
 from cyber_dashboard_api.integrations.cti.clients.ipdata_client import IpDataClient
 from cyber_dashboard_api.integrations.cti.clients.rdap_client import RdapClient
 from cyber_dashboard_api.integrations.cti.clients.shodan_client import ShodanClient
-from cyber_dashboard_api.integrations.cti.clients.virustotal_client import VirusTotalClient
+from cyber_dashboard_api.integrations.cti.clients.virustotal_client import (
+    VirusTotalClient,
+)
 from cyber_dashboard_api.integrations.cti.registry import CtiValidatorRegistry
 from cyber_dashboard_api.integrations.smtp.validator import SmtpValidator
 from cyber_dashboard_api.repositories import (

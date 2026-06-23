@@ -15,7 +15,9 @@ from common_ip_correlator.domain.ip_address import IpAddress
 from common_ip_correlator.domain.seen_ip_registry import SeenIpRegistry
 from common_ip_correlator.repositories.alert_repository import AlertRepository
 from common_ip_correlator.repositories.attack_repository import AttackRepository
-from common_ip_correlator.services.batch_processing_time_tracker import BatchProcessingTimeTracker
+from common_ip_correlator.services.batch_processing_time_tracker import (
+    BatchProcessingTimeTracker,
+)
 from common_ip_correlator.services.state_loader import StateLoader
 
 
@@ -50,7 +52,9 @@ class Correlator:
         self._logger.info("Starting common IP correlator")
         recovered_attacks = self._attack_repository.requeue_processing_attacks()
         if recovered_attacks:
-            self._logger.info("Requeued %s attacks left in processing", recovered_attacks)
+            self._logger.info(
+                "Requeued %s attacks left in processing", recovered_attacks
+            )
 
         self._registry = self._state_loader.load_registry()
         self._logger.info(
@@ -82,7 +86,9 @@ class Correlator:
             try:
                 self.process_attack(attack)
                 batch_processing_time_tracker.record_completed_attack(start_time)
-                self._logger.info("Processed attack id=%s ip=%s", attack.id, attack.attacker_ip)
+                self._logger.info(
+                    "Processed attack id=%s ip=%s", attack.id, attack.attacker_ip
+                )
             except Exception:
                 self._logger.exception("Failed to process attack id=%s", attack.id)
                 self._attack_repository.reset_to_pending(attack.id)
@@ -111,7 +117,9 @@ class Correlator:
                 )
             self._attack_repository.mark_processed(attack.id, connection=connection)
 
-        self._registry.register_source(normalized_ip, attack.source_id, attack.occurred_at)
+        self._registry.register_source(
+            normalized_ip, attack.source_id, attack.occurred_at
+        )
 
     def update_alerts(
         self,

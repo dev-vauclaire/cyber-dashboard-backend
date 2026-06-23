@@ -18,7 +18,6 @@ from cyber_dashboard_api.api.schemas import (
 )
 from cyber_dashboard_api.services import SmtpConfigService, SmtpEmailService
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/smtp-config", tags=["smtp-config"])
@@ -69,9 +68,7 @@ def send_smtp_email(
 ) -> SmtpEmailResponseSchema:
     """Envoie un email avec la configuration SMTP active."""
     logger.info("endpoint=smtp_config_send_email event=requested")
-    return SmtpEmailResponseSchema(
-        **smtp_email_service.send_email(payload=payload)
-    )
+    return SmtpEmailResponseSchema(**smtp_email_service.send_email(payload=payload))
 
 
 @router.post("/deactivate", response_model=SmtpConfigSchema)

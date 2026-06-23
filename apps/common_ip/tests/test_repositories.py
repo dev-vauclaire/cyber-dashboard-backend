@@ -183,9 +183,13 @@ class StateRepositoryTests(unittest.TestCase):
 
         seen_ips = repository.load_seen_ips()
 
-        self.assertEqual([summary.source_id for summary in seen_ips["192.0.2.70"]], [1, 3])
+        self.assertEqual(
+            [summary.source_id for summary in seen_ips["192.0.2.70"]], [1, 3]
+        )
         self.assertEqual(seen_ips["192.0.2.70"][0].first_seen_at, first_seen_at)
         self.assertEqual(seen_ips["192.0.2.70"][0].last_seen_at, last_seen_at)
         self.assertEqual(seen_ips["192.0.2.70"][0].hit_count, 2)
-        self.assertEqual([summary.source_id for summary in seen_ips["198.51.100.5"]], [2])
+        self.assertEqual(
+            [summary.source_id for summary in seen_ips["198.51.100.5"]], [2]
+        )
         self.assertEqual(seen_ips["198.51.100.5"][0].hit_count, 4)

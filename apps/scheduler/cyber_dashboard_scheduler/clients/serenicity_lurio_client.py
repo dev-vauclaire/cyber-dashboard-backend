@@ -16,7 +16,6 @@ from .serenicity_base_client import (
     SerenicityBaseClient,
 )
 
-
 LOGGER = logging.getLogger(__name__)
 DEFAULT_LURIO_PAGE_DELAY_SECONDS = 0.5
 DEFAULT_LURIO_MAX_PAGES_PER_CYCLE = 80
@@ -62,7 +61,9 @@ class SerenicityLurioClient(SerenicityBaseClient):
         if page_delay_seconds < 0:
             raise ValueError("Le délai entre pages Lurio ne peut pas être négatif")
         if max_pages_per_cycle <= 0:
-            raise ValueError("Le nombre maximal de pages Lurio doit être strictement positif")
+            raise ValueError(
+                "Le nombre maximal de pages Lurio doit être strictement positif"
+            )
         self._page_delay_seconds = page_delay_seconds
         self._max_pages_per_cycle = max_pages_per_cycle
 
@@ -116,7 +117,9 @@ class SerenicityLurioClient(SerenicityBaseClient):
             pages_read += 1
             items.extend(parsed_page["items"])
             total_count = parsed_page["total_count"]
-            last_report_created_at = _extract_last_report_created_at(parsed_page["items"])
+            last_report_created_at = _extract_last_report_created_at(
+                parsed_page["items"]
+            )
 
             if parsed_page["current_page"] >= parsed_page["last_page"]:
                 break
@@ -202,7 +205,9 @@ class SerenicityLurioClient(SerenicityBaseClient):
 
         if not isinstance(meta, dict):
             raise ApiClientError("Format inattendu pour meta dans la réponse Lurio")
-        if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):
+        if not isinstance(items, list) or not all(
+            isinstance(item, dict) for item in items
+        ):
             raise ApiClientError("Format inattendu pour data dans la réponse Lurio")
 
         current_page = SerenicityBaseClient._parse_non_negative_int(
@@ -230,7 +235,9 @@ class SerenicityLurioClient(SerenicityBaseClient):
             }
 
         if current_page <= 0 or last_page <= 0:
-            raise ApiClientError("La pagination Lurio est invalide pour une réponse non vide")
+            raise ApiClientError(
+                "La pagination Lurio est invalide pour une réponse non vide"
+            )
 
         return {
             "items": items,

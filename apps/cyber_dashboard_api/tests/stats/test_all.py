@@ -6,7 +6,6 @@ import unittest
 
 from tests.stats import test_routes
 
-
 TEST_MODULES = (test_routes,)
 
 

@@ -21,7 +21,6 @@ from cyber_dashboard_api.api.schemas import (
 from cyber_dashboard_api.api.validation import validate_datetime_range
 from cyber_dashboard_api.repositories import StatisticsRepository
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/stats/attacks", tags=["stats"])
@@ -103,7 +102,9 @@ def get_attack_distribution_by_source(
     )
 
 
-@router.get("/by-source-timeseries", response_model=AttackSourceTimeseriesResponseSchema)
+@router.get(
+    "/by-source-timeseries", response_model=AttackSourceTimeseriesResponseSchema
+)
 def get_attack_timeseries_by_source(
     from_at: datetime = Query(..., alias="from"),
     to_at: datetime = Query(..., alias="to"),
@@ -148,7 +149,9 @@ def get_attack_timeseries_by_source(
             }
 
         series_entry = series_by_source[source_id]
-        series_entry["attack_count"] = int(series_entry["attack_count"]) + bucket_attack_count
+        series_entry["attack_count"] = (
+            int(series_entry["attack_count"]) + bucket_attack_count
+        )
 
         bucket_index = bucket_index_by_start.get(bucket_start)
         if bucket_index is not None:

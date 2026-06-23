@@ -209,7 +209,7 @@ class AttacksCollectorConfigService:
                 "last_validation_status": "not_tested",
                 "last_validation_at": None,
                 "last_validation_error": None,
-                },
+            },
         )
 
         if updated_row is None:
@@ -409,7 +409,9 @@ class AttacksCollectorConfigService:
             "inventory_requested": row["inventory_requested"],
             "has_email": self._secret_service.has_secret(row.get("encrypted_email")),
             "email_hint": row.get("email_hint"),
-            "has_api_key": self._secret_service.has_secret(row.get("encrypted_api_key")),
+            "has_api_key": self._secret_service.has_secret(
+                row.get("encrypted_api_key")
+            ),
             "api_key_hint": row.get("api_key_hint"),
             "last_validation_status": row["last_validation_status"],
             "last_validation_at": row["last_validation_at"],

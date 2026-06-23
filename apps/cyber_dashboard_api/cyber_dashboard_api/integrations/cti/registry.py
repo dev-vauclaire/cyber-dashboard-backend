@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 from cyber_dashboard_api.config import ValidationSettings
-from cyber_dashboard_api.integrations.cti.clients.abuseipdb_client import AbuseIpdbClient
-from cyber_dashboard_api.integrations.cti.clients.greynoise_client import GreyNoiseClient
+from cyber_dashboard_api.integrations.cti.clients.abuseipdb_client import (
+    AbuseIpdbClient,
+)
+from cyber_dashboard_api.integrations.cti.clients.greynoise_client import (
+    GreyNoiseClient,
+)
 from cyber_dashboard_api.integrations.cti.clients.ipdata_client import IpDataClient
 from cyber_dashboard_api.integrations.cti.clients.shodan_client import ShodanClient
-from cyber_dashboard_api.integrations.cti.clients.virustotal_client import VirusTotalClient
+from cyber_dashboard_api.integrations.cti.clients.virustotal_client import (
+    VirusTotalClient,
+)
 from cyber_dashboard_api.integrations.cti.validators.abuseipdb_validator import (
     AbuseIpdbValidator,
 )

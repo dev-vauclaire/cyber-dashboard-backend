@@ -24,7 +24,6 @@ from cyber_dashboard_scheduler.services import (
 )
 from cyber_dashboard_scheduler.utils.logging import configure_logging
 
-
 LOGGER = logging.getLogger(__name__)
 
 

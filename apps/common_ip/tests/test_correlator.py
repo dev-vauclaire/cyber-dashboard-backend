@@ -67,7 +67,9 @@ class FakeAlertRepository:
         self.upserted_alerts.append(persisted)
         return persisted
 
-    def upsert_alert_source(self, alert_source: CommonIpAlertSource, *, connection=None) -> None:
+    def upsert_alert_source(
+        self, alert_source: CommonIpAlertSource, *, connection=None
+    ) -> None:
         self.upserted_sources.append(
             CommonIpAlertSource(
                 alert_id=alert_source.alert_id,
@@ -136,7 +138,9 @@ class CorrelatorTests(unittest.TestCase):
         self.assertEqual(self.alert_repository.upserted_alerts, [])
         self.assertTrue(self.correlator._registry.contains_source("192.0.2.10", 5))
 
-    def test_process_attack_with_same_source_without_common_ip_does_not_create_alert(self) -> None:
+    def test_process_attack_with_same_source_without_common_ip_does_not_create_alert(
+        self,
+    ) -> None:
         attack = self._make_attack(attack_id=2, source_id=5, attacker_ip="192.0.2.20")
         self.correlator._registry = SeenIpRegistry(
             {
@@ -156,7 +160,9 @@ class CorrelatorTests(unittest.TestCase):
         self.assertEqual(self.attack_repository.processed_ids, [2])
         self.assertEqual(self.alert_repository.upserted_alerts, [])
         self.assertEqual(
-            self.correlator._registry.get_source_summaries("192.0.2.20")[0].last_seen_at,
+            self.correlator._registry.get_source_summaries("192.0.2.20")[
+                0
+            ].last_seen_at,
             attack.occurred_at,
         )
         self.assertEqual(
@@ -166,7 +172,9 @@ class CorrelatorTests(unittest.TestCase):
 
     def test_process_attack_with_new_source_creates_alert_and_source_rows(self) -> None:
         occurred_at = datetime(2026, 4, 15, 12, 0, 0)
-        attack = self._make_attack(attack_id=3, source_id=7, attacker_ip="192.0.2.30", occurred_at=occurred_at)
+        attack = self._make_attack(
+            attack_id=3, source_id=7, attacker_ip="192.0.2.30", occurred_at=occurred_at
+        )
         self.correlator._registry = SeenIpRegistry(
             {
                 "192.0.2.30": [
@@ -184,7 +192,9 @@ class CorrelatorTests(unittest.TestCase):
 
         self.assertEqual(self.attack_repository.processed_ids, [3])
         self.assertEqual(len(self.alert_repository.upserted_alerts), 1)
-        self.assertEqual(self.alert_repository.upserted_alerts[0].distinct_source_count, 2)
+        self.assertEqual(
+            self.alert_repository.upserted_alerts[0].distinct_source_count, 2
+        )
         self.assertEqual(len(self.alert_repository.upserted_sources), 2)
         self.assertTrue(self.correlator._registry.contains_source("192.0.2.30", 7))
         self.assertEqual(
@@ -197,7 +207,9 @@ class CorrelatorTests(unittest.TestCase):
         )
         self.assertEqual(self.alert_repository.upserted_sources[1].hit_count, 1)
 
-    def test_process_attack_with_existing_common_ip_updates_alert_from_registry(self) -> None:
+    def test_process_attack_with_existing_common_ip_updates_alert_from_registry(
+        self,
+    ) -> None:
         attack = self._make_attack(
             attack_id=5,
             source_id=5,
@@ -238,7 +250,9 @@ class CorrelatorTests(unittest.TestCase):
         )
         self.assertEqual(self.alert_repository.upserted_sources[0].hit_count, 3)
         self.assertEqual(
-            self.correlator._registry.get_source_summaries("192.0.2.40")[0].last_seen_at,
+            self.correlator._registry.get_source_summaries("192.0.2.40")[
+                0
+            ].last_seen_at,
             datetime(2026, 4, 15, 12, 0, 0),
         )
 
@@ -265,10 +279,12 @@ class CorrelatorTests(unittest.TestCase):
             logger=self.logger,
         )
         self.correlator._registry = SeenIpRegistry()
-        self.attack_repository.claimed_batches = [[
-            self._make_attack(attack_id=10, source_id=1, attacker_ip="192.0.2.101"),
-            self._make_attack(attack_id=11, source_id=2, attacker_ip="192.0.2.102"),
-        ]]
+        self.attack_repository.claimed_batches = [
+            [
+                self._make_attack(attack_id=10, source_id=1, attacker_ip="192.0.2.101"),
+                self._make_attack(attack_id=11, source_id=2, attacker_ip="192.0.2.102"),
+            ]
+        ]
 
         with self.assertLogs("correlator-tests", level="INFO") as captured_logs:
             processed_count = self.correlator.process_next_batch()

@@ -74,7 +74,9 @@ class DevDelayMiddlewareTestCase(IsolatedAsyncioTestCase):
     def _build_request(path: str) -> SimpleNamespace:
         return SimpleNamespace(url=SimpleNamespace(path=path))
 
-    async def test_delay_is_applied_to_all_routes_when_no_path_filter_is_defined(self) -> None:
+    async def test_delay_is_applied_to_all_routes_when_no_path_filter_is_defined(
+        self,
+    ) -> None:
         settings = build_settings(delay_seconds=0.25)
         middleware = _build_dev_response_delay_middleware(settings)
         call_next = mock.AsyncMock(return_value="ok")

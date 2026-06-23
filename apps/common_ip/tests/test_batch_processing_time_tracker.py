@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 import unittest
 
-from common_ip_correlator.services.batch_processing_time_tracker import BatchProcessingTimeTracker
+from common_ip_correlator.services.batch_processing_time_tracker import (
+    BatchProcessingTimeTracker,
+)
 
 
 class FakePerfCounter:
@@ -36,7 +38,9 @@ class BatchProcessingTimeTrackerTests(unittest.TestCase):
         self.assertEqual(tracker.processed_attack_count, 2)
         self.assertAlmostEqual(tracker.total_processing_time_seconds, 0.02)
 
-        with self.assertLogs("batch-processing-time-tracker-tests", level="INFO") as captured_logs:
+        with self.assertLogs(
+            "batch-processing-time-tracker-tests", level="INFO"
+        ) as captured_logs:
             tracker.log_batch_average(self.logger)
 
         self.assertIn(

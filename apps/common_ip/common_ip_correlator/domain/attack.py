@@ -30,8 +30,14 @@ class Attack:
     @classmethod
     def from_record(cls, record: dict[str, Any]) -> "Attack":
         # Construire une attaque a partir d'un enregistrement de base.
-        raw_status = record.get("status", record.get("correlation_status", AttackStatus.PENDING.value))
-        status = raw_status if isinstance(raw_status, AttackStatus) else AttackStatus(raw_status)
+        raw_status = record.get(
+            "status", record.get("correlation_status", AttackStatus.PENDING.value)
+        )
+        status = (
+            raw_status
+            if isinstance(raw_status, AttackStatus)
+            else AttackStatus(raw_status)
+        )
         return cls(
             id=int(record["id"]),
             source_id=int(record["source_id"]),

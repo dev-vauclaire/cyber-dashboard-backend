@@ -115,7 +115,9 @@ class FakeCtiConfigRepository:
             return None
         return deepcopy(row)
 
-    def update_by_code(self, *, code: str, updates: dict[str, object]) -> dict[str, object] | None:
+    def update_by_code(
+        self, *, code: str, updates: dict[str, object]
+    ) -> dict[str, object] | None:
         row = self.rows.get(code)
         if row is None:
             return None
@@ -162,9 +164,9 @@ class CtiConfigServiceTestCase(unittest.TestCase):
         repository = FakeCtiConfigRepository(
             [build_cti_row(code="rdap", label="RDAP / WHOIS", is_key_required=False)]
         )
-        repository.rows["rdap"]["encrypted_api_key"] = build_secret_service().encrypt_secret(
-            "unused-secret"
-        )
+        repository.rows["rdap"][
+            "encrypted_api_key"
+        ] = build_secret_service().encrypt_secret("unused-secret")
         repository.rows["rdap"]["api_key_hint"] = "****cret"
         service = CtiConfigService(
             repository,

@@ -10,10 +10,12 @@ from fastapi import APIRouter, Depends, Query
 from cyber_dashboard_api.api.dependencies import get_attack_repository
 from cyber_dashboard_api.api.schemas import AttackItemSchema, AttackListResponseSchema
 from cyber_dashboard_api.api.schemas.common import PaginationSchema
-from cyber_dashboard_api.api.validation import normalize_optional_filter, validate_datetime_range
+from cyber_dashboard_api.api.validation import (
+    normalize_optional_filter,
+    validate_datetime_range,
+)
 from cyber_dashboard_api.models import Pagination
 from cyber_dashboard_api.repositories import AttackRepository
-
 
 logger = logging.getLogger(__name__)
 

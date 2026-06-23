@@ -7,8 +7,6 @@ from datetime import UTC, datetime
 from ipaddress import ip_address
 from typing import Any, Mapping
 
-from .color import require_hex_color
-
 
 class NormalizationError(ValueError):
     """Levée quand un payload externe ne peut pas être normalisé."""
@@ -63,14 +61,10 @@ def optional_float(
     try:
         normalized_value = float(value)
     except (TypeError, ValueError) as exc:
-        raise NormalizationError(
-            f"Champ numérique invalide : {field_name}"
-        ) from exc
+        raise NormalizationError(f"Champ numérique invalide : {field_name}") from exc
 
     if normalized_value < min_value or normalized_value > max_value:
-        raise NormalizationError(
-            f"Champ numérique hors limites : {field_name}"
-        )
+        raise NormalizationError(f"Champ numérique hors limites : {field_name}")
 
     return normalized_value
 
@@ -85,7 +79,9 @@ def require_ip(value: Any, field_name: str) -> str:
         raise NormalizationError(f"Adresse IP invalide : {field_name}") from exc
 
 
-def normalize_datetime_to_utc(value: datetime | str | None, field_name: str) -> datetime:
+def normalize_datetime_to_utc(
+    value: datetime | str | None, field_name: str
+) -> datetime:
     """Convertit une date en `datetime` timezone-aware en UTC."""
     if value is None:
         raise NormalizationError(f"Champ obligatoire invalide : {field_name}")

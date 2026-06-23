@@ -3,11 +3,7 @@ from __future__ import annotations
 from psycopg import Connection
 
 from common_ip_correlator.domain.attack import Attack
-from common_ip_correlator._runtime import ensure_backend_root_on_path
 from common_ip_correlator.db import PostgresDatabase
-
-ensure_backend_root_on_path()
-
 from packages.database.repositories import CommonIpAttackRepository
 
 

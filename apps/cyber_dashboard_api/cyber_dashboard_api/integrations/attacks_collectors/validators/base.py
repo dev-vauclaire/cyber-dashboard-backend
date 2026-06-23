@@ -7,7 +7,10 @@ from abc import ABC, abstractmethod
 from cyber_dashboard_api.integrations.attacks_collectors.types import (
     AttacksCollectorValidationContext,
 )
-from cyber_dashboard_api.integrations.common import IntegrationRequestError, ValidationResult
+from cyber_dashboard_api.integrations.common import (
+    IntegrationRequestError,
+    ValidationResult,
+)
 
 
 class BaseAttacksCollectorValidator(ABC):

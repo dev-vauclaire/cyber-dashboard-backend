@@ -32,7 +32,6 @@ from cyber_dashboard_scheduler.services.normalization.attack_normalization impor
 )
 from cyber_dashboard_scheduler.utils import NormalizationError
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -103,7 +102,9 @@ class OgoAttackCollectionService:
             )
 
             try:
-                organization_codes = _normalize_text_list(source.get("organization_codes"))
+                organization_codes = _normalize_text_list(
+                    source.get("organization_codes")
+                )
                 if not organization_codes:
                     raise RuntimeError(
                         f"Aucun organization_code exploitable pour la source OGO {source_id}"
@@ -220,8 +221,8 @@ class OgoAttackCollectionService:
 
             normalized_attacks.append(asdict(attack))
 
-        inserted_count, deduplicated_count = self._attack_repository.insert_collected_attacks(
-            normalized_attacks
+        inserted_count, deduplicated_count = (
+            self._attack_repository.insert_collected_attacks(normalized_attacks)
         )
         persist_collection_success(
             self._scheduler_state_repository,

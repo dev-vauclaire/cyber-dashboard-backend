@@ -22,8 +22,12 @@ class CommonIpAlert(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     attacker_ip: Mapped[str] = mapped_column(INET, nullable=False, unique=True)
-    first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    first_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     distinct_source_count: Mapped[int] = mapped_column(
         Integer,
         nullable=False,

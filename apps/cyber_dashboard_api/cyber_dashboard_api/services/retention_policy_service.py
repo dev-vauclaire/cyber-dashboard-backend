@@ -8,7 +8,6 @@ from cyber_dashboard_api.api.errors import BadRequestError, NotFoundError
 from cyber_dashboard_api.api.validation import validate_positive_int_field
 from cyber_dashboard_api.repositories import RetentionPolicyRepository
 
-
 ALLOWED_RETENTION_TARGET_TABLES = {"attacks", "common_ip_alerts"}
 
 

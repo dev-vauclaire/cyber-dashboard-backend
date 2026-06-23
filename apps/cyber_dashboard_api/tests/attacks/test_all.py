@@ -6,7 +6,6 @@ import unittest
 
 from tests.attacks import test_route
 
-
 TEST_MODULES = (test_route,)
 
 

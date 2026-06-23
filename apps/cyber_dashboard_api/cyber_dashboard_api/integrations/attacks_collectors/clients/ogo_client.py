@@ -6,9 +6,10 @@ import hashlib
 from dataclasses import dataclass
 from typing import Any
 
-from cyber_dashboard_api.integrations.attacks_collectors.clients.base import HttpJsonClient
+from cyber_dashboard_api.integrations.attacks_collectors.clients.base import (
+    HttpJsonClient,
+)
 from cyber_dashboard_api.integrations.common import IntegrationRequestError
-
 
 REQUIRED_JOURNAL_PRIVILEGES = frozenset({"export_logs"})
 
@@ -74,7 +75,7 @@ class OgoClient:
                 email=email,
                 api_key=api_key,
                 endpoint=endpoint,
-            )
+            ),
         )
 
         if status_code < 200 or status_code >= 300:
@@ -91,8 +92,7 @@ class OgoClient:
             status_code=status_code,
             authenticated=True,
             has_journal_access=any(
-                organization.has_journal_access
-                for organization in organizations
+                organization.has_journal_access for organization in organizations
             ),
             organizations=tuple(organizations),
         )
@@ -156,13 +156,10 @@ class OgoClient:
                 )
 
             privileges = tuple(
-                privilege
-                for privilege in raw_privileges
-                if isinstance(privilege, str)
+                privilege for privilege in raw_privileges if isinstance(privilege, str)
             )
             normalized_privileges = {
-                _normalize_privilege_name(privilege)
-                for privilege in privileges
+                _normalize_privilege_name(privilege) for privilege in privileges
             }
 
             has_journal_access = REQUIRED_JOURNAL_PRIVILEGES.issubset(

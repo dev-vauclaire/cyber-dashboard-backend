@@ -6,7 +6,6 @@ from typing import Any, Mapping
 
 from cyber_dashboard_scheduler.models import Attack
 from cyber_dashboard_scheduler.utils.normalization import (
-    NormalizationError,
     copy_payload,
     normalize_collected_at,
     normalize_datetime_to_utc,
@@ -31,7 +30,9 @@ def normalize_serenicity_sensor_flux(
         source_id=source_id,
         source_event_id=_optional_source_event_id(payload),
         attacker_ip=require_ip(payload.get("ip1"), "ip1"),
-        occurred_at=normalize_datetime_to_utc(payload.get("start_of_hour"), "start_of_hour"),
+        occurred_at=normalize_datetime_to_utc(
+            payload.get("start_of_hour"), "start_of_hour"
+        ),
         collected_at=normalize_collected_at(collected_at),
         attack_type=optional_text(payload.get("protocol")),
         raw_payload=copy_payload(payload),

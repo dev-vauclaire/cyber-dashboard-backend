@@ -1,11 +1,7 @@
 from __future__ import annotations
 
 from common_ip_correlator.domain.common_ip_alert_source import CommonIpAlertSource
-from common_ip_correlator._runtime import ensure_backend_root_on_path
 from common_ip_correlator.db import PostgresDatabase
-
-ensure_backend_root_on_path()
-
 from packages.database.repositories import CommonIpStateRepository
 
 
@@ -23,5 +19,7 @@ class StateRepository:
 
         for record in records:
             attacker_ip = str(record["attacker_ip"])
-            seen_ips.setdefault(attacker_ip, []).append(CommonIpAlertSource.from_record(record))
+            seen_ips.setdefault(attacker_ip, []).append(
+                CommonIpAlertSource.from_record(record)
+            )
         return seen_ips

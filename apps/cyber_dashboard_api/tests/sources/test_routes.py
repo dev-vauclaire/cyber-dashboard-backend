@@ -74,7 +74,11 @@ class FakeSourceService:
 
     def rename_source(self, *, source_id: int, source_name: str) -> dict[str, object]:
         self.calls.append(
-            {"method": "rename_source", "source_id": source_id, "source_name": source_name}
+            {
+                "method": "rename_source",
+                "source_id": source_id,
+                "source_name": source_name,
+            }
         )
         return self.renamed
 
@@ -85,7 +89,11 @@ class FakeSourceService:
         is_active: bool,
     ) -> dict[str, object]:
         self.calls.append(
-            {"method": "update_source_status", "source_id": source_id, "is_active": is_active}
+            {
+                "method": "update_source_status",
+                "source_id": source_id,
+                "is_active": is_active,
+            }
         )
         return self.status_updated
 
@@ -157,7 +165,9 @@ class SourceRoutesTestCase(unittest.TestCase):
     def test_list_sources_returns_typed_items(self) -> None:
         response = list_sources(source_service=self.service)
 
-        self.assertEqual(dump_schema(response)["items"][0]["domain_name"], "ogo.example.local")
+        self.assertEqual(
+            dump_schema(response)["items"][0]["domain_name"], "ogo.example.local"
+        )
         self.assertEqual(dump_schema(response)["items"][0]["source_name"], "OGO Paris")
 
     def test_rename_source_passes_payload_to_service(self) -> None:
@@ -230,7 +240,9 @@ class SourceRoutesTestCase(unittest.TestCase):
 
     def test_route_propagates_not_found_error(self) -> None:
         class MissingSourceService(FakeSourceService):
-            def rename_source(self, *, source_id: int, source_name: str) -> dict[str, object]:
+            def rename_source(
+                self, *, source_id: int, source_name: str
+            ) -> dict[str, object]:
                 del source_id, source_name
                 raise NotFoundError(
                     code="source_not_found",

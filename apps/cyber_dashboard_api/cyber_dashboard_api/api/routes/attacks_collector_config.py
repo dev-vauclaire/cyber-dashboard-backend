@@ -16,7 +16,6 @@ from cyber_dashboard_api.api.schemas import (
 )
 from cyber_dashboard_api.services import AttacksCollectorConfigService
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
@@ -55,7 +54,9 @@ def get_attacks_collector_config(
     )
 
 
-@router.post("", response_model=AttacksCollectorConfigSchema, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=AttacksCollectorConfigSchema, status_code=status.HTTP_201_CREATED
+)
 def create_attacks_collector_config(
     payload: AttacksCollectorConfigCreateRequestSchema,
     attacks_collector_config_service: AttacksCollectorConfigService = Depends(

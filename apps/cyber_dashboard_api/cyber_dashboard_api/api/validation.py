@@ -180,6 +180,7 @@ def validate_secret_update_input(
 
     return normalized_value
 
+
 def validate_email_input(
     *,
     name: str,
@@ -235,7 +236,11 @@ def validate_email_input(
         )
 
     # Validation basique du format de l'email
-    if "@" not in normalized_value or normalized_value.startswith("@") or normalized_value.endswith("@"):
+    if (
+        "@" not in normalized_value
+        or normalized_value.startswith("@")
+        or normalized_value.endswith("@")
+    ):
         from cyber_dashboard_api.api.errors import BadRequestError
 
         raise BadRequestError(

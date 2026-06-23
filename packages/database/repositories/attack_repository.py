@@ -129,7 +129,9 @@ class AttackRepository:
         row = self._database.fetch_one(query, params)
         return 0 if row is None else int(row["total"])
 
-    def insert_collected_attacks(self, attacks: list[dict[str, Any]]) -> tuple[int, int]:
+    def insert_collected_attacks(
+        self, attacks: list[dict[str, Any]]
+    ) -> tuple[int, int]:
         """Insere un lot d'attaques collectees en une seule transaction."""
         if not attacks:
             return (0, 0)

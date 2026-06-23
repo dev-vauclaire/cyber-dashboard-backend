@@ -16,7 +16,9 @@ class ValidationResult:
     @classmethod
     def ok(cls, *, provider_status_code: int | None = 200) -> "ValidationResult":
         """Construit un résultat de validation réussi."""
-        return cls(success=True, message=None, provider_status_code=provider_status_code)
+        return cls(
+            success=True, message=None, provider_status_code=provider_status_code
+        )
 
     @classmethod
     def fail(

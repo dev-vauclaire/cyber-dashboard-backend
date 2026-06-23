@@ -16,10 +16,9 @@ from alembic import context, op
 
 from packages.common.secret_service import SecretConfigurationError, SecretService
 
-
 # revision identifiers, used by Alembic.
-revision: str = '14b43480c45e'
-down_revision: Union[str, Sequence[str], None] = '6d98af97a0e5'
+revision: str = "14b43480c45e"
+down_revision: Union[str, Sequence[str], None] = "6d98af97a0e5"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -59,9 +58,7 @@ def _backfill_specialized_sources() -> None:
     if not context.is_offline_mode():
         bind = op.get_bind()
 
-        duplicate_ogo_domain_name = bind.execute(
-            sa.text(
-                """
+        duplicate_ogo_domain_name = bind.execute(sa.text("""
                 SELECT BTRIM(s.external_id) AS domain_name
                 FROM sources AS s
                 JOIN sensor_types AS st
@@ -72,18 +69,14 @@ def _backfill_specialized_sources() -> None:
                 GROUP BY BTRIM(s.external_id)
                 HAVING COUNT(*) > 1
                 LIMIT 1
-                """
-            )
-        ).scalar_one_or_none()
+                """)).scalar_one_or_none()
         if duplicate_ogo_domain_name is not None:
             raise RuntimeError(
                 "Migration V2 cannot continue because duplicate OGO domain_name values "
                 f"were found in V1 sources: {duplicate_ogo_domain_name}"
             )
 
-        duplicate_serenicity_external_id = bind.execute(
-            sa.text(
-                """
+        duplicate_serenicity_external_id = bind.execute(sa.text("""
                 SELECT BTRIM(s.external_id) AS external_id
                 FROM sources AS s
                 JOIN sensor_types AS st
@@ -95,9 +88,7 @@ def _backfill_specialized_sources() -> None:
                 GROUP BY BTRIM(s.external_id)
                 HAVING COUNT(*) > 1
                 LIMIT 1
-                """
-            )
-        ).scalar_one_or_none()
+                """)).scalar_one_or_none()
         if duplicate_serenicity_external_id is not None:
             raise RuntimeError(
                 "Migration V2 cannot continue because duplicate Serenicity "
@@ -105,8 +96,7 @@ def _backfill_specialized_sources() -> None:
                 f"{duplicate_serenicity_external_id}"
             )
 
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO serenicity_sources (
             source_id,
             external_id,
@@ -126,10 +116,8 @@ def _backfill_specialized_sources() -> None:
           AND st.code IN ('lurio', 'detoxio')
           AND s.external_id ~ '^[0-9]+$'
         ON CONFLICT (source_id) DO NOTHING
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         INSERT INTO ogo_sources (
             source_id,
             domain_name,
@@ -146,8 +134,7 @@ def _backfill_specialized_sources() -> None:
           AND BTRIM(s.external_id) <> ''
           AND st.code = 'waf'
         ON CONFLICT (source_id) DO NOTHING
-        """
-    )
+        """)
     op.execute("UPDATE sources SET updated_at = created_at, is_active = FALSE")
 
 
@@ -163,8 +150,7 @@ def _insert_legacy_collector_config(
 ) -> None:
     """Create a collector config inherited from legacy environment variables."""
     bind.execute(
-        sa.text(
-            """
+        sa.text("""
             INSERT INTO attacks_collector_config (
                 name,
                 collector_type,
@@ -186,8 +172,7 @@ def _insert_legacy_collector_config(
                 'not_tested'
             )
             ON CONFLICT (collector_type, name) DO NOTHING
-            """
-        ),
+            """),
         {
             "name": name,
             "collector_type": collector_type,
@@ -208,8 +193,7 @@ def _attach_specialized_sources_to_config(
 ) -> None:
     """Attach migrated specialized sources to the matching legacy config."""
     bind.execute(
-        sa.text(
-            f"""
+        sa.text(f"""
             UPDATE sources AS s
             SET attacks_collector_config_id = config.id
             FROM {specialized_table} AS specialized
@@ -218,8 +202,7 @@ def _attach_specialized_sources_to_config(
                AND config.name = :config_name
             WHERE s.id = specialized.source_id
               AND s.attacks_collector_config_id IS NULL
-            """
-        ),
+            """),
         {
             "collector_type": collector_type,
             "config_name": config_name,
@@ -304,7 +287,9 @@ def _migrate_scheduler_state() -> None:
     )
     op.add_column(
         "scheduler_state",
-        sa.Column("last_inventory_success_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column(
+            "last_inventory_success_at", sa.DateTime(timezone=True), nullable=True
+        ),
     )
     op.add_column(
         "scheduler_state",
@@ -325,11 +310,15 @@ def _migrate_scheduler_state() -> None:
     )
     op.add_column(
         "scheduler_state",
-        sa.Column("last_collection_success_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column(
+            "last_collection_success_at", sa.DateTime(timezone=True), nullable=True
+        ),
     )
     op.add_column(
         "scheduler_state",
-        sa.Column("last_collection_error_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column(
+            "last_collection_error_at", sa.DateTime(timezone=True), nullable=True
+        ),
     )
     op.add_column(
         "scheduler_state",
@@ -346,8 +335,7 @@ def _migrate_scheduler_state() -> None:
         "last_collection_status IN ('not_run', 'success', 'failed')",
     )
 
-    op.execute(
-        """
+    op.execute("""
         UPDATE scheduler_state
         SET
             last_inventory_status = CASE
@@ -383,8 +371,7 @@ def _migrate_scheduler_state() -> None:
                 THEN last_error_message
                 ELSE NULL
             END
-        """
-    )
+        """)
 
     op.drop_column("scheduler_state", "last_error_message")
     op.drop_column("scheduler_state", "last_error_at")
@@ -406,8 +393,7 @@ def _restore_legacy_scheduler_state() -> None:
         sa.Column("last_error_message", sa.Text(), nullable=True),
     )
 
-    op.execute(
-        """
+    op.execute("""
         UPDATE scheduler_state
         SET
             last_success_at = COALESCE(
@@ -422,8 +408,7 @@ def _restore_legacy_scheduler_state() -> None:
                 last_collection_error_message,
                 last_inventory_error_message
             )
-        """
-    )
+        """)
 
     op.drop_constraint(
         "scheduler_state_last_collection_status_check",
@@ -555,8 +540,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("code"),
     )
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO cti_config (
             code,
             label,
@@ -573,8 +557,7 @@ def upgrade() -> None:
             ('rdap', 'RDAP / WHOIS', FALSE, FALSE, 'not_tested'),
             ('reverse_dns', 'Reverse DNS', FALSE, FALSE, 'not_tested')
         ON CONFLICT (code) DO NOTHING
-        """
-    )
+        """)
     op.create_table(
         "smtp_config",
         sa.Column("id", sa.SmallInteger(), server_default=sa.text("1"), nullable=False),
@@ -620,8 +603,7 @@ def upgrade() -> None:
     )
 
     """ Initialisation de la config smtp """
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO smtp_config (
             id,
             smtp_host,
@@ -637,8 +619,7 @@ def upgrade() -> None:
         VALUES
             (1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'not_tested')
         ON CONFLICT (id) DO NOTHING
-        """
-    )
+        """)
 
     op.create_table(
         "ogo_sources",
@@ -792,8 +773,7 @@ def upgrade() -> None:
             name="retention_policies_target_table_unique",
         ),
     )
-    op.execute(
-        """
+    op.execute("""
         INSERT INTO retention_policies (
             target_table,
             retention_days,
@@ -803,12 +783,11 @@ def upgrade() -> None:
             ('attacks', 365, TRUE),
             ('common_ip_alerts', 365, TRUE)
         ON CONFLICT (target_table) DO NOTHING
-        """
-    )
+        """)
+
 
 def downgrade() -> None:
     """Downgrade schema."""
-
 
     op.add_column(
         "sources",
@@ -837,8 +816,7 @@ def downgrade() -> None:
             nullable=True,
         ),
     )
-    op.execute(
-        """
+    op.execute("""
         UPDATE sources AS s
         SET
             external_id = ss.external_id,
@@ -846,16 +824,13 @@ def downgrade() -> None:
             longitude = ss.longitude
         FROM serenicity_sources AS ss
         WHERE s.id = ss.source_id
-        """
-    )
-    op.execute(
-        """
+        """)
+    op.execute("""
         UPDATE sources AS s
         SET external_id = os.domain_name
         FROM ogo_sources AS os
         WHERE s.id = os.source_id
-        """
-    )
+        """)
     _restore_legacy_scheduler_state()
     op.drop_constraint("sources_name_not_empty", "sources", type_="check")
     op.create_unique_constraint(
@@ -869,15 +844,13 @@ def downgrade() -> None:
         ["sensor_type_id"],
         unique=False,
     )
-    op.execute(
-        """
+    op.execute("""
         UPDATE sources
         SET color = '#FF0000'
         WHERE color IS NULL
            OR BTRIM(color) = ''
            OR LENGTH(color) > 7
-        """
-    )
+        """)
     op.alter_column(
         "sources",
         "color",

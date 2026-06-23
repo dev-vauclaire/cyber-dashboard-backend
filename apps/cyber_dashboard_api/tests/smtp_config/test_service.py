@@ -48,7 +48,9 @@ class SmtpConfigServiceTestCase(unittest.TestCase):
             "super-secret",
         )
         self.assertEqual(
-            self.secret_service.decrypt_secret(self.repository.row["encrypted_smtp_password"]),
+            self.secret_service.decrypt_secret(
+                self.repository.row["encrypted_smtp_password"]
+            ),
             "super-secret",
         )
 
@@ -129,7 +131,9 @@ class SmtpConfigServiceTestCase(unittest.TestCase):
     def test_update_critical_change_resets_activation_and_validation(self) -> None:
         self.repository = FakeSmtpConfigRepository(
             build_smtp_row(
-                encrypted_smtp_password=self.secret_service.encrypt_secret("existing-secret"),
+                encrypted_smtp_password=self.secret_service.encrypt_secret(
+                    "existing-secret"
+                ),
                 smtp_password_hint="****cret",
                 is_active=True,
                 last_validation_status="success",

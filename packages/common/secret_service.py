@@ -44,9 +44,11 @@ class SecretService:
 
         if self._settings.secret_key_file:
             try:
-                key_value = Path(self._settings.secret_key_file).read_text(
-                    encoding="utf-8"
-                ).strip()
+                key_value = (
+                    Path(self._settings.secret_key_file)
+                    .read_text(encoding="utf-8")
+                    .strip()
+                )
             except OSError as exc:
                 if env_key_value is not None:
                     return env_key_value
@@ -58,9 +60,7 @@ class SecretService:
                 return key_value
             if env_key_value is not None:
                 return env_key_value
-            raise SecretConfigurationError(
-                "CYBER_DASHBOARD_SECRET_KEY_FILE est vide"
-            )
+            raise SecretConfigurationError("CYBER_DASHBOARD_SECRET_KEY_FILE est vide")
 
         if env_key_value is not None:
             return env_key_value
@@ -105,7 +105,9 @@ class SecretService:
         try:
             return fernet.decrypt(encrypted_value.encode("utf-8")).decode("utf-8")
         except InvalidToken as exc:
-            raise SecretDecryptionError("Impossible de déchiffrer le secret stocké") from exc
+            raise SecretDecryptionError(
+                "Impossible de déchiffrer le secret stocké"
+            ) from exc
 
     def build_secret_hint(self, plain_value: str) -> str | None:
         """Build a masked hint from a plain-text secret."""

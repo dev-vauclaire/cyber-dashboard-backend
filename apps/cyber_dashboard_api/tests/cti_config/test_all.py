@@ -11,7 +11,6 @@ from tests.cti_config import (
     test_shodan_validator,
 )
 
-
 TEST_MODULES = (
     test_greynoise_validator,
     test_shodan_validator,

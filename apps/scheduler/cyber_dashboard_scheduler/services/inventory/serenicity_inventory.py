@@ -30,7 +30,6 @@ from cyber_dashboard_scheduler.services.normalization.source_normalization impor
 )
 from cyber_dashboard_scheduler.utils import NormalizationError
 
-
 LOGGER = logging.getLogger(__name__)
 SerenicitySensorClientFactory: TypeAlias = Callable[[str], SerenicitySensorClient]
 SerenicityLurioClientFactory: TypeAlias = Callable[[str], SerenicityLurioClient]
@@ -67,7 +66,9 @@ class SerenicityInventoryService:
             code for code in ("detoxio", "lurio") if code in sensor_type_colors
         }
         if not supported_codes:
-            LOGGER.error("Aucun type Serenicity supporté n'est présent dans sensor_types")
+            LOGGER.error(
+                "Aucun type Serenicity supporté n'est présent dans sensor_types"
+            )
             return InventoryConfigRunOutcome(had_error=True)
 
         try:
@@ -102,19 +103,22 @@ class SerenicityInventoryService:
                 )
                 outcome.had_error = True
             else:
-                outcome.had_error = self._persist_payloads(
-                    config=config,
-                    payloads=sensor_payloads,
-                    normalizer=lambda payload: normalize_serenicity_sensor(
-                        payload,
-                        sensor_type_colors,
-                    ),
-                    supported_sensor_types=supported_codes,
-                    current_sources_by_key=current_sources_by_key,
-                    seen_source_keys=outcome.seen_source_keys,
-                    inventory_timestamp=inventory_timestamp,
-                    result=result,
-                ) or outcome.had_error
+                outcome.had_error = (
+                    self._persist_payloads(
+                        config=config,
+                        payloads=sensor_payloads,
+                        normalizer=lambda payload: normalize_serenicity_sensor(
+                            payload,
+                            sensor_type_colors,
+                        ),
+                        supported_sensor_types=supported_codes,
+                        current_sources_by_key=current_sources_by_key,
+                        seen_source_keys=outcome.seen_source_keys,
+                        inventory_timestamp=inventory_timestamp,
+                        result=result,
+                    )
+                    or outcome.had_error
+                )
 
         if "lurio" in supported_codes:
             endpoint = "GET /api/v1/lurios"
@@ -130,19 +134,22 @@ class SerenicityInventoryService:
                 )
                 outcome.had_error = True
             else:
-                outcome.had_error = self._persist_payloads(
-                    config=config,
-                    payloads=lurio_payloads,
-                    normalizer=lambda payload: normalize_lurio_source(
-                        payload,
-                        sensor_type_colors["lurio"],
-                    ),
-                    supported_sensor_types=supported_codes,
-                    current_sources_by_key=current_sources_by_key,
-                    seen_source_keys=outcome.seen_source_keys,
-                    inventory_timestamp=inventory_timestamp,
-                    result=result,
-                ) or outcome.had_error
+                outcome.had_error = (
+                    self._persist_payloads(
+                        config=config,
+                        payloads=lurio_payloads,
+                        normalizer=lambda payload: normalize_lurio_source(
+                            payload,
+                            sensor_type_colors["lurio"],
+                        ),
+                        supported_sensor_types=supported_codes,
+                        current_sources_by_key=current_sources_by_key,
+                        seen_source_keys=outcome.seen_source_keys,
+                        inventory_timestamp=inventory_timestamp,
+                        result=result,
+                    )
+                    or outcome.had_error
+                )
 
         return outcome
 

@@ -132,7 +132,9 @@ class SmtpEmailServiceTestCase(unittest.TestCase):
             sent_message["From"],
             "Cyber Dashboard <cyber-dashboard@example.local>",
         )
-        self.assertEqual(sent_message.get_content().strip(), "Une alerte a été détectée.")
+        self.assertEqual(
+            sent_message.get_content().strip(), "Une alerte a été détectée."
+        )
 
     @patch("cyber_dashboard_api.services.smtp_email_service.smtplib.SMTP_SSL")
     def test_port_465_uses_implicit_tls(self, smtp_ssl_mock: MagicMock) -> None:

@@ -124,6 +124,7 @@ class FakeAttacksCollectorConfigService:
             config_id=config_id,
         )
 
+
 def dump_schema(payload: Any) -> dict[str, Any]:
     """Convertit un schema Pydantic en dictionnaire JSON comparable."""
     return payload.model_dump(mode="json")

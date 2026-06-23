@@ -14,7 +14,6 @@ from cyber_dashboard_scheduler.services.retention import (
     CommonIpAlertRetentionService,
 )
 
-
 LOGGER = logging.getLogger(__name__)
 
 

@@ -11,7 +11,6 @@ from urllib.request import Request, urlopen
 
 from cyber_dashboard_api.integrations.common import IntegrationRequestError
 
-
 DEFAULT_ACCEPT_HEADERS = {
     "Accept": "application/json",
     "User-Agent": "cyber-dashboard-api/0.1",

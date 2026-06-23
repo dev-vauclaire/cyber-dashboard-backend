@@ -2,25 +2,31 @@
 
 API FastAPI du backend Cyber Dashboard.
 
-Cette application expose les endpoints REST utilises par le frontend. Elle couvre deux besoins :
+Cette application expose les endpoints REST utilises par le frontend. Elle
+couvre deux besoins :
 
 - consultation des donnees cyber stockees en base PostgreSQL ;
 - administration simple des configurations backend necessaires au produit.
 
-Dans le monorepo, `cyber_dashboard_api` reutilise du code partage au lieu de redefinir sa propre couche SQL :
+Dans le monorepo, `cyber_dashboard_api` reutilise du code partage au lieu de
+redefinir sa propre couche SQL :
 
-- `packages/database` : connexion PostgreSQL, modeles SQLAlchemy, repositories communs ;
+- `packages/database` : connexion PostgreSQL, modeles SQLAlchemy, repositories
+  communs ;
 - `packages/common` : services transverses, notamment le chiffrement des secrets.
 
 ## Role de l'application
 
 L'API centralise aujourd'hui :
 
-- les endpoints de consultation : dashboard, attaques, alertes, sources, statistiques ;
-- les endpoints de configuration : CTI, SMTP, collecteurs d'attaques, retention ;
+- les endpoints de consultation : dashboard, attaques, alertes, sources,
+  statistiques ;
+- les endpoints de configuration : CTI, SMTP, collecteurs d'attaques,
+  retention ;
 - les integrations externes de validation et d'enrichissement appelees a la demande.
 
-Ce n'est donc plus une API strictement read-only : le coeur cyber reste en lecture, mais la partie configuration ecrit en base.
+Ce n'est donc plus une API strictement read-only : le coeur cyber reste en
+lecture, mais la partie configuration ecrit en base.
 
 ## Structure utile
 
@@ -68,9 +74,13 @@ Documentation interactive :
 - Swagger UI : `http://127.0.0.1:8000/docs`
 - OpenAPI JSON : `http://127.0.0.1:8000/openapi.json`
 
-Le bootstrap `cyber_dashboard_api/_runtime.py` ajoute automatiquement la racine `cyber-dashboard-backend` au `PYTHONPATH`, ce qui permet aux imports `packages.*` de fonctionner meme si l'application est lancee depuis son sous-dossier.
+Le bootstrap `cyber_dashboard_api/_runtime.py` ajoute automatiquement la racine
+`cyber-dashboard-backend` au `PYTHONPATH`. Les imports `packages.*` fonctionnent
+ainsi meme si l'application est lancee depuis son sous-dossier.
 
-En local, il est recommande de cibler explicitement les dossiers surveilles avec `--reload-dir`. Sinon, Uvicorn peut tenter de surveiller aussi `.venv/` et atteindre la limite systeme de file watchers.
+En local, il est recommande de cibler explicitement les dossiers surveilles
+avec `--reload-dir`. Sinon, Uvicorn peut tenter de surveiller aussi `.venv/` et
+atteindre la limite systeme de file watchers.
 
 ## Variables d'environnement
 
@@ -101,9 +111,12 @@ Le fichier [.env.example](./.env.example) sert de base.
 
 Simulation simple de reponses lentes en developpement :
 
-- `API_DEV_RESPONSE_DELAY_SECONDS=2.0` applique 2 secondes de delai avant reponse
-- `API_DEV_RESPONSE_DELAY_PATHS=/api/attacks,/api/stats` limite ce delai a certains prefixes de routes
-- si `API_DEV_RESPONSE_DELAY_PATHS` est vide, le delai s'applique a toutes les routes
+- `API_DEV_RESPONSE_DELAY_SECONDS=2.0` applique 2 secondes de delai avant
+  reponse
+- `API_DEV_RESPONSE_DELAY_PATHS=/api/attacks,/api/stats` limite ce delai a
+  certains prefixes de routes
+- si `API_DEV_RESPONSE_DELAY_PATHS` est vide, le delai s'applique a toutes les
+  routes
 
 Priorite de lecture de la cle maitre :
 
@@ -139,31 +152,42 @@ python scripts/test_localhost_routes.py --report-file reports/api-smoke.json
 Pour couvrir aussi les routes mutables revertibles :
 
 ```bash
-python scripts/test_localhost_routes.py --include-mutations --report-file reports/api-smoke.json
+python scripts/test_localhost_routes.py \
+  --include-mutations \
+  --report-file reports/api-smoke.json
 ```
 
 Pour couvrir les routes qui appellent des services externes :
 
 ```bash
-python scripts/test_localhost_routes.py --include-mutations --include-external --report-file reports/api-smoke.json
+python scripts/test_localhost_routes.py \
+  --include-mutations \
+  --include-external \
+  --report-file reports/api-smoke.json
 ```
 
 ## Docker
 
-Les builds Docker doivent partir de la racine du monorepo `cyber-dashboard-backend`, car l'image API depend aussi de `packages/`.
+Les builds Docker doivent partir de la racine du monorepo
+`cyber-dashboard-backend`, car l'image API depend aussi de `packages/`.
 
 ### Image de production
 
 Build :
 
 ```bash
-docker build -f apps/cyber_dashboard_api/Dockerfile -t cyber-dashboard-api:prod .
+docker build \
+  -f apps/cyber_dashboard_api/Dockerfile \
+  -t cyber-dashboard-api:prod .
 ```
 
 Run :
 
 ```bash
-docker run --rm -p 8000:8000 --env-file apps/cyber_dashboard_api/.env cyber-dashboard-api:prod
+docker run --rm \
+  -p 8000:8000 \
+  --env-file apps/cyber_dashboard_api/.env \
+  cyber-dashboard-api:prod
 ```
 
 Caracteristiques :
@@ -178,7 +202,9 @@ Caracteristiques :
 Build :
 
 ```bash
-docker build -f apps/cyber_dashboard_api/Dockerfile.dev -t cyber-dashboard-api:dev .
+docker build \
+  -f apps/cyber_dashboard_api/Dockerfile.dev \
+  -t cyber-dashboard-api:dev .
 ```
 
 Run avec rechargement automatique :
@@ -192,7 +218,9 @@ docker run --rm -it \
   cyber-dashboard-api:dev
 ```
 
-L'image dev surveille a la fois le code de l'application et `packages/`, ce qui permet de travailler sur les composants partages sans reconstruire l'image a chaque changement.
+L'image dev surveille a la fois le code de l'application et `packages/`, ce qui
+permet de travailler sur les composants partages sans reconstruire l'image a
+chaque changement.
 
 ## Families d'endpoints
 
@@ -223,7 +251,9 @@ Les erreurs applicatives et de validation renvoient un format stable :
 
 ## Documentation complementaire
 
-- [docs/conventions.md](./docs/conventions.md) : conventions de structure et d'implementation
+- [docs/conventions.md](./docs/conventions.md) : conventions de structure et
+  d'implementation
 - [docs/CTI.md](./docs/CTI.md) : logique d'integration CTI et mapping des fournisseurs
 - [docs/api_doc.md](./docs/api_doc.md) : catalogue des endpoints HTTP
-- [docs/testing.md](./docs/testing.md) : strategie de tests unitaires et smoke tests localhost
+- [docs/testing.md](./docs/testing.md) : strategie de tests unitaires et smoke
+  tests localhost

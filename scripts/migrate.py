@@ -13,7 +13,6 @@ import subprocess
 import tempfile
 from typing import Any, Iterable, Literal
 
-
 V1_BASELINE_REVISION = "6d98af97a0e5"
 PUBLIC_SCHEMA = "public"
 ALEMBIC_VERSION_TABLE = "alembic_version"
@@ -175,8 +174,7 @@ def wait_for_database(database_url: str) -> None:
             time.sleep(poll_seconds)
 
     raise MigrationBootstrapError(
-        "Database did not become reachable before timeout. "
-        f"Last error: {last_error}"
+        "Database did not become reachable before timeout. " f"Last error: {last_error}"
     )
 
 
@@ -245,7 +243,9 @@ def inspect_database(database_url: str) -> DatabaseInspectionResult:
     try:
         with engine.connect() as connection:
             inspector = inspect(connection)
-            public_tables = tuple(sorted(inspector.get_table_names(schema=PUBLIC_SCHEMA)))
+            public_tables = tuple(
+                sorted(inspector.get_table_names(schema=PUBLIC_SCHEMA))
+            )
             has_version_table = has_alembic_version_table(public_tables)
             current_revision = (
                 read_current_revision(connection) if has_version_table else None
@@ -295,7 +295,9 @@ def inspect_database(database_url: str) -> DatabaseInspectionResult:
                 matches_legacy_v1=legacy_v1,
             )
     except SQLAlchemyError as exc:
-        raise MigrationBootstrapError(f"Unable to inspect database state: {exc}") from exc
+        raise MigrationBootstrapError(
+            f"Unable to inspect database state: {exc}"
+        ) from exc
     finally:
         engine.dispose()
 

@@ -300,12 +300,16 @@ class WaitForDatabaseTests(unittest.TestCase):
         _monotonic_mock: mock.Mock,
         _sleep_mock: mock.Mock,
     ) -> None:
-        probe_connection_mock.side_effect = MigrationBootstrapError("connection refused")
+        probe_connection_mock.side_effect = MigrationBootstrapError(
+            "connection refused"
+        )
 
         with self.assertRaises(MigrationBootstrapError) as context:
             wait_for_database("postgresql+psycopg://user:pass@db:5432/test")
 
-        self.assertIn("Database did not become reachable before timeout", str(context.exception))
+        self.assertIn(
+            "Database did not become reachable before timeout", str(context.exception)
+        )
         probe_connection_mock.assert_called_once_with(
             "postgresql+psycopg://user:pass@db:5432/test"
         )

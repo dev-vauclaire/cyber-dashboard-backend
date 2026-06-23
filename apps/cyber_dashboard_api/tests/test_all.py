@@ -16,7 +16,6 @@ from tests.smtp_config import test_all as smtp_config_test_all
 from tests.sources import test_all as sources_test_all
 from tests.stats import test_all as stats_test_all
 
-
 TEST_MODULES = (
     attacks_test_all,
     attacks_collector_config_test_all,

@@ -31,7 +31,9 @@ class SerenicitySensorClient(SerenicityBaseClient):
             ApiClientError: Si l'appel réseau ou le format de réponse échoue.
         """
         payload = self._request_json("/sensors")
-        return self._extract_items(payload, endpoint="/sensors", resource_name="capteurs")
+        return self._extract_items(
+            payload, endpoint="/sensors", resource_name="capteurs"
+        )
 
     def list_sensor_fluxes(
         self,
@@ -103,9 +105,15 @@ class SerenicitySensorClient(SerenicityBaseClient):
         items = payload.get("data")
 
         if not isinstance(meta, dict):
-            raise ApiClientError("Format inattendu pour meta dans la réponse Serenicity")
-        if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):
-            raise ApiClientError("Format inattendu pour data dans la réponse Serenicity")
+            raise ApiClientError(
+                "Format inattendu pour meta dans la réponse Serenicity"
+            )
+        if not isinstance(items, list) or not all(
+            isinstance(item, dict) for item in items
+        ):
+            raise ApiClientError(
+                "Format inattendu pour data dans la réponse Serenicity"
+            )
 
         current_page = SerenicityBaseClient._parse_non_negative_int(
             meta.get("current_page", 1),
@@ -132,7 +140,9 @@ class SerenicitySensorClient(SerenicityBaseClient):
             }
 
         if current_page <= 0 or last_page <= 0:
-            raise ApiClientError("La pagination Serenicity est invalide pour une réponse non vide")
+            raise ApiClientError(
+                "La pagination Serenicity est invalide pour une réponse non vide"
+            )
 
         return {
             "items": items,

@@ -12,7 +12,6 @@ from urllib3.util.retry import Retry
 
 from cyber_dashboard_scheduler.utils import format_utc_datetime_for_api
 
-
 LOGGER = logging.getLogger(__name__)
 SERENICITY_HTTP_RETRY_COUNT = 2
 SERENICITY_HTTP_RETRY_BACKOFF_SECONDS = 0.5
@@ -76,13 +75,17 @@ class SerenicityBaseClient:
         """
         url = f"{self._base_url}{path}"
         try:
-            response = self._session.get(url, params=params, timeout=self._timeout_seconds)
+            response = self._session.get(
+                url, params=params, timeout=self._timeout_seconds
+            )
             if response.status_code == 429:
                 raise self._build_rate_limit_error(url=url, response=response)
             response.raise_for_status()
         except requests.RequestException as exc:
             self._reset_session_after_failure()
-            raise ApiClientError(f"Échec de l'appel API Serenicity {url}: {exc}") from exc
+            raise ApiClientError(
+                f"Échec de l'appel API Serenicity {url}: {exc}"
+            ) from exc
 
         try:
             return response.json()
@@ -129,7 +132,9 @@ class SerenicityBaseClient:
             )
 
     @staticmethod
-    def _build_rate_limit_error(*, url: str, response: requests.Response) -> ApiRateLimitError:
+    def _build_rate_limit_error(
+        *, url: str, response: requests.Response
+    ) -> ApiRateLimitError:
         """Construit une erreur dédiée à partir d'une réponse HTTP 429.
 
         Args:
@@ -152,7 +157,9 @@ class SerenicityBaseClient:
             rate_limit_reset_at=rate_limit_reset_at,
         )
         retry_after_suffix = (
-            f" retry_after={retry_after_seconds}s" if retry_after_seconds is not None else ""
+            f" retry_after={retry_after_seconds}s"
+            if retry_after_seconds is not None
+            else ""
         )
         reset_suffix = (
             f" rate_limit_reset_at={rate_limit_reset_at}" if rate_limit_reset_at else ""
@@ -180,7 +187,9 @@ class SerenicityBaseClient:
         return format_utc_datetime_for_api(value)
 
     @staticmethod
-    def _extract_items(payload: Any, *, endpoint: str, resource_name: str) -> list[dict[str, Any]]:
+    def _extract_items(
+        payload: Any, *, endpoint: str, resource_name: str
+    ) -> list[dict[str, Any]]:
         """Extrait une liste d'objets depuis les réponses standards Serenicity.
 
         Args:

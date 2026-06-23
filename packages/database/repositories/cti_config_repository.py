@@ -121,7 +121,9 @@ class CtiConfigRepository:
 
         unknown_columns = set(updates) - self._ALLOWED_UPDATE_COLUMNS
         if unknown_columns:
-            raise ValueError(f"Unsupported CTI update columns: {sorted(unknown_columns)}")
+            raise ValueError(
+                f"Unsupported CTI update columns: {sorted(unknown_columns)}"
+            )
 
         set_clauses = [f"{column} = %({column})s" for column in updates]
         set_clauses.append("updated_at = NOW()")

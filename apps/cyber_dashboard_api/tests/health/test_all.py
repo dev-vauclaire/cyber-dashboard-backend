@@ -6,7 +6,6 @@ import unittest
 
 from tests.health import test_dev_delay_middleware, test_route
 
-
 TEST_MODULES = (test_route, test_dev_delay_middleware)
 
 

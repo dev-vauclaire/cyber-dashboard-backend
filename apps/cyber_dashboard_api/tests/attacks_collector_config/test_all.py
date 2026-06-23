@@ -17,7 +17,6 @@ from tests.attacks_collector_config import (
     test_update_route,
 )
 
-
 ROUTE_TEST_MODULES = (
     test_activate_route,
     test_create_route,

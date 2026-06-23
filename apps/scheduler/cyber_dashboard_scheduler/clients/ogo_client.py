@@ -200,15 +200,21 @@ class OgoApiClient:
     ) -> dict[str, Any]:
         """Valide une reponse paginee standard d'OGO V2."""
         if not isinstance(payload, dict):
-            raise ApiClientError(f"Format inattendu pour la reponse OGO {endpoint_label}")
+            raise ApiClientError(
+                f"Format inattendu pour la reponse OGO {endpoint_label}"
+            )
 
         items = payload.get("content")
-        if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):
+        if not isinstance(items, list) or not all(
+            isinstance(item, dict) for item in items
+        ):
             raise ApiClientError(
                 f"Format inattendu pour le champ content des {item_label} OGO"
             )
 
-        total_pages = _parse_non_negative_int(payload.get("totalPages", 1), "totalPages")
+        total_pages = _parse_non_negative_int(
+            payload.get("totalPages", 1), "totalPages"
+        )
         if not items and total_pages == 0:
             return {"items": [], "last_page_number": 0}
         if total_pages <= 0:
@@ -222,19 +228,29 @@ class OgoApiClient:
         }
 
     @staticmethod
-    def _parse_journal_page_payload(payload: Any, *, endpoint_label: str) -> dict[str, Any]:
+    def _parse_journal_page_payload(
+        payload: Any, *, endpoint_label: str
+    ) -> dict[str, Any]:
         """Valide une reponse paginee du journal OGO."""
         if not isinstance(payload, dict):
-            raise ApiClientError(f"Format inattendu pour la reponse OGO {endpoint_label}")
+            raise ApiClientError(
+                f"Format inattendu pour la reponse OGO {endpoint_label}"
+            )
 
         items = payload.get("content")
-        if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):
+        if not isinstance(items, list) or not all(
+            isinstance(item, dict) for item in items
+        ):
             raise ApiClientError(
                 f"Format inattendu pour le champ content du journal OGO {endpoint_label}"
             )
 
-        total_pages = _parse_non_negative_int(payload.get("totalPages", 1), "totalPages")
-        total_count = _parse_non_negative_int(payload.get("totalElements", 0), "totalElements")
+        total_pages = _parse_non_negative_int(
+            payload.get("totalPages", 1), "totalPages"
+        )
+        total_count = _parse_non_negative_int(
+            payload.get("totalElements", 0), "totalElements"
+        )
 
         if not items and total_pages == 0:
             return {

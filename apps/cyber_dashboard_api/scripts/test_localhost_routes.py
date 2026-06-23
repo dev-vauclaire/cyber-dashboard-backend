@@ -10,7 +10,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Callable, Iterable
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -20,7 +20,9 @@ def default_date_range() -> tuple[str, str]:
     """Construit une plage ISO 8601 recente pour les routes statistiques."""
     now = datetime.now(UTC).replace(microsecond=0)
     start = (now - timedelta(days=7)).replace(hour=0, minute=0, second=0)
-    return start.isoformat().replace("+00:00", "Z"), now.isoformat().replace("+00:00", "Z")
+    return start.isoformat().replace("+00:00", "Z"), now.isoformat().replace(
+        "+00:00", "Z"
+    )
 
 
 def next_color(current_color: str | None) -> str:
@@ -101,7 +103,9 @@ class HttpClient:
             status_code = int(exc.code)
             raw_body = exc.read().decode("utf-8")
         except URLError as exc:
-            raise RuntimeError(f"HTTP request failed for {method} {path}: {exc}") from exc
+            raise RuntimeError(
+                f"HTTP request failed for {method} {path}: {exc}"
+            ) from exc
 
         payload: object | None = None
         if raw_body:
@@ -374,9 +378,11 @@ class ApiRouteSmokeRunner:
             method="GET",
             path="/health",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and payload.get("status") == "ok"
-            else "Expected {'status': 'ok'}",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and payload.get("status") == "ok"
+                else "Expected {'status': 'ok'}"
+            ),
         )
 
     def _check_dashboard(self) -> None:
@@ -385,10 +391,18 @@ class ApiRouteSmokeRunner:
             method="GET",
             path="/api/dashboard/overview",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict)
-            and {"total_attacks", "total_common_ip_alerts", "total_active_sources", "total_inactive_sources"} <= set(payload.keys())
-            else "Missing expected dashboard keys",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and {
+                    "total_attacks",
+                    "total_common_ip_alerts",
+                    "total_active_sources",
+                    "total_inactive_sources",
+                }
+                <= set(payload.keys())
+                else "Missing expected dashboard keys"
+            ),
         )
 
     def _check_sources(self) -> dict[str, object] | None:
@@ -397,9 +411,11 @@ class ApiRouteSmokeRunner:
             method="GET",
             path="/api/sources/inventory",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and isinstance(payload.get("items"), list)
-            else "Expected an 'items' array",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and isinstance(payload.get("items"), list)
+                else "Expected an 'items' array"
+            ),
         )
 
         response = self._request_and_validate(
@@ -407,9 +423,11 @@ class ApiRouteSmokeRunner:
             method="GET",
             path="/api/sources",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and isinstance(payload.get("items"), list)
-            else "Expected an 'items' array",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and isinstance(payload.get("items"), list)
+                else "Expected an 'items' array"
+            ),
         )
         if response is None or not isinstance(response.payload, dict):
             return None
@@ -444,9 +462,12 @@ class ApiRouteSmokeRunner:
             path=rename_path,
             expected_statuses=(200,),
             body={"source_name": updated_name},
-            validator=lambda payload: None
-            if isinstance(payload, dict) and payload.get("source_name") == updated_name
-            else "The source name was not updated as expected",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and payload.get("source_name") == updated_name
+                else "The source name was not updated as expected"
+            ),
         )
         if response is not None:
             self._client.request(
@@ -464,9 +485,12 @@ class ApiRouteSmokeRunner:
                 path=status_path,
                 expected_statuses=(200,),
                 body={"is_active": toggled_status},
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("is_active") is toggled_status
-                else "The source status was not updated as expected",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict)
+                    and payload.get("is_active") is toggled_status
+                    else "The source status was not updated as expected"
+                ),
             )
             if response is not None:
                 self._client.request(
@@ -484,9 +508,12 @@ class ApiRouteSmokeRunner:
                 path=color_path,
                 expected_statuses=(200,),
                 body={"color": updated_color},
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("color") == updated_color
-                else "The source color was not updated as expected",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict)
+                    and payload.get("color") == updated_color
+                    else "The source color was not updated as expected"
+                ),
             )
             if response is not None and isinstance(color, str):
                 self._client.request(
@@ -509,11 +536,13 @@ class ApiRouteSmokeRunner:
             path="/api/alerts/common-ips",
             expected_statuses=(200,),
             query={"page": 1, "limit": 10, "from": self._from_at, "to": self._to_at},
-            validator=lambda payload: None
-            if isinstance(payload, dict)
-            and isinstance(payload.get("pagination"), dict)
-            and isinstance(payload.get("items"), list)
-            else "Expected 'pagination' and 'items' in the response",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and isinstance(payload.get("pagination"), dict)
+                and isinstance(payload.get("items"), list)
+                else "Expected 'pagination' and 'items' in the response"
+            ),
         )
         if response is None or not isinstance(response.payload, dict):
             return None
@@ -528,7 +557,9 @@ class ApiRouteSmokeRunner:
             return None
 
         first_item = items[0]
-        if not isinstance(first_item, dict) or not isinstance(first_item.get("id"), int):
+        if not isinstance(first_item, dict) or not isinstance(
+            first_item.get("id"), int
+        ):
             return None
 
         alert_id = first_item["id"]
@@ -537,9 +568,12 @@ class ApiRouteSmokeRunner:
             method="GET",
             path=f"/api/alerts/common-ips/{alert_id}",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and isinstance(payload.get("sources"), list)
-            else "Expected a 'sources' array in the response",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and isinstance(payload.get("sources"), list)
+                else "Expected a 'sources' array in the response"
+            ),
         )
         return first_item
 
@@ -559,11 +593,13 @@ class ApiRouteSmokeRunner:
             path="/api/attacks",
             expected_statuses=(200,),
             query=query,
-            validator=lambda payload: None
-            if isinstance(payload, dict)
-            and isinstance(payload.get("pagination"), dict)
-            and isinstance(payload.get("items"), list)
-            else "Expected 'pagination' and 'items' in the response",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and isinstance(payload.get("pagination"), dict)
+                and isinstance(payload.get("items"), list)
+                else "Expected 'pagination' and 'items' in the response"
+            ),
         )
 
     def _check_stats(self) -> None:
@@ -574,9 +610,11 @@ class ApiRouteSmokeRunner:
             path="/api/stats/attacks/summary",
             expected_statuses=(200,),
             query=base_query,
-            validator=lambda payload: None
-            if isinstance(payload, dict) and "total_attacks" in payload
-            else "Expected 'total_attacks' in the response",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and "total_attacks" in payload
+                else "Expected 'total_attacks' in the response"
+            ),
         )
         self._request_and_validate(
             name="stats_by_source",
@@ -584,9 +622,12 @@ class ApiRouteSmokeRunner:
             path="/api/stats/attacks/by-source",
             expected_statuses=(200,),
             query=base_query,
-            validator=lambda payload: None
-            if isinstance(payload, dict) and isinstance(payload.get("by_source"), list)
-            else "Expected 'by_source' in the response",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and isinstance(payload.get("by_source"), list)
+                else "Expected 'by_source' in the response"
+            ),
         )
         self._request_and_validate(
             name="stats_by_source_timeseries",
@@ -594,11 +635,13 @@ class ApiRouteSmokeRunner:
             path="/api/stats/attacks/by-source-timeseries",
             expected_statuses=(200,),
             query=base_query,
-            validator=lambda payload: None
-            if isinstance(payload, dict)
-            and isinstance(payload.get("bucket_starts_utc"), list)
-            and isinstance(payload.get("series"), list)
-            else "Expected 'bucket_starts_utc' and 'series' in the response",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and isinstance(payload.get("bucket_starts_utc"), list)
+                and isinstance(payload.get("series"), list)
+                else "Expected 'bucket_starts_utc' and 'series' in the response"
+            ),
         )
         self._request_and_validate(
             name="stats_by_type",
@@ -606,9 +649,11 @@ class ApiRouteSmokeRunner:
             path="/api/stats/attacks/by-type",
             expected_statuses=(200,),
             query=base_query,
-            validator=lambda payload: None
-            if isinstance(payload, dict) and isinstance(payload.get("items"), list)
-            else "Expected 'items' in the response",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and isinstance(payload.get("items"), list)
+                else "Expected 'items' in the response"
+            ),
         )
 
     def _check_cti_config(self) -> dict[str, object] | None:
@@ -617,9 +662,11 @@ class ApiRouteSmokeRunner:
             method="GET",
             path="/api/cti-config",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and isinstance(payload.get("items"), list)
-            else "Expected an 'items' array",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and isinstance(payload.get("items"), list)
+                else "Expected an 'items' array"
+            ),
         )
         if response is None or not isinstance(response.payload, dict):
             return None
@@ -644,9 +691,11 @@ class ApiRouteSmokeRunner:
                 method="GET",
                 path=f"/api/cti-config/{code}",
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("code") == code
-                else "The returned CTI config does not match the requested code",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict) and payload.get("code") == code
+                    else "The returned CTI config does not match the requested code"
+                ),
             )
         return selected
 
@@ -666,9 +715,11 @@ class ApiRouteSmokeRunner:
             path=patch_path,
             expected_statuses=(200,),
             body={"label": updated_label},
-            validator=lambda payload: None
-            if isinstance(payload, dict) and payload.get("label") == updated_label
-            else "The CTI label was not updated as expected",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and payload.get("label") == updated_label
+                else "The CTI label was not updated as expected"
+            ),
         )
         if response is not None:
             self._client.request(
@@ -688,9 +739,12 @@ class ApiRouteSmokeRunner:
                     method="POST",
                     path=activate_path,
                     expected_statuses=(200,),
-                    validator=lambda payload: None
-                    if isinstance(payload, dict) and payload.get("is_active") is True
-                    else "The CTI config was not activated as expected",
+                    validator=lambda payload: (
+                        None
+                        if isinstance(payload, dict)
+                        and payload.get("is_active") is True
+                        else "The CTI config was not activated as expected"
+                    ),
                 )
                 if response is not None:
                     self._client.request(method="POST", path=deactivate_path)
@@ -700,9 +754,12 @@ class ApiRouteSmokeRunner:
                     method="POST",
                     path=deactivate_path,
                     expected_statuses=(200,),
-                    validator=lambda payload: None
-                    if isinstance(payload, dict) and payload.get("is_active") is False
-                    else "The CTI config was not deactivated as expected",
+                    validator=lambda payload: (
+                        None
+                        if isinstance(payload, dict)
+                        and payload.get("is_active") is False
+                        else "The CTI config was not deactivated as expected"
+                    ),
                 )
                 if response is not None:
                     self._client.request(method="POST", path=activate_path)
@@ -712,9 +769,11 @@ class ApiRouteSmokeRunner:
                 method="DELETE",
                 path=delete_key_path,
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("has_api_key") is False
-                else "The CTI config did not report API key removal",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict) and payload.get("has_api_key") is False
+                    else "The CTI config did not report API key removal"
+                ),
             )
         else:
             self._skip(
@@ -740,9 +799,11 @@ class ApiRouteSmokeRunner:
                 path=path,
                 expected_statuses=(200,),
                 query={"ip_address": self._cti_test_ip},
-                validator=lambda payload: None
-                if isinstance(payload, dict)
-                else "Expected a JSON object response",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict)
+                    else "Expected a JSON object response"
+                ),
             )
 
     def _check_smtp_config(self) -> None:
@@ -751,9 +812,11 @@ class ApiRouteSmokeRunner:
             method="GET",
             path="/api/smtp-config",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and "is_active" in payload
-            else "Expected an SMTP config object",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and "is_active" in payload
+                else "Expected an SMTP config object"
+            ),
         )
 
     def _check_smtp_mutations(self) -> None:
@@ -777,13 +840,18 @@ class ApiRouteSmokeRunner:
             path="/api/smtp-config",
             expected_statuses=(200,),
             body={"smtp_from_name": temporary_name},
-            validator=lambda payload: None
-            if isinstance(payload, dict) and payload.get("smtp_from_name") == temporary_name
-            else "The SMTP config was not updated as expected",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and payload.get("smtp_from_name") == temporary_name
+                else "The SMTP config was not updated as expected"
+            ),
         )
         if patch_response is not None:
             revert_body = {"smtp_from_name": original_name}
-            self._client.request(method="PATCH", path="/api/smtp-config", body=revert_body)
+            self._client.request(
+                method="PATCH", path="/api/smtp-config", body=revert_body
+            )
 
         self._request_and_validate(
             name="smtp_config_put",
@@ -791,9 +859,9 @@ class ApiRouteSmokeRunner:
             path="/api/smtp-config",
             expected_statuses=(200,),
             body={"smtp_from_name": original_name},
-            validator=lambda payload: None
-            if isinstance(payload, dict)
-            else "Expected an SMTP config object",
+            validator=lambda payload: (
+                None if isinstance(payload, dict) else "Expected an SMTP config object"
+            ),
         )
 
     def _check_attacks_collector_config(self) -> dict[str, object] | None:
@@ -802,9 +870,11 @@ class ApiRouteSmokeRunner:
             method="GET",
             path="/api/attacks-collector-config",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and isinstance(payload.get("items"), list)
-            else "Expected an 'items' array",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and isinstance(payload.get("items"), list)
+                else "Expected an 'items' array"
+            ),
         )
         if response is None or not isinstance(response.payload, dict):
             return None
@@ -838,9 +908,11 @@ class ApiRouteSmokeRunner:
             method="POST",
             path=f"/api/attacks-collector-config/{config_id}/activate",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and payload.get("is_active") is True
-            else "The collector config was not activated as expected",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and payload.get("is_active") is True
+                else "The collector config was not activated as expected"
+            ),
         )
         if response is not None and is_active is False:
             self._client.request(
@@ -860,9 +932,12 @@ class ApiRouteSmokeRunner:
                 "collector_type": "serenicity",
                 "api_key": "smoke-test-api-key",
             },
-            validator=lambda payload: None
-            if isinstance(payload, dict) and payload.get("collector_type") == "serenicity"
-            else "The collector config was not created as expected",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and payload.get("collector_type") == "serenicity"
+                else "The collector config was not created as expected"
+            ),
         )
         if create_response is None or not isinstance(create_response.payload, dict):
             return
@@ -885,9 +960,11 @@ class ApiRouteSmokeRunner:
                 method="GET",
                 path=f"/api/attacks-collector-config/{config_id}",
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("id") == config_id
-                else "The collector config could not be reloaded",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict) and payload.get("id") == config_id
+                    else "The collector config could not be reloaded"
+                ),
             )
             self._request_and_validate(
                 name="attacks_collector_config_patch",
@@ -895,47 +972,58 @@ class ApiRouteSmokeRunner:
                 path=f"/api/attacks-collector-config/{config_id}",
                 expected_statuses=(200,),
                 body={"name": f"smoke-serenicity-{unique_suffix}-updated"},
-                validator=lambda payload: None
-                if isinstance(payload, dict) and str(payload.get("name", "")).endswith("-updated")
-                else "The collector config name was not updated as expected",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict)
+                    and str(payload.get("name", "")).endswith("-updated")
+                    else "The collector config name was not updated as expected"
+                ),
             )
             self._request_and_validate(
                 name="attacks_collector_config_deactivate",
                 method="POST",
                 path=f"/api/attacks-collector-config/{config_id}/deactivate",
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("is_active") is False
-                else "The collector config was not deactivated as expected",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict) and payload.get("is_active") is False
+                    else "The collector config was not deactivated as expected"
+                ),
             )
             self._request_and_validate(
                 name="attacks_collector_config_delete_api_key",
                 method="DELETE",
                 path=f"/api/attacks-collector-config/{config_id}/api-key",
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("has_api_key") is False
-                else "The collector config still reports an API key",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict) and payload.get("has_api_key") is False
+                    else "The collector config still reports an API key"
+                ),
             )
             self._request_and_validate(
                 name="attacks_collector_config_delete_email",
                 method="DELETE",
                 path=f"/api/attacks-collector-config/{config_id}/email",
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("has_email") is False
-                else "The collector config still reports an email",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict) and payload.get("has_email") is False
+                    else "The collector config still reports an email"
+                ),
             )
             self._request_and_validate(
                 name="attacks_collector_config_request_inventory",
                 method="POST",
                 path=f"/api/attacks-collector-config/{config_id}/request-inventory",
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict)
-                and payload.get("attacks_collector_config_id") == config_id
-                and payload.get("inventory_requested") is True
-                else "The inventory request response is invalid",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict)
+                    and payload.get("attacks_collector_config_id") == config_id
+                    and payload.get("inventory_requested") is True
+                    else "The inventory request response is invalid"
+                ),
             )
 
         finally:
@@ -953,9 +1041,11 @@ class ApiRouteSmokeRunner:
             method="GET",
             path="/api/retention-policies",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and isinstance(payload.get("items"), list)
-            else "Expected an 'items' array",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and isinstance(payload.get("items"), list)
+                else "Expected an 'items' array"
+            ),
         )
         if response is None or not isinstance(response.payload, dict):
             return None
@@ -970,17 +1060,26 @@ class ApiRouteSmokeRunner:
                 method="GET",
                 path=f"/api/retention-policies/{target_table}",
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("target_table") == target_table
-                else "The retention policy could not be reloaded",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict)
+                    and payload.get("target_table") == target_table
+                    else "The retention policy could not be reloaded"
+                ),
             )
         return first_item
 
-    def _check_retention_policy_mutation(self, retention_policy: dict[str, object]) -> None:
+    def _check_retention_policy_mutation(
+        self, retention_policy: dict[str, object]
+    ) -> None:
         target_table = retention_policy.get("target_table")
         retention_days = retention_policy.get("retention_days")
         is_active = retention_policy.get("is_active")
-        if not isinstance(target_table, str) or not isinstance(retention_days, int) or not isinstance(is_active, bool):
+        if (
+            not isinstance(target_table, str)
+            or not isinstance(retention_days, int)
+            or not isinstance(is_active, bool)
+        ):
             return
 
         updated_days = retention_days + 1
@@ -992,11 +1091,13 @@ class ApiRouteSmokeRunner:
             path=path,
             expected_statuses=(200,),
             body={"retention_days": updated_days, "is_active": updated_active},
-            validator=lambda payload: None
-            if isinstance(payload, dict)
-            and payload.get("retention_days") == updated_days
-            and payload.get("is_active") is updated_active
-            else "The retention policy was not updated as expected",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and payload.get("retention_days") == updated_days
+                and payload.get("is_active") is updated_active
+                else "The retention policy was not updated as expected"
+            ),
         )
         if response is not None:
             self._client.request(
@@ -1012,9 +1113,11 @@ class ApiRouteSmokeRunner:
                 method="POST",
                 path="/api/smtp-config/activate",
                 expected_statuses=(200,),
-                validator=lambda payload: None
-                if isinstance(payload, dict) and payload.get("is_active") is True
-                else "The SMTP config was not activated as expected",
+                validator=lambda payload: (
+                    None
+                    if isinstance(payload, dict) and payload.get("is_active") is True
+                    else "The SMTP config was not activated as expected"
+                ),
             )
         else:
             self._skip(
@@ -1029,18 +1132,23 @@ class ApiRouteSmokeRunner:
             method="POST",
             path="/api/smtp-config/deactivate",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and payload.get("is_active") is False
-            else "The SMTP config was not deactivated as expected",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict) and payload.get("is_active") is False
+                else "The SMTP config was not deactivated as expected"
+            ),
         )
         self._request_and_validate(
             name="smtp_config_delete_password",
             method="DELETE",
             path="/api/smtp-config/password",
             expected_statuses=(200,),
-            validator=lambda payload: None
-            if isinstance(payload, dict) and payload.get("has_smtp_password") is False
-            else "The SMTP password was not deleted as expected",
+            validator=lambda payload: (
+                None
+                if isinstance(payload, dict)
+                and payload.get("has_smtp_password") is False
+                else "The SMTP password was not deleted as expected"
+            ),
         )
 
 

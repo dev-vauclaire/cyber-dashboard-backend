@@ -6,7 +6,6 @@ from sqlalchemy import Enum as SqlEnum
 
 from .enums import AttacksCollectorType, CorrelationStatus
 
-
 status_correlation_enum = SqlEnum(
     CorrelationStatus,
     name="status_correlation",

@@ -27,7 +27,6 @@ from cyber_dashboard_scheduler.services.inventory.common import (
     deactivate_missing_sources,
 )
 
-
 LOGGER = logging.getLogger(__name__)
 
 

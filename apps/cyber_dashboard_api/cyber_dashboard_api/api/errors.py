@@ -17,7 +17,6 @@ from cyber_dashboard_api.api.schemas.errors import (
     ErrorResponseSchema,
 )
 
-
 logger = logging.getLogger(__name__)
 
 

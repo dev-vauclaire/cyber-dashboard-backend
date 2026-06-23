@@ -26,7 +26,6 @@ from cyber_dashboard_api.models import Pagination
 from cyber_dashboard_api.repositories import AlertRepository
 from cyber_dashboard_api.services import AlertEmailService
 
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/alerts/common-ips", tags=["alerts"])
