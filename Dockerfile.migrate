@@ -9,8 +9,6 @@ FROM ${PYTHON_IMAGE} AS dependencies
 
 # Variables d'environnement pour optimiser le build et l'execution
 # UV_COMPILE_BYTECODE=1 : compile les fichiers .py en .pyc pour une execution plus rapide
-# UV_LINK_MODE=copy : copie les fichiers de l'environnement virtuel dans l'image finale
-# UV_PYTHON_DOWNLOADS=0 : n'installe pas les dependances de python, on utilise celles de l'image uv
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=0

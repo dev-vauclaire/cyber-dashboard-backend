@@ -7,8 +7,6 @@ FROM ${PYTHON_IMAGE} AS dependencies
 
 # Variables d'environnement pour optimiser le build et l'execution
 # UV_COMPILE_BYTECODE=1 : compile les fichiers .py en .pyc pour une execution plus rapide
-# UV_LINK_MODE=copy : copie les fichiers de l'environnement virtuel dans l'image finale
-# UV_PYTHON_DOWNLOADS=0 : n'installe pas les dependances de python, on utilise celles de l'image uv
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=0
@@ -41,7 +39,7 @@ COPY . .
 
 # On update l'environnement virtuel avec les packages locaux
 # --frozen : Prend le fichier uv.lock comme source de vérité, si le fichier uv.lock n'est pas présent la commande échoue
-# --no-editable : Fais une copie du code source du package dans l'environnement virtuel
+# --no-editable : Fais une copie du code source et de ses packages dans l'environnement virtuel
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --package cyber-dashboard-api --no-editable
 
@@ -64,7 +62,6 @@ RUN groupadd --system appuser \
 # .venv : l'environnement virtuel avec toutes les dépendances installées
 # apps/cyber_dashboard_api : le code source de l'application
 COPY --from=production-builder --chown=appuser:appuser /app/.venv /app/.venv
-COPY --from=production-builder --chown=appuser:appuser /app/apps/cyber_dashboard_api/src /app/apps/cyber_dashboard_api/src
 
 USER appuser
 
