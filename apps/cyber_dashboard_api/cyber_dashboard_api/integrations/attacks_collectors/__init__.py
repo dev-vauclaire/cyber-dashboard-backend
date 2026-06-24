@@ -1,1 +1,0 @@
-"""Intégrations collecteurs d'attaques."""

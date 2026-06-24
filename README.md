@@ -8,9 +8,10 @@ besoin :
 - `apps/cyber_dashboard_api` : API REST FastAPI
 - `apps/scheduler` : collecteur et scheduler des attaques
 - `apps/common_ip` : corrélateur d'IP communes
-- `packages/database` : source de vérité BDD, connexion PostgreSQL et
-  repositories communs
-- `packages/common` : services transverses partagés, comme le chiffrement
+- `packages/cyber-dashboard-database` : source de vérité BDD,
+connexion PostgreSQL et repositories communs
+- `packages/cyber-dashboard-common-tools` : services transverses
+partagés, comme le chiffrement
 - `alembic` : historique des migrations de schéma
 
 ## Structure
@@ -23,18 +24,18 @@ cyber-dashboard-backend/
 │   ├── scheduler/
 │   └── common_ip/
 ├── packages/
-│   ├── common/
-│   └── database/
+│   ├── cyber-dashboard-common-tools/
+│   └── cyber-dashboard-database/
 └── README.md
 ```
 
 ## Principes d'organisation
 
 - Les applications vivent dans `apps/` et gardent leur logique métier propre.
-- Le schéma SQLAlchemy de référence vit dans `packages/database/models`.
+- Le schéma SQLAlchemy de référence vit dans `packages/cyber-dashboard-database/models`.
 - Les repositories réutilisables entre apps vivent dans
-  `packages/database/repositories`.
-- Les services techniques partagés vivent dans `packages/common`.
+  `packages/cyber-dashboard-database/repositories`.
+- Les services techniques partagés vivent dans `packages/cyber-dashboard-common-tools`.
 - Les migrations Alembic décrivent l'évolution du schéma commun du backend.
 
 ## Bootstrap de migration Alembic
@@ -72,8 +73,9 @@ Exemple Docker one-shot futur :
 docker compose run --rm migrate
 ```
 
-## Prochaine étape de mutualisation
+## Prochaine étape de mutualisation à implémenter
 
-- finaliser la bascule de `scheduler` vers `packages/database`
-- extraire les composants purement communs hors des applications
-- garder un seul contrat de base de données pour les trois apps
+- Utilise un workspace Poetry pour mutualiser
+les dépendances entre apps et packages.
+- Avoir un pyproject.toml racine pour déclarer
+les dépendances communes et les scripts de build.
