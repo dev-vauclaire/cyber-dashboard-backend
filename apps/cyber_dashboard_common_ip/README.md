@@ -1,131 +1,94 @@
-# CYBER DASHBOARD COMMON IP
+# Cyber Dashboard Common IP
 
-Worker de correlation charge de detecter les adresses IP vues sur plusieurs sources.
+Worker de correlation charge de detecter les adresses IP observees sur plusieurs
+sources. La distribution `cyber-dashboard-common-ip` fournit le module
+`cyber_dashboard_common_ip` et la commande `cyber-common-ip`.
 
-Dans le monorepo, `common_ip` garde sa logique metier locale mais s'appuie
-desormais sur :
+Le worker s'appuie sur `cyber_dashboard_database` pour la connexion, le schema
+SQLAlchemy et les repositories partages.
 
-- `packages/database/db` pour la connexion PostgreSQL partagee ;
-- `packages/database/repositories` pour les acces SQL communs au correlateur ;
-- `packages/database/models` comme source de verite du schema utilise par les
-  tests d'integration.
+## Fonctionnement
 
-## Role de l'application
+Le service :
 
-Le worker :
+1. charge son etat depuis PostgreSQL ;
+2. reclame les attaques `pending` par lots avec `FOR UPDATE SKIP LOCKED` ;
+3. maintient un registre memoire minimal des IP deja vues ;
+4. cree ou met a jour `common_ip_alerts` et `common_ip_alert_sources` ;
+5. remet une attaque en `pending` si son traitement echoue.
 
-- lit les attaques en statut `pending` ;
-- reclamme des lots avec `FOR UPDATE SKIP LOCKED` ;
-- maintient un registre memoire minimal des IP deja vues ;
-- cree ou met a jour `common_ip_alerts` et `common_ip_alert_sources` ;
-- repasse une attaque en `pending` si son traitement echoue.
-
-Le service reste volontairement simple : pas d'API HTTP, pas d'integration
-externe, uniquement la boucle de correlation.
-
-## Structure utile
+## Structure
 
 ```text
-apps/common_ip/
-├── common_ip_correlator/
-│   ├── config/             # lecture des variables d'environnement
-│   ├── db/                 # facade locale vers packages.database.db
-│   ├── domain/             # objets metier du correlateur
-│   ├── repositories/       # wrappers locaux vers les repositories partages
-│   ├── services/           # boucle de correlation et chargement d'etat
-│   ├── _runtime.py         # bootstrap du PYTHONPATH pour le monorepo
-│   └── main.py             # point d'entree du worker
+apps/cyber_dashboard_common_ip/
+├── src/cyber_dashboard_common_ip/
+│   ├── config/
+│   ├── db/
+│   ├── domain/
+│   ├── repositories/
+│   ├── services/
+│   └── main.py
 ├── tests/
 ├── Dockerfile
-└── requirements.txt
+└── pyproject.toml
 ```
-
-## Variables d'environnement
-
-Variables PostgreSQL recommandees :
-
-- `DB_HOST`
-- `DB_PORT`
-- `DB_NAME`
-- `DB_USER`
-- `DB_PASSWORD`
-
-Variables du worker :
-
-- `CORRELATOR_BATCH_SIZE`
-- `CORRELATOR_POLL_INTERVAL_SECONDS`
-- `CORRELATOR_LOG_LEVEL`
-- `CORRELATOR_COMPUTE_AVERAGE_PROCESSING_TIME`
-
-Les anciens alias `CORRELATOR_DB_*`, `POSTGRES_*` et `PG*` restent supportes
-pour faciliter la transition.
-
-Le fichier [.env.example](./.env.example) sert de base.
 
 ## Demarrage local
 
-Depuis `apps/common_ip` :
+Depuis la racine :
 
 ```bash
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-python -m common_ip_correlator.main
+uv sync --all-packages --locked
+cp apps/cyber_dashboard_common_ip/.env.example \
+  apps/cyber_dashboard_common_ip/.env
+make common-ip
 ```
 
-Le bootstrap `common_ip_correlator/_runtime.py` ajoute automatiquement la racine
-`cyber-dashboard-backend` au `PYTHONPATH`. Les imports `packages.*` fonctionnent
-ainsi meme si l'application est lancee depuis son sous-dossier.
+Commande equivalente :
 
-## Boucle de traitement
+```bash
+uv run --package cyber-dashboard-common-ip cyber-common-ip
+```
 
-Au demarrage :
+L'application charge automatiquement
+`apps/cyber_dashboard_common_ip/.env`.
 
-1. chargement de la configuration ;
-2. creation de la connexion PostgreSQL partagee ;
-3. remise en `pending` des attaques eventuellement laissees en `processing` ;
-4. reconstruction du registre memoire a partir des attaques deja `completed`.
+## Variables d'environnement
 
-Ensuite, chaque cycle :
+Connexion PostgreSQL :
 
-1. reclame un lot d'attaques `pending` ;
-2. traite chaque attaque dans une transaction courte ;
-3. cree ou met a jour les alertes si l'IP est vue sur plusieurs sources ;
-4. attend `CORRELATOR_POLL_INTERVAL_SECONDS` si aucun lot n'est disponible.
+- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`.
+
+Comportement du worker :
+
+- `CORRELATOR_BATCH_SIZE` ;
+- `CORRELATOR_POLL_INTERVAL_SECONDS` ;
+- `CORRELATOR_LOG_LEVEL` ;
+- `CORRELATOR_COMPUTE_AVERAGE_PROCESSING_TIME`.
+
+Le fichier [.env.example](./.env.example) contient les valeurs de depart. Les
+anciens alias `CORRELATOR_DB_*`, `POSTGRES_*` et `PG*` restent acceptes pendant
+la transition.
 
 ## Tests
 
-Lancer toute la suite :
-
 ```bash
-cd apps/common_ip
-. .venv/bin/activate
-python -m unittest tests.test_all
+uv run --directory apps/cyber_dashboard_common_ip python -m unittest tests.test_all
 ```
 
-Fichiers de tests :
-
-- `test_domain.py` : IP et registre memoire
-- `test_batch_processing_time_tracker.py` : mesure de performance par lot
-- `test_correlator.py` : orchestration metier du service principal
-- `test_repositories.py` : mapping des wrappers locaux vers le SQL partage
-- `test_postgres_integration.py` : verification sur PostgreSQL avec le schema
-  SQLAlchemy partage
+Le test d'integration PostgreSQL est ignore lorsqu'aucune base de test n'est
+configuree.
 
 ## Docker
 
-Les builds Docker doivent partir de la racine du monorepo
-`cyber-dashboard-backend`, car l'image depend aussi de `packages/`.
-
-Build :
+Depuis la racine :
 
 ```bash
-docker build -f apps/common_ip/Dockerfile -t cyber-dashboard-common-ip:prod .
-```
+docker build \
+  -f apps/cyber_dashboard_common_ip/Dockerfile \
+  -t cyber-dashboard-common-ip:prod .
 
-Run :
-
-```bash
-docker run --rm --env-file apps/common_ip/.env cyber-dashboard-common-ip:prod
+docker run --rm \
+  --env-file apps/cyber_dashboard_common_ip/.env \
+  cyber-dashboard-common-ip:prod
 ```

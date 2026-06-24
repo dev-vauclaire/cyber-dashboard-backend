@@ -1,25 +1,29 @@
-# Package database
+# cyber-dashboard-database
 
-`packages/database` centralise la source de verite de la base partagee par les
-applications du monorepo.
+Source de verite de la base PostgreSQL partagee par les applications.
 
-Sous-dossiers :
+- Distribution : `cyber-dashboard-database`
+- Module Python : `cyber_dashboard_database`
+- Source : `src/cyber_dashboard_database/`
 
-- `models/` : modeles SQLAlchemy de reference du schema ;
+Le package contient :
+
+- `models/` : modeles SQLAlchemy et metadata de reference ;
 - `db/` : primitives de connexion PostgreSQL et builders partages ;
-- `repositories/` : acces aux donnees reutilisables par plusieurs apps.
+- `repositories/` : acces aux donnees reutilisables par plusieurs applications.
 
-Principes de fonctionnement :
+Ses principales primitives sont exposees depuis le module racine :
 
-- les modeles du schema sont definis ici avant toute migration Alembic ;
-- les repositories de ce package ne doivent pas dependre d'une application
-  concrete ;
-- ils peuvent couvrir aussi bien des lectures API que des ecritures techniques
-  pour les workers ;
-- chaque app peut exposer une facade locale vers ces repositories si elle veut
-  garder un espace de noms stable.
+```python
+from cyber_dashboard_database import Base, PostgresDatabase, metadata
+```
 
-Regle importante :
+Les repositories ne doivent pas dependre d'une application concrete. Toute
+evolution de schema est d'abord refletee dans `models/`, puis portee dans une
+migration sous `alembic/`.
 
-- toute evolution de schema doit d'abord etre refletee dans `models/`, puis
-  portee dans `alembic/`.
+Installation dans le workspace :
+
+```bash
+uv sync --all-packages --locked
+```
