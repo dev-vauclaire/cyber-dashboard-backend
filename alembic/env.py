@@ -7,7 +7,7 @@ from sqlalchemy import pool
 from alembic import context
 
 # Import des modèles SQLAlchemy
-from packages.database.models import metadata
+from cyber_dashboard_database.models import metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

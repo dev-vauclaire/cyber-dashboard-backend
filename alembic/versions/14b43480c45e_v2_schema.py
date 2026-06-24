@@ -14,7 +14,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import context, op
 
-from packages.cyber_dashboard_common_tools.src.cyber_dashboard_common_tools.secret_service import (
+from cyber_dashboard_common_tools.secret_service import (
     SecretConfigurationError,
     SecretService,
 )
