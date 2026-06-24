@@ -1,0 +1,23 @@
+[project]
+name = "cyber-dashboard-scheduler"
+version = "0.1.0"
+description = "Application qui planifie des tâches. Elle communique avec une base de donnée et des api externes."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.34.2",
+    "python-dotenv>=1.2.2",
+    "cyber-dashboard-database",
+    "cyber-dashboard-common-tools",
+]
+
+[tool.uv.sources]
+cyber-dashboard-database = { workspace = true }
+cyber-dashboard-common-tools = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.11.21,<0.12.0"]
+build-backend = "uv_build"
+
+[project.scripts]
+cyber-scheduler = "cyber_dashboard_scheduler.main:main"
