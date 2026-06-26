@@ -8,6 +8,7 @@ dependencies = [
     "alembic>=1.18.4",
     "cyber-dashboard-database",
     "cyber-dashboard-common-tools",
+    "vex>=0.0.19",
 ]
 
 [tool.uv.sources]
