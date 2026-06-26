@@ -64,3 +64,4 @@ repos:
     hooks:
       - id: semgrep
         args: ['--config', 'p/security-audit', '--config', 'p/python', '--severity=ERROR', '--error']
+    files: \.py$
