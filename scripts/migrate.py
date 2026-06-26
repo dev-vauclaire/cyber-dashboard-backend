@@ -121,7 +121,7 @@ def resolve_baseline_revision() -> str:
 def _probe_database_connection(database_url: str) -> None:
     """Attempt a single SQLAlchemy connection against the target database."""
     try:
-        from sqlalchemy import create_engine, text
+        from sqlalchemy import create_engine, literal, select
         from sqlalchemy.exc import SQLAlchemyError
     except ModuleNotFoundError as exc:
         raise MigrationBootstrapError(
@@ -138,7 +138,7 @@ def _probe_database_connection(database_url: str) -> None:
 
     try:
         with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
+            connection.execute(select(literal(1)))
     except SQLAlchemyError as exc:
         raise MigrationBootstrapError(str(exc)) from exc
     finally:
@@ -304,11 +304,15 @@ def inspect_database(database_url: str) -> DatabaseInspectionResult:
 
 def read_current_revision(connection: Any) -> str | None:
     """Read the current Alembic revision if the version table is populated."""
-    from sqlalchemy import text
+    from sqlalchemy import Column, MetaData, String, Table, select
 
-    query = text(
-        f"SELECT version_num FROM {PUBLIC_SCHEMA}.{ALEMBIC_VERSION_TABLE} LIMIT 1"
+    version_table = Table(
+        ALEMBIC_VERSION_TABLE,
+        MetaData(),
+        Column("version_num", String()),
+        schema=PUBLIC_SCHEMA,
     )
+    query = select(version_table.c.version_num).limit(1)
     row = connection.execute(query).first()
     if row is None:
         return None

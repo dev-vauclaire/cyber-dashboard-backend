@@ -9,10 +9,11 @@ Create Date: 2026-06-10 16:50:08.078903
 from __future__ import annotations
 
 import os
-from typing import Sequence, Union
+from typing import Literal, Sequence, Union
 
 import sqlalchemy as sa
 from alembic import context, op
+from sqlalchemy.dialects import postgresql
 
 from cyber_dashboard_common_tools.secret_service import (
     SecretConfigurationError,
@@ -28,6 +29,46 @@ depends_on: Union[str, Sequence[str], None] = None
 
 LEGACY_OGO_CONFIG_NAME = "legacy-ogo"
 LEGACY_SERENICITY_CONFIG_NAME = "legacy-serenicity"
+SpecializedSourceTableName = Literal["ogo_sources", "serenicity_sources"]
+
+SOURCES_TABLE = sa.table(
+    "sources",
+    sa.column("id"),
+    sa.column("sensor_type_id"),
+    sa.column("external_id"),
+    sa.column("latitude"),
+    sa.column("longitude"),
+    sa.column("attacks_collector_config_id"),
+)
+SENSOR_TYPES_TABLE = sa.table(
+    "sensor_types",
+    sa.column("id"),
+    sa.column("code"),
+)
+ATTACKS_COLLECTOR_CONFIG_TABLE = sa.table(
+    "attacks_collector_config",
+    sa.column("id"),
+    sa.column("name"),
+    sa.column("collector_type"),
+    sa.column("encrypted_email"),
+    sa.column("email_hint"),
+    sa.column("encrypted_api_key"),
+    sa.column("api_key_hint"),
+    sa.column("is_active"),
+    sa.column("last_validation_status"),
+)
+OGO_SOURCES_TABLE = sa.table(
+    "ogo_sources",
+    sa.column("source_id"),
+)
+SERENICITY_SOURCES_TABLE = sa.table(
+    "serenicity_sources",
+    sa.column("source_id"),
+)
+SPECIALIZED_SOURCE_TABLES = {
+    "ogo_sources": OGO_SOURCES_TABLE,
+    "serenicity_sources": SERENICITY_SOURCES_TABLE,
+}
 
 
 class _MigrationSecretSettings:
@@ -60,38 +101,39 @@ def _backfill_specialized_sources() -> None:
     """Redistribute legacy V1 source data into specialized V2 tables."""
     if not context.is_offline_mode():
         bind = op.get_bind()
+        trimmed_external_id = sa.func.btrim(SOURCES_TABLE.c.external_id)
+        source_sensor_type_join = SOURCES_TABLE.join(
+            SENSOR_TYPES_TABLE,
+            SENSOR_TYPES_TABLE.c.id == SOURCES_TABLE.c.sensor_type_id,
+        )
 
-        duplicate_ogo_domain_name = bind.execute(sa.text("""
-                SELECT BTRIM(s.external_id) AS domain_name
-                FROM sources AS s
-                JOIN sensor_types AS st
-                    ON st.id = s.sensor_type_id
-                WHERE s.external_id IS NOT NULL
-                  AND BTRIM(s.external_id) <> ''
-                  AND st.code = 'waf'
-                GROUP BY BTRIM(s.external_id)
-                HAVING COUNT(*) > 1
-                LIMIT 1
-                """)).scalar_one_or_none()
+        duplicate_ogo_domain_name = bind.execute(
+            sa.select(trimmed_external_id.label("domain_name"))
+            .select_from(source_sensor_type_join)
+            .where(SOURCES_TABLE.c.external_id.is_not(None))
+            .where(trimmed_external_id != "")
+            .where(SENSOR_TYPES_TABLE.c.code == "waf")
+            .group_by(trimmed_external_id)
+            .having(sa.func.count() > 1)
+            .limit(1)
+        ).scalar_one_or_none()
         if duplicate_ogo_domain_name is not None:
             raise RuntimeError(
                 "Migration V2 cannot continue because duplicate OGO domain_name values "
                 f"were found in V1 sources: {duplicate_ogo_domain_name}"
             )
 
-        duplicate_serenicity_external_id = bind.execute(sa.text("""
-                SELECT BTRIM(s.external_id) AS external_id
-                FROM sources AS s
-                JOIN sensor_types AS st
-                    ON st.id = s.sensor_type_id
-                WHERE s.external_id IS NOT NULL
-                  AND BTRIM(s.external_id) <> ''
-                  AND st.code IN ('lurio', 'detoxio')
-                  AND s.external_id ~ '^[0-9]+$'
-                GROUP BY BTRIM(s.external_id)
-                HAVING COUNT(*) > 1
-                LIMIT 1
-                """)).scalar_one_or_none()
+        duplicate_serenicity_external_id = bind.execute(
+            sa.select(trimmed_external_id.label("external_id"))
+            .select_from(source_sensor_type_join)
+            .where(SOURCES_TABLE.c.external_id.is_not(None))
+            .where(trimmed_external_id != "")
+            .where(SENSOR_TYPES_TABLE.c.code.in_(("lurio", "detoxio")))
+            .where(SOURCES_TABLE.c.external_id.op("~")("^[0-9]+$"))
+            .group_by(trimmed_external_id)
+            .having(sa.func.count() > 1)
+            .limit(1)
+        ).scalar_one_or_none()
         if duplicate_serenicity_external_id is not None:
             raise RuntimeError(
                 "Migration V2 cannot continue because duplicate Serenicity "
@@ -152,38 +194,23 @@ def _insert_legacy_collector_config(
     api_key_hint: str | None,
 ) -> None:
     """Create a collector config inherited from legacy environment variables."""
+    statement = postgresql.insert(ATTACKS_COLLECTOR_CONFIG_TABLE).values(
+        name=name,
+        collector_type=collector_type,
+        encrypted_email=encrypted_email,
+        email_hint=email_hint,
+        encrypted_api_key=encrypted_api_key,
+        api_key_hint=api_key_hint,
+        is_active=True,
+        last_validation_status="not_tested",
+    )
     bind.execute(
-        sa.text("""
-            INSERT INTO attacks_collector_config (
-                name,
-                collector_type,
-                encrypted_email,
-                email_hint,
-                encrypted_api_key,
-                api_key_hint,
-                is_active,
-                last_validation_status
-            )
-            VALUES (
-                :name,
-                :collector_type,
-                :encrypted_email,
-                :email_hint,
-                :encrypted_api_key,
-                :api_key_hint,
-                TRUE,
-                'not_tested'
-            )
-            ON CONFLICT (collector_type, name) DO NOTHING
-            """),
-        {
-            "name": name,
-            "collector_type": collector_type,
-            "encrypted_email": encrypted_email,
-            "email_hint": email_hint,
-            "encrypted_api_key": encrypted_api_key,
-            "api_key_hint": api_key_hint,
-        },
+        statement.on_conflict_do_nothing(
+            index_elements=[
+                ATTACKS_COLLECTOR_CONFIG_TABLE.c.collector_type,
+                ATTACKS_COLLECTOR_CONFIG_TABLE.c.name,
+            ]
+        )
     )
 
 
@@ -192,24 +219,20 @@ def _attach_specialized_sources_to_config(
     bind: sa.engine.Connection,
     collector_type: str,
     config_name: str,
-    specialized_table: str,
+    specialized_table: SpecializedSourceTableName,
 ) -> None:
     """Attach migrated specialized sources to the matching legacy config."""
+    specialized_sources_table = SPECIALIZED_SOURCE_TABLES.get(specialized_table)
+    if specialized_sources_table is None:
+        raise ValueError(f"Unsupported specialized source table: {specialized_table}")
+
     bind.execute(
-        sa.text(f"""
-            UPDATE sources AS s
-            SET attacks_collector_config_id = config.id
-            FROM {specialized_table} AS specialized
-            INNER JOIN attacks_collector_config AS config
-                ON config.collector_type = :collector_type
-               AND config.name = :config_name
-            WHERE s.id = specialized.source_id
-              AND s.attacks_collector_config_id IS NULL
-            """),
-        {
-            "collector_type": collector_type,
-            "config_name": config_name,
-        },
+        sa.update(SOURCES_TABLE)
+        .values(attacks_collector_config_id=ATTACKS_COLLECTOR_CONFIG_TABLE.c.id)
+        .where(SOURCES_TABLE.c.id == specialized_sources_table.c.source_id)
+        .where(SOURCES_TABLE.c.attacks_collector_config_id.is_(None))
+        .where(ATTACKS_COLLECTOR_CONFIG_TABLE.c.collector_type == collector_type)
+        .where(ATTACKS_COLLECTOR_CONFIG_TABLE.c.name == config_name)
     )
 
 
@@ -488,9 +511,8 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
             "collector_type",
-            "encrypted_email",
-            "encrypted_api_key",
-            name="attacks_collector_config_unique_email_api_key_per_type",
+            "name",
+            name="attacks_collector_config_unique_name_per_type",
         ),
     )
     op.create_table(
