@@ -1,5 +1,8 @@
 .PHONY: api scheduler common-ip migrate lint active_lint_on_commit
 
+########################
+### Application commands
+########################
 # Lance l'application API
 api:
 	uv run --package cyber-dashboard-api uvicorn cyber_dashboard_api.main:app --reload --host 0.0.0.0 --port 8000
@@ -16,13 +19,20 @@ common-ip:
 migrate:
 	uv run scripts/migrate.py
 
-# Lance les linters sur tous les fichiers du projet
-lint:
+########################
+### pre-commit commands
+########################
+
+# Lance les hooks sur tous les fichiers du projet
+run_pre_commit:
 	uv run pre-commit run --all-files
 
 # Active les linters pour qu'ils s'exécutent automatiquement avant chaque commit
-active_lint_on_commit:
+activate_pre_commit:
 	uv run pre-commit install
+
+update_pre_commit:
+	uv run pre-commit autoupdate
 
 # Lance les tests unitaires
 # Lance une BDD postgreSQL de test dans un conteneur Docker
