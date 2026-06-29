@@ -52,7 +52,7 @@ repos:
     hooks:
       - id: uv-lock-sbom-grype
         name: Generate uv.lock SBOM and scan with Grype
-        entry: scripts/check_uv_lock_vulnerabilities.py --fail-on high
+        entry: scripts/security/check_uv_lock_vulnerabilities.py --fail-on high
         language: system
         files: ^uv\.lock$
         pass_filenames: false

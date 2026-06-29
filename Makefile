@@ -1,4 +1,4 @@
-.PHONY: api scheduler common-ip migrate lint active_lint_on_commit
+.PHONY: api scheduler common-ip migrate db-seed-dev run_pre_commit activate_pre_commit update_pre_commit
 
 ########################
 ### Application commands
@@ -17,7 +17,11 @@ common-ip:
 
 # Lance le script de migration de la base de données
 migrate:
-	uv run scripts/migrate.py
+	uv run python scripts/db/migrate.py
+
+# Insere ou met a jour un jeu de donnees complet dans la base de donnees
+db-seed-dev:
+	uv run python scripts/db/seed_dev.py
 
 ########################
 ### pre-commit commands
