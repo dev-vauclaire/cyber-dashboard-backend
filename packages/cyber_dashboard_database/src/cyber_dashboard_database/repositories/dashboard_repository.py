@@ -47,6 +47,28 @@ class DashboardRepository:
             alert_limit_clause = "LIMIT %(alert_limit)s"
             params["alert_limit"] = alert_limit
 
+        selected_alerts_cte = f"""
+            selected_alerts AS (
+                SELECT
+                    a.id,
+                    a.attacker_ip,
+                    a.distinct_source_count,
+                    a.first_seen_at,
+                    a.last_seen_at
+                FROM common_ip_alerts AS a
+                WHERE a.distinct_source_count >= %(min_distinct_source_count)s
+                  AND EXISTS (
+                      SELECT 1
+                      FROM common_ip_alert_sources AS cas
+                      INNER JOIN sources AS linked_source
+                          ON linked_source.id = cas.source_id
+                      WHERE cas.alert_id = a.id
+                  )
+                ORDER BY a.distinct_source_count DESC, a.last_seen_at DESC, a.attacker_ip ASC
+                {alert_limit_clause}
+            )
+        """
+
         collectors_query = """
             SELECT
                 id,
@@ -62,12 +84,16 @@ class DashboardRepository:
             ORDER BY collector_type ASC, name ASC, id ASC
         """
         sources_query = """
-            WITH source_alert_counts AS (
+            WITH
+            {selected_alerts_cte},
+            source_alert_counts AS (
                 SELECT
-                    source_id,
-                    COUNT(alert_id)::INT AS alert_count
-                FROM common_ip_alert_sources
-                GROUP BY source_id
+                    cas.source_id,
+                    COUNT(cas.alert_id)::INT AS alert_count
+                FROM common_ip_alert_sources AS cas
+                INNER JOIN selected_alerts
+                    ON selected_alerts.id = cas.alert_id
+                GROUP BY cas.source_id
             )
             SELECT
                 s.id AS source_id,
@@ -78,7 +104,7 @@ class DashboardRepository:
                 st.label AS sensor_type_label,
                 config.id AS collector_id,
                 config.collector_type,
-                COALESCE(source_alert_counts.alert_count, 0)::INT AS alert_count,
+                source_alert_counts.alert_count,
                 ogo.domain_name,
                 ss.external_id,
                 scheduler_state.last_inventory_at,
@@ -101,31 +127,23 @@ class DashboardRepository:
                 ON ss.source_id = s.id
             LEFT JOIN scheduler_state
                 ON scheduler_state.source_id = s.id
-            LEFT JOIN source_alert_counts
+            INNER JOIN source_alert_counts
                 ON source_alert_counts.source_id = s.id
             ORDER BY config.collector_type ASC NULLS LAST, config.name ASC NULLS LAST, st.code ASC, s.name ASC
-        """
+        """.format(selected_alerts_cte=selected_alerts_cte)
         alerts_query = f"""
+            WITH {selected_alerts_cte}
             SELECT
                 id AS alert_id,
                 attacker_ip::TEXT AS attacker_ip,
                 distinct_source_count,
                 first_seen_at,
                 last_seen_at
-            FROM common_ip_alerts
-            WHERE distinct_source_count >= %(min_distinct_source_count)s
+            FROM selected_alerts
             ORDER BY distinct_source_count DESC, last_seen_at DESC, attacker_ip ASC
-            {alert_limit_clause}
         """
         alert_links_query = f"""
-            WITH selected_alerts AS (
-                SELECT
-                    id
-                FROM common_ip_alerts
-                WHERE distinct_source_count >= %(min_distinct_source_count)s
-                ORDER BY distinct_source_count DESC, last_seen_at DESC, attacker_ip ASC
-                {alert_limit_clause}
-            )
+            WITH {selected_alerts_cte}
             SELECT
                 cas.alert_id,
                 cas.source_id,
@@ -135,11 +153,13 @@ class DashboardRepository:
             FROM common_ip_alert_sources AS cas
             INNER JOIN selected_alerts
                 ON selected_alerts.id = cas.alert_id
+            INNER JOIN sources AS s
+                ON s.id = cas.source_id
             ORDER BY cas.alert_id ASC, cas.last_seen_at DESC, cas.source_id ASC
         """
         return {
             "collectors": self._database.fetch_all(collectors_query),
-            "sources": self._database.fetch_all(sources_query),
+            "sources": self._database.fetch_all(sources_query, params),
             "alerts": self._database.fetch_all(alerts_query, params),
             "alert_links": self._database.fetch_all(alert_links_query, params),
         }
