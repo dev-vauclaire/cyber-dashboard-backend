@@ -22,9 +22,25 @@ __all__ = [
     "SmtpConfig",
     "Source",
     "attacks_collector_type_enum",
+    "load_all_models",
     "metadata",
     "status_correlation_enum",
 ]
+
+_MODEL_MODULES = (
+    ".attack",
+    ".attacks_collector_config",
+    ".common_ip_alert",
+    ".common_ip_alert_source",
+    ".cti_config",
+    ".ogo_source",
+    ".retention_policies",
+    ".scheduler_state",
+    ".sensor_type",
+    ".serenicity_source",
+    ".smtp_config",
+    ".source",
+)
 
 _EXPORTS: dict[str, tuple[str, str]] = {
     "Attack": (".attack", "Attack"),
@@ -47,9 +63,16 @@ _EXPORTS: dict[str, tuple[str, str]] = {
 }
 
 
+def load_all_models() -> None:
+    """Load every mapped model so Base.metadata contains the full schema."""
+    for module_name in _MODEL_MODULES:
+        import_module(module_name, __name__)
+
+
 def __getattr__(name: str) -> Any:
     """Charge uniquement l'export demandé."""
     if name == "metadata":
+        load_all_models()
         base_module = import_module(".base", __name__)
         return base_module.Base.metadata
 
