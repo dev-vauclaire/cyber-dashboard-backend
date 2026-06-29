@@ -19,6 +19,7 @@ from cyber_dashboard_api.integrations.cti.clients.greynoise_client import (
     GreyNoiseClient,
 )
 from cyber_dashboard_api.integrations.cti.clients.ipdata_client import IpDataClient
+from cyber_dashboard_api.integrations.cti.clients.ipinfo_client import IpinfoClient
 from cyber_dashboard_api.integrations.cti.clients.rdap_client import RdapClient
 from cyber_dashboard_api.integrations.cti.clients.shodan_client import ShodanClient
 from cyber_dashboard_api.integrations.cti.clients.virustotal_client import (
@@ -34,6 +35,7 @@ from cyber_dashboard_api.services.secret_service import (
 ABUSEIPDB_PROVIDER_CODE = "abuseipdb"
 GREYNOISE_PROVIDER_CODE = "greynoise"
 IPDATA_PROVIDER_CODE = "ipdata"
+IPINFO_PROVIDER_CODE = "ipinfo"
 RDAP_PROVIDER_CODE = "rdap"
 SHODAN_PROVIDER_CODE = "shodan"
 VIRUSTOTAL_PROVIDER_CODE = "virustotal"
@@ -52,6 +54,7 @@ class CtiEnrichmentService:
         rdap_client: RdapClient,
         virustotal_client: VirusTotalClient,
         shodan_client: ShodanClient | None = None,
+        ipinfo_client: IpinfoClient | None = None,
     ) -> None:
         self._repository = repository
         self._secret_service = secret_service
@@ -61,6 +64,7 @@ class CtiEnrichmentService:
         self._rdap_client = rdap_client
         self._virustotal_client = virustotal_client
         self._shodan_client = shodan_client
+        self._ipinfo_client = ipinfo_client
 
     def enrich_with_abuseipdb(
         self,
@@ -118,6 +122,29 @@ class CtiEnrichmentService:
             self._raise_enrichment_request_error("GreyNoise", exc)
 
         return self._map_greynoise_payload(ip_address=ip_address, payload=payload)
+
+    def enrich_with_ipinfo(
+        self,
+        *,
+        ip_address: str,
+    ) -> dict[str, Any]:
+        """Retourne l'enrichissement IPinfo Lite d'une adresse IP."""
+        api_key = self._load_active_api_key(IPINFO_PROVIDER_CODE)
+        if self._ipinfo_client is None:
+            raise ServiceUnavailableError(
+                code="cti_enrichment_unavailable",
+                message="Le client IPinfo n'est pas configuré",
+            )
+
+        try:
+            payload, _ = self._ipinfo_client.get_ip_report(
+                api_key=api_key,
+                ip_address=ip_address,
+            )
+        except IntegrationRequestError as exc:
+            self._raise_enrichment_request_error("IPinfo", exc)
+
+        return self._map_ipinfo_payload(ip_address=ip_address, payload=payload)
 
     def enrich_with_rdap(
         self,
@@ -316,6 +343,29 @@ class CtiEnrichmentService:
             "name": payload.get("name"),
             "link": payload.get("link"),
             "last_seen": payload.get("last_seen"),
+        }
+
+    @staticmethod
+    def _map_ipinfo_payload(
+        *,
+        ip_address: str,
+        payload: object,
+    ) -> dict[str, Any]:
+        if not isinstance(payload, dict):
+            raise ServiceUnavailableError(
+                code="cti_enrichment_invalid_response",
+                message="IPinfo a renvoyé une réponse inattendue",
+            )
+
+        return {
+            "ip_address": str(payload.get("ip") or ip_address),
+            "asn": payload.get("asn"),
+            "as_name": payload.get("as_name"),
+            "as_domain": payload.get("as_domain"),
+            "country_code": payload.get("country_code"),
+            "country": payload.get("country"),
+            "continent_code": payload.get("continent_code"),
+            "continent": payload.get("continent"),
         }
 
     @staticmethod

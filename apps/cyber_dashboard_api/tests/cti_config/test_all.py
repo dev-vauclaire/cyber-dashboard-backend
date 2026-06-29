@@ -6,6 +6,7 @@ import unittest
 
 from tests.cti_config import (
     test_greynoise_validator,
+    test_ipinfo_validator,
     test_routes,
     test_service,
     test_shodan_validator,
@@ -13,6 +14,7 @@ from tests.cti_config import (
 
 TEST_MODULES = (
     test_greynoise_validator,
+    test_ipinfo_validator,
     test_shodan_validator,
     test_routes,
     test_service,

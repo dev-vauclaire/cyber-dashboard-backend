@@ -10,6 +10,7 @@ from cyber_dashboard_api.integrations.cti.clients.greynoise_client import (
     GreyNoiseClient,
 )
 from cyber_dashboard_api.integrations.cti.clients.ipdata_client import IpDataClient
+from cyber_dashboard_api.integrations.cti.clients.ipinfo_client import IpinfoClient
 from cyber_dashboard_api.integrations.cti.clients.shodan_client import ShodanClient
 from cyber_dashboard_api.integrations.cti.clients.virustotal_client import (
     VirusTotalClient,
@@ -22,6 +23,9 @@ from cyber_dashboard_api.integrations.cti.validators.greynoise_validator import 
 )
 from cyber_dashboard_api.integrations.cti.validators.ipdata_validator import (
     IpDataValidator,
+)
+from cyber_dashboard_api.integrations.cti.validators.ipinfo_validator import (
+    IpinfoValidator,
 )
 from cyber_dashboard_api.integrations.cti.validators.shodan_validator import (
     ShodanValidator,
@@ -39,6 +43,7 @@ class CtiValidatorRegistry:
         self._validators = {
             "abuseipdb": AbuseIpdbValidator(AbuseIpdbClient(timeout_seconds=timeout)),
             "ipdata": IpDataValidator(IpDataClient(timeout_seconds=timeout)),
+            "ipinfo": IpinfoValidator(IpinfoClient(timeout_seconds=timeout)),
             "greynoise": GreyNoiseValidator(GreyNoiseClient(timeout_seconds=timeout)),
             "virustotal": VirusTotalValidator(
                 VirusTotalClient(timeout_seconds=timeout)

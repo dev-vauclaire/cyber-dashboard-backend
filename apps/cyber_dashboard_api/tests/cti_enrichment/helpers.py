@@ -112,6 +112,20 @@ def build_ipdata_payload() -> dict[str, Any]:
     }
 
 
+def build_ipinfo_payload() -> dict[str, Any]:
+    """Construit un payload IPinfo representative."""
+    return {
+        "ip": "8.8.8.8",
+        "asn": "AS15169",
+        "as_name": "Google LLC",
+        "as_domain": "google.com",
+        "country_code": "US",
+        "country": "United States",
+        "continent_code": "NA",
+        "continent": "North America",
+    }
+
+
 def build_greynoise_payload() -> dict[str, Any]:
     """Construit un payload GreyNoise representative."""
     return {
@@ -323,6 +337,38 @@ class FakeIpDataClient:
         return deepcopy(self.payload), self.status_code
 
 
+class FakeIpinfoClient:
+    """Client IPinfo fake configurable."""
+
+    def __init__(
+        self,
+        *,
+        payload: object | None = None,
+        status_code: int = 200,
+        error: IntegrationRequestError | None = None,
+    ) -> None:
+        self.payload = payload
+        self.status_code = status_code
+        self.error = error
+        self.calls: list[dict[str, Any]] = []
+
+    def get_ip_report(
+        self,
+        *,
+        api_key: str,
+        ip_address: str,
+    ) -> tuple[object, int]:
+        self.calls.append(
+            {
+                "api_key": api_key,
+                "ip_address": ip_address,
+            }
+        )
+        if self.error is not None:
+            raise self.error
+        return deepcopy(self.payload), self.status_code
+
+
 class FakeGreyNoiseClient:
     """Client GreyNoise fake configurable."""
 
@@ -467,6 +513,22 @@ class FakeCtiEnrichmentService:
         return deepcopy(self.result)
 
     def enrich_with_ipdata(
+        self,
+        *,
+        ip_address: str,
+    ) -> dict[str, Any]:
+        self.calls.append(
+            {
+                "ip_address": ip_address,
+            }
+        )
+        if self.error is not None:
+            raise self.error
+        if self.result is None:
+            raise AssertionError("No fake result configured")
+        return deepcopy(self.result)
+
+    def enrich_with_ipinfo(
         self,
         *,
         ip_address: str,

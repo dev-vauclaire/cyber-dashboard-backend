@@ -55,6 +55,19 @@ class IpDataEnrichmentResponseSchema(ApiSchema):
     is_threat: bool
 
 
+class IpinfoEnrichmentResponseSchema(ApiSchema):
+    """Representation publique d'un enrichissement IPinfo Lite."""
+
+    ip_address: str
+    asn: str | None
+    as_name: str | None
+    as_domain: str | None
+    country_code: str | None
+    country: str | None
+    continent_code: str | None
+    continent: str | None
+
+
 class RdapEnrichmentResponseSchema(ApiSchema):
     """Representation publique d'un enrichissement RDAP."""
 

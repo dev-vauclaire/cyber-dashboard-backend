@@ -12,6 +12,7 @@ from cyber_dashboard_api.api.schemas import (
     AbuseIpdbEnrichmentResponseSchema,
     GreyNoiseEnrichmentResponseSchema,
     IpDataEnrichmentResponseSchema,
+    IpinfoEnrichmentResponseSchema,
     RdapEnrichmentResponseSchema,
     ShodanEnrichmentResponseSchema,
     VirusTotalEnrichmentResponseSchema,
@@ -56,6 +57,22 @@ def get_ipdata_enrichment(
         ip_address=str(ip_address),
     )
     return IpDataEnrichmentResponseSchema(**payload)
+
+
+@router.get("/ipinfo", response_model=IpinfoEnrichmentResponseSchema)
+def get_ipinfo_enrichment(
+    ip_address: IPv4Address | IPv6Address,
+    cti_enrichment_service: CtiEnrichmentService = Depends(get_cti_enrichment_service),
+) -> IpinfoEnrichmentResponseSchema:
+    """Retourne l'enrichissement IPinfo Lite d'une adresse IP."""
+    logger.info(
+        "endpoint=cti_enrichment_ipinfo event=requested ip_address=%s",
+        ip_address,
+    )
+    payload = cti_enrichment_service.enrich_with_ipinfo(
+        ip_address=str(ip_address),
+    )
+    return IpinfoEnrichmentResponseSchema(**payload)
 
 
 @router.get("/greynoise", response_model=GreyNoiseEnrichmentResponseSchema)

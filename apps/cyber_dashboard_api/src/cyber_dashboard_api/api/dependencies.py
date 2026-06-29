@@ -16,6 +16,7 @@ from cyber_dashboard_api.integrations.cti.clients.greynoise_client import (
     GreyNoiseClient,
 )
 from cyber_dashboard_api.integrations.cti.clients.ipdata_client import IpDataClient
+from cyber_dashboard_api.integrations.cti.clients.ipinfo_client import IpinfoClient
 from cyber_dashboard_api.integrations.cti.clients.rdap_client import RdapClient
 from cyber_dashboard_api.integrations.cti.clients.shodan_client import ShodanClient
 from cyber_dashboard_api.integrations.cti.clients.virustotal_client import (
@@ -134,6 +135,12 @@ def get_ipdata_client() -> IpDataClient:
 
 
 @lru_cache(maxsize=1)
+def get_ipinfo_client() -> IpinfoClient:
+    """Construit le client IPinfo partage."""
+    return IpinfoClient(timeout_seconds=get_settings().validation.timeout_seconds)
+
+
+@lru_cache(maxsize=1)
 def get_greynoise_client() -> GreyNoiseClient:
     """Construit le client GreyNoise partage."""
     return GreyNoiseClient(timeout_seconds=get_settings().validation.timeout_seconds)
@@ -190,6 +197,7 @@ def get_cti_enrichment_service() -> CtiEnrichmentService:
         get_rdap_client(),
         get_virustotal_client(),
         get_shodan_client(),
+        get_ipinfo_client(),
     )
 
 
