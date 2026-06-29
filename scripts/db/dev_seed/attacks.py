@@ -74,6 +74,15 @@ ATTACK_PATTERNS = (
         "correlation_status": "failed",
     },
     {
+        "source_key": "lurio-backup",
+        "attacker_ip": "8.8.8.8",
+        "attack_type": "honeypot_probe",
+        "count": 4,
+        "first_hours_ago": 16,
+        "spacing_hours": 36,
+        "correlation_status": "failed",
+    },
+    {
         "source_key": "ogo-extranet",
         "attacker_ip": "192.0.2.140",
         "attack_type": "path_traversal",

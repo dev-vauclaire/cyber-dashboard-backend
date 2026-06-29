@@ -34,6 +34,14 @@ COMMON_IP_ALERTS = (
         "last_hours_ago": 36,
         "status": "investigating",
     },
+    {
+        "key": "shared-google-dns",
+        "attacker_ip": "8.8.8.8",
+        "source_keys": ("lurio-backup", "detoxio-main", "ogo-portal"),
+        "first_hours_ago": 96,
+        "last_hours_ago": 2,
+        "status": "open",
+    },
 )
 
 
