@@ -23,17 +23,43 @@ cyber-dashboard-backend/
 ```
 
 Chaque application et package a sa propre documentation dans son dossier respectif.
+Cette page sert de point d'entrée aux nouveaux développeurs qui veulent
+contribuer au backend Cyber Dashboard.
 
-## Installation de l'environnement de developpement
+## Prerequis
 
-Ce dépot utilise l'outil [`uv`](https://docs.astral.sh/uv/getting-started/installation/)
-pour la gestion des dépendances,
-des versions de python et des environnements virtuels.
+Avant de configurer le projet, installez les outils suivants :
 
-Pour installer l'environnement de developpement, vous devrez installer
-[`uv`](https://docs.astral.sh/uv/getting-started/installation/) :
+| Outil | Usage |
+| --- | --- |
+| Python 3.12 | Version Python attendue par le workspace |
+| `uv` | Gestion des dépendances, du lockfile et des environnements virtuels |
+| GNU Make | Raccourcis de lancement des applications et des hooks |
+| Docker | Build et execution des images applicatives |
+| Docker Compose | Orchestration locale (`docker compose` ou `docker-compose`) |
+| Syft | Generation du SBOM de `uv.lock` pendant le hook de sécurité |
+| Grype | Scan de vulnérabilités du SBOM généré par Syft |
 
-Ensuite, placez-vous à la racine du monorepo et lancez la commande suivante :
+Vérifiez que les binaires sont disponibles dans votre shell :
+
+```bash
+python --version
+uv --version
+make --version
+docker --version
+docker compose version
+# ou, selon votre installation :
+docker-compose --version
+syft version
+grype version
+```
+
+## Configuration de l'environnement de developpement
+
+Ce dépôt utilise [`uv`](https://docs.astral.sh/uv/getting-started/installation/)
+pour gérer les dépendances, le lockfile et l'environnement virtuel.
+
+Placez-vous à la racine du monorepo et installez les dépendances verrouillées :
 
 ```bash
 # Créer un environnement virtuel python avec toutes les dépendances requises (uv.lock)
@@ -57,10 +83,11 @@ cp apps/cyber_dashboard_common_ip/.env.example apps/cyber_dashboard_common_ip/.e
 
 > Pour chaque application, vous trouverez plus de détails sur leurs variables d'environnement dans leurs README respectifs.
 <!-- markdownlint-enable MD013 -->
+
 ## Lancer les applications en mode développement
 
-Pour lancer les applications en mode développement dépendament de ce
-sur quoi vous travaillez, vous pouvez utiliser les commandes `make` suivantes :
+Pour lancer les applications en mode développement, utilisez la cible `make`
+qui correspond au service sur lequel vous travaillez :
 
 ```bash
 # Lance l'API
@@ -73,31 +100,74 @@ make common-ip
 make migrate
 ```
 
-## Lancer hooks de qualité
+## Lancer les tests unitaires : PAS ENCORE IMPLEMENTÉ
 
-Pour ce qui est des hooks de qualités, le projet utilise
-[`pre-commit`](https://pre-commit.com/) pour executer les linters et les tests unitaires.
-Vous pouvez voir la liste des hooks dans le fichier
-`.pre-commit-config.yaml` à la racine du projet.
+Les tests unitaires se lancent avec `unittest` via `uv`.
+Depuis la racine du monorepo :
+
+```bash
+# Tests du script de migration
+uv run python -m unittest scripts.tests.test_migrate
+
+# Tests de l'API
+uv run --directory apps/cyber_dashboard_api python -m unittest tests.test_all
+
+# Tests du scheduler
+uv run --directory apps/cyber_dashboard_scheduler \
+  python -m unittest discover -s tests -t .
+
+# Tests du service de correlation d'IP
+uv run --directory apps/cyber_dashboard_common_ip python -m unittest tests.test_all
+```
+
+## Lancer les hooks de qualité et de sécurité
+
+Le projet utilise [`pre-commit`](https://pre-commit.com/)
+pour exécuter des hooks :
+
+- Linting
+- Formatage
+- Secrets detection
+- SCA (Software Composition Analysis)
+- SAST (Static Application Security Testing)
+
+La configuration se trouve dans `.pre-commit-config.yaml` à la racine du projet.
 
 Pour lancer les hooks de qualité sur tous les fichiers du projet,
 vous pouvez utiliser la commande suivante :
 
 ```bash
-make lint
+uv run pre-commit run --all-files
 ```
 
 Pour activer les hooks avant chaque commit,
 vous pouvez utiliser la commande suivante :
 
 ```bash
-make active_lint_on_commit
+uv run pre-commit install
 ```
 
-## Lancer les tests unitaires et les hooks de qualite
+Pour mettre à jour les versions des hooks
+déclarés dans `.pre-commit-config.yaml` :
 
-TODO :
-`make test_all`, `make test_<application>` `make test_<package>`
+```bash
+uv run pre-commit autoupdate
+```
+
+Les hooks actuellement configurés sont :
+<!-- markdownlint-disable MD013 -->
+| Hook | Type de vérification |
+| --- | --- |
+| `pre-commit-hooks` | Fins de lignes, espaces, YAML/TOML/JSON, conflits de merge, clés privées |
+| `markdownlint` | Lint et auto-correction des fichiers Markdown |
+| `black` | Formatage Python |
+| `ruff` | Lint Python avec auto-correction |
+| `gitleaks` | Détection de secrets |
+| `uv-lock-sbom-grype` | SBOM `uv.lock` avec Syft puis scan de vulnérabilités avec Grype |
+| `semgrep` | SAST Python et règles `security-audit` |
+<!-- markdownlint-enable MD013 -->
+Les tests unitaires seront lancés par `pre-commit` mais
+actuellement ce n'est pas encore implémenté.
 
 ## Conteneurisation avec Docker
 
@@ -113,6 +183,8 @@ TODO :
 | Migrations | `docker build -f Dockerfile.migrate -t cyber-dashboard-migrate:prod .` |
 
 > Remarque : Placer vous dans le dossier racine du projet pour lancer les commandes de build.
+
+TODO : Ajouter le processus d'analyse de sécurité des images avec Syft, Grype et VEX
 
 ### Exécuter les conteneurs
 
