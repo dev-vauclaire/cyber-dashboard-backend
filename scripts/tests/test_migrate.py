@@ -6,7 +6,7 @@ import os
 import unittest
 from unittest import mock
 
-from scripts.migrate import (
+from scripts.db.migrate import (
     ALEMBIC_VERSION_TABLE,
     DatabaseInspectionResult,
     MigrationBootstrapError,
@@ -241,9 +241,9 @@ class WaitForDatabaseTests(unittest.TestCase):
         },
         clear=False,
     )
-    @mock.patch("scripts.migrate.time.sleep")
-    @mock.patch("scripts.migrate.time.monotonic", side_effect=[0, 0])
-    @mock.patch("scripts.migrate._probe_database_connection")
+    @mock.patch("scripts.db.migrate.time.sleep")
+    @mock.patch("scripts.db.migrate.time.monotonic", side_effect=[0, 0])
+    @mock.patch("scripts.db.migrate._probe_database_connection")
     def test_wait_for_database_returns_when_connection_succeeds(
         self,
         probe_connection_mock: mock.Mock,
@@ -264,9 +264,9 @@ class WaitForDatabaseTests(unittest.TestCase):
         },
         clear=False,
     )
-    @mock.patch("scripts.migrate.time.sleep")
-    @mock.patch("scripts.migrate.time.monotonic", side_effect=[0, 0, 1])
-    @mock.patch("scripts.migrate._probe_database_connection")
+    @mock.patch("scripts.db.migrate.time.sleep")
+    @mock.patch("scripts.db.migrate.time.monotonic", side_effect=[0, 0, 1])
+    @mock.patch("scripts.db.migrate._probe_database_connection")
     def test_wait_for_database_retries_after_transient_connection_error(
         self,
         probe_connection_mock: mock.Mock,
@@ -291,9 +291,9 @@ class WaitForDatabaseTests(unittest.TestCase):
         },
         clear=False,
     )
-    @mock.patch("scripts.migrate.time.sleep")
-    @mock.patch("scripts.migrate.time.monotonic", side_effect=[0, 11])
-    @mock.patch("scripts.migrate._probe_database_connection")
+    @mock.patch("scripts.db.migrate.time.sleep")
+    @mock.patch("scripts.db.migrate.time.monotonic", side_effect=[0, 11])
+    @mock.patch("scripts.db.migrate._probe_database_connection")
     def test_wait_for_database_raises_after_timeout(
         self,
         probe_connection_mock: mock.Mock,

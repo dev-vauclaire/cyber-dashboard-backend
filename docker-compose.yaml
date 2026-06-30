@@ -1,0 +1,43 @@
+# Ce fichier docker-compose est fait pour le développement.
+# Il lance une base de données postgres avec un jeu de donnée.
+services:
+  db:
+    container_name: bdd_postgres
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Initialise le schéma de la base de données
+  migrate:
+    container_name: migrate
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/postgres
+    depends_on:
+      db:
+        condition: service_healthy
+
+  seed-dev:
+    container_name: seed_dev
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/postgres
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - ./scripts/db:/app/scripts/db:ro
+    command: ["python", "/app/scripts/db/seed_dev.py"]

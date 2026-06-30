@@ -1,39 +1,31 @@
 # Conventions API
 
-Ce document definit les conventions a suivre pour faire evoluer
-`apps/cyber_dashboard_api` dans le monorepo `cyber-dashboard-backend`.
+Conventions pour faire evoluer `apps/cyber_dashboard_api` dans le workspace.
 
 ## Positionnement dans le monorepo
-
-L'API est une application du dossier `apps/`.
-
-Structure cible :
 
 ```text
 cyber-dashboard-backend/
 ├── alembic/
 ├── apps/
 │   ├── cyber_dashboard_api/
-│   ├── scheduler/
-│   └── common_ip/
+│   ├── cyber_dashboard_common_ip/
+│   └── cyber_dashboard_scheduler/
 └── packages/
-    ├── common/
-    └── database/
+    ├── cyber_dashboard_common_tools/
+    └── cyber_dashboard_database/
 ```
 
-Principe :
+- `apps/` contient les executables et leur logique metier propre ;
+- `cyber_dashboard_database.models` est la source de verite SQLAlchemy ;
+- `cyber_dashboard_database.repositories` contient les acces reutilisables ;
+- `cyber_dashboard_common_tools` contient les services techniques partages.
 
-- `apps/` contient les executables ;
-- `packages/` contient le code partage ;
-- `packages/database/models` est la source de verite du schema SQLAlchemy ;
-- `packages/database/repositories` contient les repositories reutilisables ;
-- `packages/common` contient les helpers transverses comme le chiffrement.
-
-## Structure de l'application API
+## Structure de l'API
 
 ```text
 apps/cyber_dashboard_api/
-├── cyber_dashboard_api/
+├── src/cyber_dashboard_api/
 │   ├── api/
 │   │   ├── routes/
 │   │   ├── schemas/
@@ -48,200 +40,77 @@ apps/cyber_dashboard_api/
 │   ├── repositories/
 │   ├── services/
 │   ├── utils/
-│   ├── _runtime.py
 │   └── main.py
 ├── docs/
 ├── scripts/
 ├── tests/
 ├── Dockerfile
-├── Dockerfile.dev
-└── requirements.txt
+└── pyproject.toml
 ```
 
-## Role de chaque dossier
+## Responsabilites
 
-### `cyber_dashboard_api/api`
+### `api`
 
-Couche HTTP FastAPI.
+La couche FastAPI declare les routes et schemas, valide les parametres, traduit
+les erreurs et appelle les services. Elle ne contient ni SQL, ni logique metier
+longue, ni appel externe direct.
 
-Responsabilites :
+Un fichier de route correspond a un domaine fonctionnel. Les schemas Pydantic
+suivent les suffixes `Schema`, `RequestSchema`, `ResponseSchema` et
+`ItemSchema` selon leur role.
 
-- declarer les routes ;
-- typer les requetes et reponses ;
-- valider les params simples ;
-- uniformiser les erreurs ;
-- appeler les services et repositories appropries.
+### `config`
 
-Interdit dans cette couche :
+Toute nouvelle variable d'environnement est centralisee ici. Le reste de
+l'application ne lit pas directement `os.environ`.
 
-- SQL ;
-- logique metier longue ;
-- appels HTTP externes directs.
+### `db` et `repositories`
 
-### `cyber_dashboard_api/api/routes`
+Ces dossiers sont des facades locales vers `cyber_dashboard_database`. Le SQL
+partage vit dans le package, pas dans l'application.
 
-Un fichier par domaine fonctionnel.
+### `services`
 
-Exemples :
+Les services appliquent les regles metier, orchestrent plusieurs repositories
+et pilotent les integrations externes.
 
-- `alerts.py`
-- `attacks.py`
-- `sources.py`
-- `stats.py`
-- `cti_config.py`
+### `integrations`
 
-Convention :
+Les clients CTI, SMTP et collecteurs encapsulent les particularites de chaque
+fournisseur. Les services les consomment via des interfaces simples.
 
-- route courte et lisible ;
-- logs de base coherents ;
-- pas de logique metier complexe dans les handlers.
+### `models` et `utils`
 
-### `cyber_dashboard_api/api/schemas`
+`models` contient les objets internes qui ne font pas partie du contrat HTTP.
+`utils` contient les helpers techniques locaux, comme la configuration des logs.
 
-Schemas Pydantic de contrat public.
+### `scripts` et `tests`
 
-Conventions de nommage :
+`scripts` contient les controles operatoires, notamment le smoke test HTTP.
+`tests` couvre en priorite services, routes, validations et erreurs metier.
 
-- `...Schema` : objet public simple ;
-- `...RequestSchema` : body entrant ;
-- `...ResponseSchema` : enveloppe de reponse ;
-- `...ItemSchema` : element d'une liste.
+## Flux d'une requete
 
-### `cyber_dashboard_api/config`
+1. La route lit et valide la requete.
+2. Elle appelle un service ou un repository.
+3. Le service applique la logique metier et orchestre ses dependances.
+4. Le repository partage lit ou ecrit en base.
+5. La route renvoie un schema public stable.
 
-Configuration centralisee.
+## Partage de code
 
-Regles :
+- un repository reutilise rejoint `cyber_dashboard_database.repositories` ;
+- un outil technique reutilise rejoint `cyber_dashboard_common_tools` ;
+- un package partage n'importe jamais une application ;
+- une application peut garder une facade locale pour stabiliser ses imports.
 
-- toute nouvelle variable d'environnement est declaree ici ;
-- aucune lecture directe de `os.environ` ailleurs dans l'app.
+## Workspace et Docker
 
-### `cyber_dashboard_api/db`
-
-Facade locale vers `packages.database.db`.
-
-Raison d'etre :
-
-- garder des imports stables cote API ;
-- construire l'acces DB avec les settings de l'application.
-
-### `cyber_dashboard_api/repositories`
-
-Facade locale vers `packages.database.repositories`.
-
-Regle :
-
-- la logique SQL partagee doit vivre dans
-`packages/database/repositories` ;
-- l'API ne reimplemente pas ses propres
-repositories si une version partagee existe deja.
-
-### `cyber_dashboard_api/services`
-
-Orchestration metier.
-
-Responsabilites :
-
-- appliquer les regles metier ;
-- orchestrer plusieurs repositories ;
-- piloter les integrations externes ;
-- gerer les secrets et validations reelles.
-
-### `cyber_dashboard_api/integrations`
-
-Connecteurs externes.
-
-Sous-domaines actuels :
-
-- `cti/`
-- `smtp/`
-- `attacks_collectors/`
-
-Regles :
-
-- un client externe vit ici ;
-- les specificites fournisseur sont encapsulees ici ;
-- les services consomment ces clients via des abstractions simples.
-
-### `cyber_dashboard_api/models`
-
-Modeles internes non exposes comme contrat HTTP.
-
-Exemples :
-
-- pagination ;
-- filtres.
-
-### `cyber_dashboard_api/utils`
-
-Helpers techniques transverses.
-
-Exemple principal :
-
-- bootstrap de logs.
-
-### `docs`
-
-Documentation locale de l'application.
-
-Fichiers cibles :
-
-- `README.md` : vue d'ensemble et demarrage ;
-- `docs/api_doc.md` : catalogue des endpoints ;
-- `docs/conventions.md` : conventions de structure ;
-- `docs/testing.md` : strategie de tests ;
-- `docs/CTI.md` : details d'integration CTI.
-
-### `scripts`
-
-Scripts operatoires non metier.
-
-Usage typique :
-
-- smoke test localhost ;
-- controle rapide d'infra locale ;
-- utilitaires de validation manuelle.
-
-### `tests`
-
-Tests unitaires et tests de comportement local.
-
-Organisation recommandee :
-
-- un sous-dossier par domaine ;
-- `test_all.py` par domaine si plusieurs fichiers ;
-- `tests/test_all.py` comme agregateur global.
-
-Priorites de test :
-
-- services ;
-- routes ;
-- validations ;
-- cas d'erreur metier.
-
-## Flux standard d'une requete
-
-Flux cible :
-
-1. la route FastAPI lit la requete ;
-2. la route valide les params simples ;
-3. la route appelle un service ou un repository ;
-4. le service applique la logique metier si necessaire ;
-5. le repository partage lit ou ecrit en base ;
-6. la route renvoie un schema stable.
-
-## Regles de partage de code
-
-- si une app a besoin d'un repository partage, il doit etre place dans
-  `packages/database/repositories` ;
-- si une app a besoin d'un helper technique partage, il doit etre place dans
-  `packages/common` ;
-- le code partage ne doit pas importer `cyber_dashboard_api` ;
-- l'app peut exposer une facade locale pour garder ses imports historiques.
-
-## Regles Docker
-
-- les builds de `cyber_dashboard_api` partent de la racine du monorepo ;
-- les images doivent copier `apps/cyber_dashboard_api` et `packages/` ;
-- les images doivent tourner en utilisateur non-root ;
-- le Docker dev doit monter le code applicatif et le code partage.
+- les dependances sont declarees dans `pyproject.toml` et verrouillees dans le
+  `uv.lock` racine ;
+- le bootstrap local se fait avec `uv sync --all-packages --locked` ;
+- les builds Docker partent toujours de la racine du monorepo ;
+- le Dockerfile expose les cibles `development` et `production` ;
+- le runtime de production utilise `appuser` et ne contient pas `uv` ;
+- la cible de developpement monte `apps/cyber_dashboard_api/src` et `packages`.

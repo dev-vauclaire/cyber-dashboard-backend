@@ -42,3 +42,6 @@ reports/
 *.log
 
 **/secrets/*
+
+.agents
+.codex

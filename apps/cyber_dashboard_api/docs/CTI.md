@@ -434,7 +434,7 @@ Exemple d'erreur provider inactif :
 {
   "error": {
     "code": "cti_provider_inactive",
-    "message": "CTI provider 'shodan' is not active"
+    "message": "Le fournisseur CTI 'shodan' n'est pas actif"
   }
 }
 ```
@@ -445,7 +445,7 @@ Exemple d'erreur provider indisponible :
 {
   "error": {
     "code": "cti_enrichment_unavailable",
-    "message": "Shodan service is unavailable"
+    "message": "Le service Shodan est indisponible"
   }
 }
 ```
@@ -456,7 +456,7 @@ Exemple d'erreur de payload externe invalide :
 {
   "error": {
     "code": "cti_enrichment_invalid_response",
-    "message": "Shodan returned an unexpected response"
+    "message": "Shodan a renvoyé une réponse inattendue"
   }
 }
 ```

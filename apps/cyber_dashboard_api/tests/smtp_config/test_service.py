@@ -108,7 +108,7 @@ class SmtpConfigServiceTestCase(unittest.TestCase):
             self.service.update_config(payload)
 
         self.assertEqual(context.exception.code, "invalid_payload")
-        self.assertIn("adresse email valide", context.exception.message)
+        self.assertIn("adresse e-mail valide", context.exception.message)
 
     def test_update_rejects_from_name_header_injection(self) -> None:
         payload = SmtpConfigUpdateRequestSchema(
@@ -268,7 +268,7 @@ class SmtpConfigServiceTestCase(unittest.TestCase):
             )
         )
         self.validator = FakeValidator(
-            ValidationResult.fail("Timeout lors de la connexion SMTP.")
+            ValidationResult.fail("Délai d'attente dépassé lors de la connexion SMTP.")
         )
         self.service = SmtpConfigService(
             self.repository,
@@ -283,7 +283,7 @@ class SmtpConfigServiceTestCase(unittest.TestCase):
         self.assertEqual(context.exception.code, "smtp_validation_failed")
         self.assertEqual(
             self.repository.row["last_validation_error"],
-            "Timeout lors de la connexion SMTP.",
+            "Délai d'attente dépassé lors de la connexion SMTP.",
         )
         self.assertFalse(self.repository.row["is_active"])
 

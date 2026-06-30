@@ -18,6 +18,7 @@ from tests.cti_enrichment.helpers import (
     FakeCtiConfigRepository,
     FakeGreyNoiseClient,
     FakeIpDataClient,
+    FakeIpinfoClient,
     FakeRdapClient,
     FakeShodanClient,
     FakeVirusTotalClient,
@@ -25,6 +26,7 @@ from tests.cti_enrichment.helpers import (
     build_cti_row,
     build_greynoise_payload,
     build_ipdata_payload,
+    build_ipinfo_payload,
     build_rdap_payload,
     build_shodan_payload,
     build_secret_service,
@@ -44,6 +46,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
         self.abuseipdb_client = FakeAbuseIpdbClient(payload=build_abuseipdb_payload())
         self.greynoise_client = FakeGreyNoiseClient(payload=build_greynoise_payload())
         self.ipdata_client = FakeIpDataClient(payload=build_ipdata_payload())
+        self.ipinfo_client = FakeIpinfoClient(payload=build_ipinfo_payload())
         self.rdap_client = FakeRdapClient(payload=build_rdap_payload())
         self.shodan_client = FakeShodanClient(payload=build_shodan_payload())
         self.virustotal_client = FakeVirusTotalClient(
@@ -58,6 +61,7 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             self.rdap_client,
             self.virustotal_client,
             self.shodan_client,
+            self.ipinfo_client,
         )
 
     def test_enrich_with_abuseipdb_returns_expected_projection(self) -> None:
@@ -181,6 +185,46 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(client.calls[0]["ip_address"], "71.6.135.131")
+
+    def test_enrich_with_ipinfo_returns_expected_projection(self) -> None:
+        encrypted_api_key = self.secret_service.encrypt_secret("ipinfo-api-key")
+        repository = FakeCtiConfigRepository(
+            build_cti_row(
+                code="ipinfo",
+                label="IPinfo",
+                encrypted_api_key=encrypted_api_key,
+            )
+        )
+        client = FakeIpinfoClient(payload=build_ipinfo_payload())
+        service = CtiEnrichmentService(
+            repository,
+            self.secret_service,
+            self.abuseipdb_client,
+            self.ipdata_client,
+            self.greynoise_client,
+            self.rdap_client,
+            self.virustotal_client,
+            self.shodan_client,
+            client,
+        )
+
+        result = service.enrich_with_ipinfo(ip_address="8.8.8.8")
+
+        self.assertEqual(
+            result,
+            {
+                "ip_address": "8.8.8.8",
+                "asn": "AS15169",
+                "as_name": "Google LLC",
+                "as_domain": "google.com",
+                "country_code": "US",
+                "country": "United States",
+                "continent_code": "NA",
+                "continent": "North America",
+            },
+        )
+        self.assertEqual(client.calls[0]["api_key"], "ipinfo-api-key")
+        self.assertEqual(client.calls[0]["ip_address"], "8.8.8.8")
 
     def test_enrich_with_shodan_returns_expected_projection(self) -> None:
         encrypted_api_key = self.secret_service.encrypt_secret("shodan-api-key")
@@ -471,6 +515,36 @@ class CtiEnrichmentServiceTestCase(unittest.TestCase):
 
         self.assertEqual(context.exception.code, "cti_enrichment_unavailable")
         self.assertIn("indisponible", context.exception.message.lower())
+
+    def test_enrich_with_ipinfo_maps_external_errors(self) -> None:
+        encrypted_api_key = self.secret_service.encrypt_secret("ipinfo-api-key")
+        repository = FakeCtiConfigRepository(
+            build_cti_row(
+                code="ipinfo",
+                label="IPinfo",
+                encrypted_api_key=encrypted_api_key,
+            )
+        )
+        client = FakeIpinfoClient(
+            error=IntegrationRequestError("rate_limit", "rate limit", status_code=429)
+        )
+        service = CtiEnrichmentService(
+            repository,
+            self.secret_service,
+            self.abuseipdb_client,
+            self.ipdata_client,
+            self.greynoise_client,
+            self.rdap_client,
+            self.virustotal_client,
+            self.shodan_client,
+            client,
+        )
+
+        with self.assertRaises(ServiceUnavailableError) as context:
+            service.enrich_with_ipinfo(ip_address="8.8.8.8")
+
+        self.assertEqual(context.exception.code, "cti_enrichment_unavailable")
+        self.assertIn("limite de débit", context.exception.message.lower())
 
     def test_enrich_with_shodan_maps_external_errors(self) -> None:
         encrypted_api_key = self.secret_service.encrypt_secret("shodan-api-key")

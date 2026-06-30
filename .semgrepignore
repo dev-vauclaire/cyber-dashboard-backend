@@ -1,0 +1,15 @@
+# Fichiers de tests (souvent avec du code volontairement vulnérable)
+tests/
+*_test.py
+test_*.py
+
+# Fichiers de configuration
+*.yml
+*.yaml
+
+LICENSE
+Makefile
+README*
+
+# Fichiers de migration Alembic
+versions/

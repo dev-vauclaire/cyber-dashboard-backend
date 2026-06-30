@@ -15,6 +15,7 @@ from tests.retention_policies import test_all as retention_policies_test_all
 from tests.smtp_config import test_all as smtp_config_test_all
 from tests.sources import test_all as sources_test_all
 from tests.stats import test_all as stats_test_all
+from tests import test_errors
 
 TEST_MODULES = (
     attacks_test_all,
@@ -24,6 +25,7 @@ TEST_MODULES = (
     cti_config_test_all,
     dashboard_test_all,
     health_test_all,
+    test_errors,
     retention_policies_test_all,
     smtp_config_test_all,
     sources_test_all,

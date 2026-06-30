@@ -1,0 +1,20 @@
+[project]
+name = "cyber-dashboard-common-ip"
+version = "0.1.0"
+description = "Application qui encapsule une hashmap pour faire de la corrélation d'addresse IP."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "python-dotenv>=1.2.2",
+    "cyber-dashboard-database",
+]
+
+[tool.uv.sources]
+cyber-dashboard-database = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.11.21,<0.12.0"]
+build-backend = "uv_build"
+
+[project.scripts]
+cyber-common-ip = "cyber_dashboard_common_ip.main:main"

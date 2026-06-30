@@ -6,8 +6,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-# Import des modèles SQLAlchemy
-from packages.database.models import metadata
+# Import des modeles SQLAlchemy
+from cyber_dashboard_database.models import load_all_models, metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,6 +18,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+load_all_models()
 target_metadata = metadata
 
 # other values from the config, defined by the needs of env.py,
