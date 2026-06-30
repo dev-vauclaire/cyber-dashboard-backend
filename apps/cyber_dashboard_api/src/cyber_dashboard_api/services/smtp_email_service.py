@@ -69,7 +69,7 @@ class SmtpEmailService:
         if not bool(smtp_row.get("is_active")):
             raise BadRequestError(
                 code="smtp_config_inactive",
-                message="La configuration SMTP doit être active avant l'envoi d'un email",
+                message="La configuration SMTP doit être active avant l'envoi d'un e-mail",
             )
 
         missing_fields = [
@@ -125,7 +125,7 @@ class SmtpEmailService:
         except (socket.timeout, TimeoutError, OSError, smtplib.SMTPException) as exc:
             raise ServiceUnavailableError(
                 code="smtp_send_failed",
-                message="Impossible d'envoyer l'email avec la configuration SMTP actuelle",
+                message="Impossible d'envoyer l'e-mail avec la configuration SMTP actuelle",
             ) from exc
 
     @staticmethod

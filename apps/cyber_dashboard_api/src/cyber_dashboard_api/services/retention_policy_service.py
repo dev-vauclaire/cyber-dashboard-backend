@@ -78,6 +78,9 @@ class RetentionPolicyService:
         if normalized_target_table not in ALLOWED_RETENTION_TARGET_TABLES:
             raise BadRequestError(
                 code="invalid_target_table",
-                message="target_table doit être l'une des valeurs suivantes : attacks, common_ip_alerts",
+                message=(
+                    "Le champ 'target_table' doit être l'une des valeurs suivantes : "
+                    "attacks, common_ip_alerts"
+                ),
             )
         return normalized_target_table

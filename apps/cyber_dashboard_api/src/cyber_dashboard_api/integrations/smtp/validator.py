@@ -49,7 +49,9 @@ class SmtpValidator:
                 provider_status_code=exc.smtp_code,
             )
         except (socket.timeout, TimeoutError):
-            return ValidationResult.fail("Timeout lors de la connexion SMTP.")
+            return ValidationResult.fail(
+                "Délai d'attente dépassé lors de la connexion SMTP."
+            )
         except (_SmtpTlsValidationError, ssl.SSLError, smtplib.SMTPNotSupportedError):
             return ValidationResult.fail("Erreur TLS lors de la validation SMTP.")
         except smtplib.SMTPConnectError as exc:

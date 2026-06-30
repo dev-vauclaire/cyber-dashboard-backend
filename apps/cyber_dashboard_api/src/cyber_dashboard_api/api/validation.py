@@ -90,10 +90,10 @@ def validate_source_name(source_name: str) -> str:
     normalized_value = source_name.strip()
 
     if not normalized_value:
-        raise ValueError("source_name ne doit pas être vide")
+        raise ValueError("Le champ 'source_name' ne doit pas être vide")
 
     if _contains_control_characters(normalized_value):
-        raise ValueError("source_name contient des caractères invalides")
+        raise ValueError("Le champ 'source_name' contient des caractères invalides")
 
     return normalized_value
 
@@ -245,7 +245,7 @@ def validate_email_input(
 
         raise BadRequestError(
             code="invalid_payload",
-            message=f"Le champ '{name}' doit être une adresse email valide",
+            message=f"Le champ '{name}' doit être une adresse e-mail valide",
         )
 
     return normalized_value

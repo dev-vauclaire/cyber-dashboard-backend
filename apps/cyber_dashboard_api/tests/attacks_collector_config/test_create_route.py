@@ -53,7 +53,7 @@ class CreateAttacksCollectorConfigRouteTestCase(unittest.TestCase):
             errors={
                 "create_config": BadRequestError(
                     code="invalid_payload",
-                    message="Field 'is_active' cannot be true on create",
+                    message="Le champ 'is_active' ne peut pas valoir true à la création",
                 )
             }
         )

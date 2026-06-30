@@ -33,7 +33,7 @@ class OgoValidator(BaseAttacksCollectorValidator):
         if context.api_key is None:
             return ValidationResult.fail("La clé API OGO est manquante")
         if context.email is None:
-            return ValidationResult.fail("L'email OGO est manquant")
+            return ValidationResult.fail("L'e-mail OGO est manquant")
 
         try:
             result = self._client.validate_credentials(

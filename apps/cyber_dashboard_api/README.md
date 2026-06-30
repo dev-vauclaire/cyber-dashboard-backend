@@ -141,7 +141,7 @@ Les erreurs applicatives utilisent une enveloppe stable :
 {
   "error": {
     "code": "invalid_date_range",
-    "message": "Query parameter 'from' must be earlier than or equal to 'to'"
+    "message": "Le paramètre de requête 'from' doit être antérieur ou égal à 'to'"
   }
 }
 ```

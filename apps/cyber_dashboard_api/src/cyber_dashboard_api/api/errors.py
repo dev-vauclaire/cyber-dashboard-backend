@@ -19,6 +19,13 @@ from cyber_dashboard_api.api.schemas.errors import (
 
 logger = logging.getLogger(__name__)
 
+_EXPECTED_VALUE_MESSAGE_PATTERN = re.compile(r"^Input should be (.+)$")
+_MIN_CHARACTERS_MESSAGE_PATTERN = re.compile(
+    r"^String should have at least (\d+) character(?:s)?$"
+)
+_MAX_CHARACTERS_MESSAGE_PATTERN = re.compile(
+    r"^String should have at most (\d+) character(?:s)?$"
+)
 
 _VALIDATION_MESSAGE_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"^Field required$"), "Champ requis"),
@@ -43,6 +50,18 @@ _VALIDATION_MESSAGE_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
         "La valeur doit être une chaîne de caractères valide",
     ),
     (
+        re.compile(r"^Input should be a valid URL(?:, .+)?$"),
+        "La valeur doit être une URL valide",
+    ),
+    (
+        re.compile(r"^Input should be a valid email address(?:, .+)?$"),
+        "La valeur doit être une adresse e-mail valide",
+    ),
+    (
+        re.compile(r"^Input is not a valid email address(?:, .+)?$"),
+        "La valeur doit être une adresse e-mail valide",
+    ),
+    (
         re.compile(r"^Input should be a valid dictionary(?:, .+)?$"),
         "La valeur doit être un objet valide",
     ),
@@ -57,6 +76,10 @@ _VALIDATION_MESSAGE_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (
         re.compile(r"^Input should be a valid date(?:, .+)?$"),
         "La valeur doit être une date valide",
+    ),
+    (
+        re.compile(r"^Input should be a valid IPv4 or IPv6 address(?:, .+)?$"),
+        "La valeur doit être une adresse IPv4 ou IPv6 valide",
     ),
     (
         re.compile(r"^Input should be greater than or equal to (.+)$"),
@@ -75,20 +98,8 @@ _VALIDATION_MESSAGE_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
         r"La valeur doit être strictement inférieure à \1",
     ),
     (
-        re.compile(r"^String should have at least (\d+) characters$"),
-        r"Le texte doit contenir au minimum \1 caractères",
-    ),
-    (
-        re.compile(r"^String should have at most (\d+) characters$"),
-        r"Le texte doit contenir au maximum \1 caractères",
-    ),
-    (
         re.compile(r"^String should match pattern '(.+)'$"),
         r"Le texte ne respecte pas le format attendu : \1",
-    ),
-    (
-        re.compile(r"^Input should be (.+)$"),
-        r"La valeur doit être \1",
     ),
 )
 
@@ -234,11 +245,43 @@ def _translate_validation_message(message: str) -> str:
     if normalized_message.startswith(assertion_prefix):
         return normalized_message[len(assertion_prefix) :]
 
+    min_characters_match = _MIN_CHARACTERS_MESSAGE_PATTERN.match(normalized_message)
+    if min_characters_match:
+        character_count = _format_character_count(min_characters_match.group(1))
+        return f"Le texte doit contenir au minimum {character_count}"
+
+    max_characters_match = _MAX_CHARACTERS_MESSAGE_PATTERN.match(normalized_message)
+    if max_characters_match:
+        character_count = _format_character_count(max_characters_match.group(1))
+        return f"Le texte doit contenir au maximum {character_count}"
+
     for pattern, replacement in _VALIDATION_MESSAGE_PATTERNS:
         if pattern.match(normalized_message):
             return pattern.sub(replacement, normalized_message)
 
+    expected_value_match = _EXPECTED_VALUE_MESSAGE_PATTERN.match(normalized_message)
+    if expected_value_match:
+        expected_value = _translate_expected_value(expected_value_match.group(1))
+        return f"La valeur doit être {expected_value}"
+
     return normalized_message
+
+
+def _format_character_count(raw_count: str) -> str:
+    """Formate un nombre de caracteres avec le bon accord."""
+    count = int(raw_count)
+    label = "caractère" if count == 1 else "caractères"
+    return f"{count} {label}"
+
+
+def _translate_expected_value(expected_value: str) -> str:
+    """Traduit les listes de valeurs attendues produites par Pydantic."""
+    translated_value = re.sub(r"\bor\b", "ou", expected_value)
+    return (
+        translated_value.replace("True", "true")
+        .replace("False", "false")
+        .replace("None", "null")
+    )
 
 
 def _translate_http_exception_message(message: str) -> str:
@@ -291,7 +334,7 @@ def register_exception_handlers(application: FastAPI) -> None:
         return _build_error_response(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             code="validation_error",
-            message="Paramètres de requête invalides",
+            message="Requête invalide",
             details=details,
         )
 

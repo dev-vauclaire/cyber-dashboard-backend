@@ -94,7 +94,10 @@ class SmtpValidatorTestCase(unittest.TestCase):
         result = self.validator.validate(build_context(smtp_port=587))
 
         self.assertFalse(result.success)
-        self.assertEqual(result.message, "Timeout lors de la connexion SMTP.")
+        self.assertEqual(
+            result.message,
+            "Délai d'attente dépassé lors de la connexion SMTP.",
+        )
 
     @patch("cyber_dashboard_api.integrations.smtp.validator.smtplib.SMTP_SSL")
     def test_auth_failure_returns_auth_message(self, smtp_ssl_mock: Mock) -> None:
