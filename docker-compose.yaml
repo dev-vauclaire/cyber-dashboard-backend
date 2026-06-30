@@ -24,7 +24,6 @@ services:
       dockerfile: Dockerfile.migrate
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/postgres
-      CYBER_DASHBOARD_SECRET_KEY: ${CYBER_DASHBOARD_SECRET_KEY}
     depends_on:
       db:
         condition: service_healthy
