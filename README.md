@@ -184,7 +184,7 @@ actuellement ce n'est pas encore implémenté.
 
 > Remarque : Placer vous dans le dossier racine du projet pour lancer les commandes de build.
 
-TODO : Ajouter le processus d'analyse de sécurité des images avec Syft, Grype et VEX
+### Push les images sur docker hub TODO : Ajouter le processus d'analyse de sécurité des images avec Syft, Grype et VEX
 
 ### Exécuter les conteneurs
 
